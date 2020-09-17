@@ -1,0 +1,2753 @@
+openapi: 3.0.1
+info:
+  title: deposits
+  version: v2
+servers:
+- url: https://localhost:8889/api
+- url: http://localhost:8889/api
+tags:
+- description: Allows you to retrieve, create, update or delete deposit accounts.
+  name: DepositAccounts
+paths:
+  /deposits/{depositAccountId}:undoMaturity:
+    post:
+      operationId: undoMaturity
+      parameters:
+      - description: Key that can be used to support idempotency on this POST. Must
+          be a valid UUID(version 4 is recommended) string and can only be used with
+          the exact same request. Can be used in retry mechanisms to prevent double
+          posting.
+        in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+      - description: The id or encoded key of the deposit account
+        in: path
+        name: depositAccountId
+        required: true
+        schema:
+          type: string
+      responses:
+        "102":
+          content: {}
+          description: Your idempotent request was already submitted and is currently
+            being processed, try again later.
+        "204":
+          content: {}
+          description: Undo maturity action posted
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Deposit account not found
+      security:
+      - basic: []
+      summary: Undo the maturity period for the specified deposit account
+      tags:
+      - DepositAccounts
+      x-accepts: application/vnd.mambu.v2+json
+  /deposits/{depositAccountId}/cards/{cardReferenceToken}:
+    delete:
+      operationId: deleteCard
+      parameters:
+      - description: The id or encoded key of the deposit account
+        in: path
+        name: depositAccountId
+        required: true
+        schema:
+          type: string
+      - description: Reference token of the card to be retrieved
+        in: path
+        name: cardReferenceToken
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          content: {}
+          description: Card deleted
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Deposit account not found
+      security:
+      - basic: []
+      summary: Delete a card associated to the provided account via its reference
+        token
+      tags:
+      - DepositAccounts
+      x-accepts: application/vnd.mambu.v2+json
+  /deposits/{depositAccountId}:changeState:
+    post:
+      operationId: changeState
+      parameters:
+      - description: Key that can be used to support idempotency on this POST. Must
+          be a valid UUID(version 4 is recommended) string and can only be used with
+          the exact same request. Can be used in retry mechanisms to prevent double
+          posting.
+        in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+      - description: The id or encoded key of the deposit account
+        in: path
+        name: depositAccountId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepositAccountAction'
+        description: Allows specifying the action details for a deposit account
+        required: true
+      responses:
+        "102":
+          content: {}
+          description: Your idempotent request was already submitted and is currently
+            being processed, try again later.
+        "200":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/DepositAccount'
+          description: Deposit account action posted
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Deposit account not found
+      security:
+      - basic: []
+      summary: Allows posting an action such as approve deposit account
+      tags:
+      - DepositAccounts
+      x-codegen-request-body-name: body
+      x-contentType: application/json
+      x-accepts: application/vnd.mambu.v2+json
+  /deposits/{depositAccountId}/cards:
+    get:
+      operationId: getAllCards
+      parameters:
+      - description: The id or encoded key of the deposit account
+        in: path
+        name: depositAccountId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Card'
+                type: array
+          description: Account cards list retrieved
+          headers:
+            Items-Offset:
+              description: Pagination details, the index of the first returned item
+              schema:
+                format: int32
+                type: integer
+            Items-Limit:
+              description: Pagination details, the requested page size
+              schema:
+                format: int32
+                type: integer
+            Items-Total:
+              description: Pagination details, the total available items
+              schema:
+                format: int32
+                type: integer
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Deposit account not found
+      security:
+      - basic: []
+      summary: Allows retrieval of all cards associated with the account
+      tags:
+      - DepositAccounts
+      x-accepts: application/vnd.mambu.v2+json
+    post:
+      operationId: createCard
+      parameters:
+      - description: Key that can be used to support idempotency on this POST. Must
+          be a valid UUID(version 4 is recommended) string and can only be used with
+          the exact same request. Can be used in retry mechanisms to prevent double
+          posting.
+        in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+      - description: The id or encoded key of the deposit account
+        in: path
+        name: depositAccountId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Card'
+        description: Card to be created
+        required: true
+      responses:
+        "102":
+          content: {}
+          description: Your idempotent request was already submitted and is currently
+            being processed, try again later.
+        "201":
+          content: {}
+          description: Card was created
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Deposit account not found
+      security:
+      - basic: []
+      summary: Create and associate a new card to the provided account
+      tags:
+      - DepositAccounts
+      x-codegen-request-body-name: body
+      x-contentType: application/json
+      x-accepts: application/vnd.mambu.v2+json
+  /deposits/{depositAccountId}:startMaturity:
+    post:
+      operationId: startMaturity
+      parameters:
+      - description: Key that can be used to support idempotency on this POST. Must
+          be a valid UUID(version 4 is recommended) string and can only be used with
+          the exact same request. Can be used in retry mechanisms to prevent double
+          posting.
+        in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+      - description: The id or encoded key of the deposit account
+        in: path
+        name: depositAccountId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartMaturityAction'
+        description: Allows specifying the details for an action to start the maturity
+          period for a deposit account
+        required: true
+      responses:
+        "102":
+          content: {}
+          description: Your idempotent request was already submitted and is currently
+            being processed, try again later.
+        "200":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/DepositAccount'
+          description: Start maturity action posted
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Deposit account not found
+      security:
+      - basic: []
+      summary: Starts the maturity period for the specified deposit account
+      tags:
+      - DepositAccounts
+      x-codegen-request-body-name: body
+      x-contentType: application/json
+      x-accepts: application/vnd.mambu.v2+json
+  /deposits/{depositAccountId}:
+    delete:
+      operationId: delete
+      parameters:
+      - description: The id or encoded key of the deposit account
+        in: path
+        name: depositAccountId
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          content: {}
+          description: Deposit account deleted
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Deposit account not found
+      security:
+      - basic: []
+      summary: Delete an inactive deposit account via id or encoded key
+      tags:
+      - DepositAccounts
+      x-accepts: application/vnd.mambu.v2+json
+    get:
+      operationId: getById
+      parameters:
+      - description: The id or encoded key of the deposit account
+        in: path
+        name: depositAccountId
+        required: true
+        schema:
+          type: string
+      - description: The level of details to retrieve, FULL means the full details
+          of the object will be retrieved (custom fields, address, contact info or
+          any other related object), BASIC will return only the first level elements
+          of the object
+        in: query
+        name: detailsLevel
+        schema:
+          enum:
+          - BASIC
+          - FULL
+          type: string
+      responses:
+        "200":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/DepositAccount'
+          description: Deposit account retrieved
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Deposit account not found
+      security:
+      - basic: []
+      summary: Allows retrieval of a single deposit account via id or encoded key
+      tags:
+      - DepositAccounts
+      x-accepts: application/vnd.mambu.v2+json
+    patch:
+      operationId: patch
+      parameters:
+      - description: The id or encoded key of the deposit account
+        in: path
+        name: depositAccountId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/PatchOperation'
+              type: array
+        description: Patch operations to be applied to a resource
+        required: true
+      responses:
+        "204":
+          content: {}
+          description: Deposit account updated
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Deposit account not found
+      security:
+      - basic: []
+      summary: Partially update a deposit account
+      tags:
+      - DepositAccounts
+      x-codegen-request-body-name: body
+      x-contentType: application/json
+      x-accepts: application/vnd.mambu.v2+json
+    put:
+      operationId: update
+      parameters:
+      - description: The id or encoded key of the deposit account
+        in: path
+        name: depositAccountId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepositAccount'
+        required: false
+      responses:
+        "200":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/DepositAccount'
+          description: Deposit account updated
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Deposit account not found
+      security:
+      - basic: []
+      summary: Update an existing deposit account
+      tags:
+      - DepositAccounts
+      x-codegen-request-body-name: body
+      x-contentType: application/json
+      x-accepts: application/vnd.mambu.v2+json
+  /deposits/{depositAccountId}/authorizationholds:
+    get:
+      operationId: getAllAuthorizationHolds
+      parameters:
+      - description: The id or encoded key of the deposit account
+        in: path
+        name: depositAccountId
+        required: true
+        schema:
+          type: string
+      - description: Pagination, index to start searching at when retrieving elements,
+          used in combination with limit to paginate results
+        in: query
+        name: offset
+        schema:
+          format: int32
+          type: integer
+      - description: Pagination, the number of elements to retrieve, used in combination
+          with offset to paginate results
+        in: query
+        name: limit
+        schema:
+          format: int32
+          type: integer
+      - description: Flag specifying whether the pagination should be enabled or not.
+          Please note that by default it is disabled (OFF), in order to improve the
+          performance of the APIs
+        in: query
+        name: paginationDetails
+        schema:
+          default: "OFF"
+          enum:
+          - "ON"
+          - "OFF"
+          type: string
+      - description: The status of the authorization holds to filter on
+        in: query
+        name: status
+        schema:
+          enum:
+          - PENDING
+          - REVERSED
+          - SETTLED
+          - EXPIRED
+          type: string
+      responses:
+        "200":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AuthorizationHold'
+                type: array
+          description: The list of authorization holds retrieved
+          headers:
+            Items-Offset:
+              description: Pagination details, the index of the first returned item
+              schema:
+                format: int32
+                type: integer
+            Items-Limit:
+              description: Pagination details, the requested page size
+              schema:
+                format: int32
+                type: integer
+            Items-Total:
+              description: Pagination details, the total available items
+              schema:
+                format: int32
+                type: integer
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      security:
+      - basic: []
+      summary: Retrieves authorization holds related to a deposit account, ordered
+        from newest to oldest by creation date
+      tags:
+      - DepositAccounts
+      x-accepts: application/vnd.mambu.v2+json
+  /deposits:
+    get:
+      operationId: getAll
+      parameters:
+      - description: Pagination, index to start searching at when retrieving elements,
+          used in combination with limit to paginate results
+        in: query
+        name: offset
+        schema:
+          format: int32
+          type: integer
+      - description: Pagination, the number of elements to retrieve, used in combination
+          with offset to paginate results
+        in: query
+        name: limit
+        schema:
+          format: int32
+          type: integer
+      - description: Flag specifying whether the pagination should be enabled or not.
+          Please note that by default it is disabled (OFF), in order to improve the
+          performance of the APIs
+        in: query
+        name: paginationDetails
+        schema:
+          default: "OFF"
+          enum:
+          - "ON"
+          - "OFF"
+          type: string
+      - description: The level of details to retrieve, FULL means the full details
+          of the object will be retrieved (custom fields, address, contact info or
+          any other related object), BASIC will return only the first level elements
+          of the object
+        in: query
+        name: detailsLevel
+        schema:
+          enum:
+          - BASIC
+          - FULL
+          type: string
+      - description: The username of the credit officer to whom the deposit accounts
+          are assigned to
+        in: query
+        name: creditOfficerUsername
+        schema:
+          type: string
+      - description: The id/encodedKey of the branch to which the deposit accounts
+          are assigned to
+        in: query
+        name: branchId
+        schema:
+          type: string
+      - description: The id/encodedKey of the centre to which the deposit accounts
+          are assigned to
+        in: query
+        name: centreId
+        schema:
+          type: string
+      - description: The state of the deposit accounts to filter on
+        in: query
+        name: accountState
+        schema:
+          enum:
+          - PENDING_APPROVAL
+          - APPROVED
+          - ACTIVE
+          - ACTIVE_IN_ARREARS
+          - MATURED
+          - LOCKED
+          - DORMANT
+          - CLOSED
+          - CLOSED_WRITTEN_OFF
+          - WITHDRAWN
+          - CLOSED_REJECTED
+          type: string
+      - description: 'The type of the account holder: CLIENT/GROUP'
+        in: query
+        name: accountHolderType
+        schema:
+          enum:
+          - CLIENT
+          - GROUP
+          type: string
+      - description: The id of the account holder
+        in: query
+        name: accountHolderId
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/DepositAccount'
+                type: array
+          description: Deposit accounts list retrieved
+          headers:
+            Items-Offset:
+              description: Pagination details, the index of the first returned item
+              schema:
+                format: int32
+                type: integer
+            Items-Limit:
+              description: Pagination details, the requested page size
+              schema:
+                format: int32
+                type: integer
+            Items-Total:
+              description: Pagination details, the total available items
+              schema:
+                format: int32
+                type: integer
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      security:
+      - basic: []
+      summary: Allows retrieval of deposit accounts using various query parameters.
+        It's possible to look up deposits by their state, branch, centre or by a credit
+        officer to which the deposits are assigned.
+      tags:
+      - DepositAccounts
+      x-accepts: application/vnd.mambu.v2+json
+    post:
+      operationId: create
+      parameters:
+      - description: Key that can be used to support idempotency on this POST. Must
+          be a valid UUID(version 4 is recommended) string and can only be used with
+          the exact same request. Can be used in retry mechanisms to prevent double
+          posting.
+        in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepositAccount'
+        description: Deposit account to be created
+        required: true
+      responses:
+        "102":
+          content: {}
+          description: Your idempotent request was already submitted and is currently
+            being processed, try again later.
+        "201":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/DepositAccount'
+          description: Deposit account created
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      security:
+      - basic: []
+      summary: Creates a new deposit account
+      tags:
+      - DepositAccounts
+      x-codegen-request-body-name: body
+      x-contentType: application/json
+      x-accepts: application/vnd.mambu.v2+json
+  /deposits/{depositAccountId}:applyInterest:
+    post:
+      operationId: applyInterest
+      parameters:
+      - description: Key that can be used to support idempotency on this POST. Must
+          be a valid UUID(version 4 is recommended) string and can only be used with
+          the exact same request. Can be used in retry mechanisms to prevent double
+          posting.
+        in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+      - description: The id or encoded key of the deposit to which the interest will
+          be applied
+        in: path
+        name: depositAccountId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyInterestInput'
+        description: Input details for apply accrued interest action
+        required: true
+      responses:
+        "102":
+          content: {}
+          description: Your idempotent request was already submitted and is currently
+            being processed, try again later.
+        "204":
+          content: {}
+          description: Interest applied
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Deposit account not found
+      security:
+      - basic: []
+      summary: Apply accrued interest
+      tags:
+      - DepositAccounts
+      x-codegen-request-body-name: body
+      x-contentType: application/json
+      x-accepts: application/vnd.mambu.v2+json
+components:
+  schemas:
+    DepositAccountAction:
+      description: Allows specifying the action details for a deposit account
+      example:
+        notes: notes
+        action: APPROVE
+      properties:
+        action:
+          description: The action type to be applied
+          enum:
+          - APPROVE
+          - UNDO_APPROVE
+          - LOCK
+          - UNLOCK
+          type: string
+        notes:
+          description: The notes related to the action performed
+          type: string
+      required:
+      - action
+      type: object
+    DepositAccountOverdraftInterestRateSettings:
+      description: Overdraft interest rate settings for deposit accounts
+      example:
+        interestRate: 1.1730742509559433
+        interestSpread: 4.965218492984954
+        interestRateReviewUnit: DAYS
+        interestRateSource: FIXED_INTEREST_RATE
+        interestRateReviewCount: 5
+        interestRateTiers:
+        - interestRate: 1.4658129805029452
+          endingBalance: 6.027456183070403
+          encodedKey: encodedKey
+          endingDay: 5
+        - interestRate: 1.4658129805029452
+          endingBalance: 6.027456183070403
+          encodedKey: encodedKey
+          endingDay: 5
+        interestChargeFrequency: ANNUALIZED
+        encodedKey: encodedKey
+        interestChargeFrequencyCount: 9
+        interestRateTerms: FIXED
+      properties:
+        interestRate:
+          description: The interest rate for the deposit account
+          type: number
+        interestSpread:
+          description: The rate based on which the interest is accrued and applied
+            for accounts with InterestRateSource#INDEX_INTEREST_RATE
+          type: number
+        interestRateReviewUnit:
+          description: The interest rate review frequency measurement unit
+          enum:
+          - DAYS
+          - WEEKS
+          - MONTHS
+          type: string
+        interestRateSource:
+          description: The interest rate source. Represents the interest calculation
+            method
+          enum:
+          - FIXED_INTEREST_RATE
+          - INDEX_INTEREST_RATE
+          readOnly: true
+          type: string
+        interestRateReviewCount:
+          description: The interest rate review frequency unit count
+          format: int32
+          type: integer
+        interestRateTiers:
+          description: The list of interest rate tiers. An interest rate tier holds
+            the values to define how the interest is computed
+          items:
+            $ref: '#/components/schemas/DepositAccountInterestRateTier'
+          type: array
+        interestChargeFrequency:
+          description: The interest change frequency. Holds the possible values for
+            how often is interest charged on loan or deposit accounts
+          enum:
+          - ANNUALIZED
+          - EVERY_MONTH
+          - EVERY_FOUR_WEEKS
+          - EVERY_WEEK
+          - EVERY_DAY
+          - EVERY_X_DAYS
+          type: string
+        encodedKey:
+          description: The encoded for this set of interest settings, auto generated,
+            unique
+          readOnly: true
+          type: string
+        interestChargeFrequencyCount:
+          description: The count of units to apply over the interval (e.g. [x] weeks)
+          format: int32
+          type: integer
+        interestRateTerms:
+          description: How is the interest rate determined when being accrued for
+            an account
+          enum:
+          - FIXED
+          - TIERED
+          - TIERED_PERIOD
+          type: string
+      type: object
+    StartMaturityAction:
+      description: The action to start the maturity period for a deposit account
+      example:
+        notes: notes
+        maturityDate: 1987-04-26T00:00:00.000+0000
+      properties:
+        maturityDate:
+          description: The date at which the maturity period starts
+          example: 1987-04-26
+          format: date
+          type: string
+        notes:
+          description: The notes related to the action performed
+          type: string
+      type: object
+    MonthAndDay:
+      description: Wrapper for month and day for instances where the year isn't needed
+      example:
+        month: 2
+        day: 7
+      properties:
+        month:
+          description: The month of the year
+          format: int32
+          type: integer
+        day:
+          description: The day in the month
+          format: int32
+          type: integer
+      type: object
+    CardAcceptor:
+      description: The details of the card acceptor (merchant) in a transaction hold.
+      properties:
+        zip:
+          description: The ZIP code of the location in which the card acceptor has
+            the business.
+          type: string
+        country:
+          description: The country in which the card acceptor has the business.
+          type: string
+        city:
+          description: The city in which the card acceptor has the business.
+          type: string
+        street:
+          description: The street in which the card acceptor has the business.
+          type: string
+        name:
+          description: The name of the card acceptor.
+          type: string
+        state:
+          description: The state in which the card acceptor has the business.
+          type: string
+        mcc:
+          description: The Merchant Category Code of the card acceptor.
+          format: int32
+          type: integer
+      type: object
+    DepositAccountAccruedAmounts:
+      description: Groups all fields related to a deposit account's accrued amounts
+      example:
+        technicalOverdraftInterestAccrued: 8.762042012749001
+        overdraftInterestAccrued: 9.369310271410669
+        interestAccrued: 6.683562403749608
+      properties:
+        overdraftInterestAccrued:
+          description: The amount of overdraft interest that has been accrued in the
+            account
+          readOnly: true
+          type: number
+        interestAccrued:
+          description: The amount of interest that has been accrued in the account
+          readOnly: true
+          type: number
+        technicalOverdraftInterestAccrued:
+          description: The amount of technical overdraft interest that has been accrued
+            in the account
+          readOnly: true
+          type: number
+      type: object
+    DepositAccountInterestPaymentSettings:
+      description: Groups all fields related to a deposit account's interest payment
+        settings
+      example:
+        interestPaymentPoint: FIRST_DAY_OF_MONTH
+        interestPaymentDates:
+        - month: 2
+          day: 7
+        - month: 2
+          day: 7
+      properties:
+        interestPaymentDates:
+          description: The list of all dates on which the interest is payed into deposit
+            account
+          items:
+            $ref: '#/components/schemas/MonthAndDay'
+          type: array
+        interestPaymentPoint:
+          description: The interest payment point, specifies when the interest should
+            be paid to the account
+          enum:
+          - FIRST_DAY_OF_MONTH
+          - EVERY_WEEK
+          - EVERY_OTHER_WEEK
+          - EVERY_MONTH
+          - EVERY_3_MONTHS
+          - ON_FIXED_DATES
+          - ON_ACCOUNT_MATURITY
+          type: string
+      type: object
+    DepositAccountInterestRateTier:
+      description: Used or TIERED interest rates, holds the values to define how the
+        interest is computed
+      example:
+        interestRate: 1.4658129805029452
+        endingBalance: 6.027456183070403
+        encodedKey: encodedKey
+        endingDay: 5
+      properties:
+        endingBalance:
+          description: The top-limit value for the account balance in order to determine
+            if this tier is used or not
+          type: number
+        interestRate:
+          description: The rate used for computing the interest for an account which
+            has the balance less than the ending balance
+          type: number
+        encodedKey:
+          description: The encoded key of the interest rate tier, auto generated,
+            unique
+          readOnly: true
+          type: string
+        endingDay:
+          description: The top-limit value for the account period since activation
+            in order to determine if this tier is used or not
+          format: int32
+          type: integer
+      required:
+      - interestRate
+      type: object
+    ErrorResponse:
+      properties:
+        errors:
+          items:
+            $ref: '#/components/schemas/RestError'
+          type: array
+      type: object
+    DepositAccount:
+      description: An account where a customer holds his savings
+      example:
+        accountState: PENDING_APPROVAL
+        migrationEventKey: migrationEventKey
+        notes: notes
+        lastSetToArrearsDate: 2016-09-06T13:37:50+03:00
+        assignedBranchKey: assignedBranchKey
+        lastOverdraftInterestReviewDate: 2016-09-06T13:37:50+03:00
+        lastInterestStoredDate: 2016-09-06T13:37:50+03:00
+        interestSettings:
+          interestRateSettings:
+            interestRate: 0.8008281904610115
+            interestRateTiers:
+            - interestRate: 1.4658129805029452
+              endingBalance: 6.027456183070403
+              encodedKey: encodedKey
+              endingDay: 5
+            - interestRate: 1.4658129805029452
+              endingBalance: 6.027456183070403
+              encodedKey: encodedKey
+              endingDay: 5
+            interestChargeFrequency: ANNUALIZED
+            encodedKey: encodedKey
+            interestChargeFrequencyCount: 5
+            interestRateTerms: FIXED
+          interestPaymentSettings:
+            interestPaymentPoint: FIRST_DAY_OF_MONTH
+            interestPaymentDates:
+            - month: 2
+              day: 7
+            - month: 2
+              day: 7
+        balances:
+          overdraftInterestDue: 9.301444243932576
+          totalBalance: 3.616076749251911
+          lockedBalance: 2.027123023002322
+          technicalOverdraftAmount: 4.145608029883936
+          overdraftAmount: 7.386281948385884
+          holdBalance: 1.2315135367772556
+          technicalOverdraftInterestDue: 1.0246457001441578
+          feesDue: 1.4894159098541704
+          availableBalance: 6.84685269835264
+        creditArrangementKey: creditArrangementKey
+        maturityDate: 2016-09-06T13:37:50+03:00
+        encodedKey: encodedKey
+        id: id
+        overdraftSettings:
+          allowOverdraft: true
+          overdraftLimit: 7.457744773683766
+          overdraftExpiryDate: 2016-09-06T13:37:50+03:00
+        lastAccountAppraisalDate: 2016-09-06T13:37:50+03:00
+        withholdingTaxSourceKey: withholdingTaxSourceKey
+        assignedUserKey: assignedUserKey
+        overdraftInterestSettings:
+          interestRateSettings:
+            interestRate: 1.1730742509559433
+            interestSpread: 4.965218492984954
+            interestRateReviewUnit: DAYS
+            interestRateSource: FIXED_INTEREST_RATE
+            interestRateReviewCount: 5
+            interestRateTiers:
+            - interestRate: 1.4658129805029452
+              endingBalance: 6.027456183070403
+              encodedKey: encodedKey
+              endingDay: 5
+            - interestRate: 1.4658129805029452
+              endingBalance: 6.027456183070403
+              encodedKey: encodedKey
+              endingDay: 5
+            interestChargeFrequency: ANNUALIZED
+            encodedKey: encodedKey
+            interestChargeFrequencyCount: 9
+            interestRateTerms: FIXED
+        lastModifiedDate: 2016-09-06T13:37:50+03:00
+        accountType: CURRENT_ACCOUNT
+        lockedDate: 2016-09-06T13:37:50+03:00
+        creationDate: 2016-09-06T13:37:50+03:00
+        lastInterestCalculationDate: 2016-09-06T13:37:50+03:00
+        assignedCentreKey: assignedCentreKey
+        approvedDate: 2016-09-06T13:37:50+03:00
+        closedDate: 2016-09-06T13:37:50+03:00
+        accruedAmounts:
+          technicalOverdraftInterestAccrued: 8.762042012749001
+          overdraftInterestAccrued: 9.369310271410669
+          interestAccrued: 6.683562403749608
+        name: name
+        _IBAN:
+          IBAN: IBAN
+        accountHolderKey: accountHolderKey
+        productTypeKey: productTypeKey
+        activationDate: 2016-09-06T13:37:50+03:00
+        internalControls:
+          targetAmount: 6.438423552598547
+          recommendedDepositAmount: 9.018348186070783
+          maxWithdrawalAmount: 3.5571952270680973
+        currencyCode: currencyCode
+        accountHolderType: CLIENT
+        linkedSettlementAccountKeys:
+        - linkedSettlementAccountKeys
+        - linkedSettlementAccountKeys
+      properties:
+        accountState:
+          description: The state of the deposit account
+          enum:
+          - PENDING_APPROVAL
+          - APPROVED
+          - ACTIVE
+          - ACTIVE_IN_ARREARS
+          - MATURED
+          - LOCKED
+          - DORMANT
+          - CLOSED
+          - CLOSED_WRITTEN_OFF
+          - WITHDRAWN
+          - CLOSED_REJECTED
+          readOnly: true
+          type: string
+        migrationEventKey:
+          description: The migration event encoded key associated with this deposit
+            account. If this account was imported, track which 'migration event' they
+            came from.
+          readOnly: true
+          type: string
+        notes:
+          description: Extra notes about this deposit account
+          type: string
+        lastSetToArrearsDate:
+          description: Date when the deposit account was set to In Arrears state,
+            or null if the account is not In Arrears state (as Organization Time)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          readOnly: true
+          type: string
+        assignedBranchKey:
+          description: Key of the branch this deposit account is assigned to
+          type: string
+        lastOverdraftInterestReviewDate:
+          description: When the overdraft interest was last time reviewed
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          readOnly: true
+          type: string
+        lastInterestStoredDate:
+          description: When/if the account had last interest applied (stored to balance)
+            (as Organization Time)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          readOnly: true
+          type: string
+        interestSettings:
+          $ref: '#/components/schemas/DepositAccountInterestSettings'
+        balances:
+          $ref: '#/components/schemas/DepositAccountBalances'
+        creditArrangementKey:
+          description: The key to the credit arrangement where this account is registered
+            to
+          type: string
+        maturityDate:
+          description: For fixed or compulsory savings plans, this is when the account
+            matures (as Organization Time)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          readOnly: true
+          type: string
+        encodedKey:
+          description: The encoded key of the deposit account, auto generated, unique
+          readOnly: true
+          type: string
+        id:
+          description: The id of the deposit account, can be generated and customized,
+            unique
+          type: string
+        overdraftSettings:
+          $ref: '#/components/schemas/DepositAccountOverdraftSettings'
+        lastAccountAppraisalDate:
+          description: When/if the account had last been evaluated for interest calculations/maturity
+            (as Organization Time)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          readOnly: true
+          type: string
+        withholdingTaxSourceKey:
+          description: The tax source from where the account withholding taxes will
+            be updated
+          type: string
+        assignedUserKey:
+          description: Key of the user this deposit is assigned to
+          type: string
+        _IBAN:
+          $ref: '#/components/schemas/DepositAccount__IBAN'
+        overdraftInterestSettings:
+          $ref: '#/components/schemas/DepositAccountOverdraftInterestSettings'
+        lastModifiedDate:
+          description: The last date the deposit account was updated (as UTC)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          readOnly: true
+          type: string
+        accountType:
+          description: Indicates the type of the deposit account and the product that
+            it belongs to
+          enum:
+          - CURRENT_ACCOUNT
+          - REGULAR_SAVINGS
+          - FIXED_DEPOSIT
+          - SAVINGS_PLAN
+          - INVESTOR_ACCOUNT
+          type: string
+        lockedDate:
+          description: The date this deposit account was locked (as Organization Time)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          readOnly: true
+          type: string
+        creationDate:
+          description: The date this deposit account was created (as UTC)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          readOnly: true
+          type: string
+        lastInterestCalculationDate:
+          description: When/if the account had the interest last calculated (as Organization
+            Time)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          readOnly: true
+          type: string
+        assignedCentreKey:
+          description: Key of the centre this account is assigned to
+          type: string
+        approvedDate:
+          description: The date this deposit account was approved (as Organization
+            Time)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          readOnly: true
+          type: string
+        closedDate:
+          description: The date this deposit account was closed (as UTC)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          readOnly: true
+          type: string
+        accruedAmounts:
+          $ref: '#/components/schemas/DepositAccountAccruedAmounts'
+        name:
+          description: The name of the deposit account
+          type: string
+        accountHolderKey:
+          description: The encodedKey of the client or group (a.k.a account holder)
+          type: string
+        productTypeKey:
+          description: The key to the type of product that this account is based on
+          type: string
+        activationDate:
+          description: The date this deposit account was activated (as Organization
+            Time)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          readOnly: true
+          type: string
+        internalControls:
+          $ref: '#/components/schemas/DepositAccountInternalControls'
+        currencyCode:
+          description: The currency code
+          type: string
+        accountHolderType:
+          description: The type of the account holder (i.e CLIENT or GROUP)
+          enum:
+          - CLIENT
+          - GROUP
+          type: string
+        linkedSettlementAccountKeys:
+          description: Lists all loan's keys on which the deposit is used as a settlement
+            account.
+          items:
+            type: string
+          readOnly: true
+          type: array
+      required:
+      - accountHolderKey
+      - accountHolderType
+      - name
+      - productTypeKey
+      type: object
+    Card:
+      description: A card which can be associated to an account (deposit / loan).
+        Cards consist only in card references (tokens). Card details are not stored
+        by Mambu.
+      example:
+        referenceToken: referenceToken
+      properties:
+        referenceToken:
+          description: The reference token of the card
+          type: string
+      required:
+      - referenceToken
+      type: object
+    DepositAccountOverdraftSettings:
+      description: Groups all fields related to a deposit account's overdraft settings
+      example:
+        allowOverdraft: true
+        overdraftLimit: 7.457744773683766
+        overdraftExpiryDate: 2016-09-06T13:37:50+03:00
+      properties:
+        allowOverdraft:
+          description: Whether this account supports overdraft or not
+          type: boolean
+        overdraftLimit:
+          description: How much may be taken out as overdraft, null means 0
+          type: number
+        overdraftExpiryDate:
+          description: The expiration date of an overdraft
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+      type: object
+    DepositAccountInterestSettings:
+      description: Groups all fields related to a deposit account's interest settings
+      example:
+        interestRateSettings:
+          interestRate: 0.8008281904610115
+          interestRateTiers:
+          - interestRate: 1.4658129805029452
+            endingBalance: 6.027456183070403
+            encodedKey: encodedKey
+            endingDay: 5
+          - interestRate: 1.4658129805029452
+            endingBalance: 6.027456183070403
+            encodedKey: encodedKey
+            endingDay: 5
+          interestChargeFrequency: ANNUALIZED
+          encodedKey: encodedKey
+          interestChargeFrequencyCount: 5
+          interestRateTerms: FIXED
+        interestPaymentSettings:
+          interestPaymentPoint: FIRST_DAY_OF_MONTH
+          interestPaymentDates:
+          - month: 2
+            day: 7
+          - month: 2
+            day: 7
+      properties:
+        interestRateSettings:
+          $ref: '#/components/schemas/DepositAccountInterestRateSettings'
+        interestPaymentSettings:
+          $ref: '#/components/schemas/DepositAccountInterestPaymentSettings'
+      type: object
+    AuthorizationHold:
+      description: An authorization hold entry as a result of a hold action performed
+        by a card acceptor.
+      properties:
+        amount:
+          description: The amount of money to be held as a result of the authorization
+            hold request.
+          type: number
+        advice:
+          description: Whether the given request should be accepted without balance
+            validations.
+          type: boolean
+        cardAcceptor:
+          $ref: '#/components/schemas/CardAcceptor'
+        cardToken:
+          description: The reference token of the card.
+          readOnly: true
+          type: string
+        externalReferenceId:
+          description: The external reference ID to be used to reference the account
+            hold in subsequent requests.
+          type: string
+        originalAmount:
+          description: The original amount of money to be held as a result of the
+            authorization hold request.
+          type: number
+        exchangeRate:
+          description: The exchange rate for the original currency.
+          type: number
+        encodedKey:
+          description: The internal ID of the authorization hold, auto generated,
+            unique.
+          readOnly: true
+          type: string
+        userTransactionTime:
+          description: The formatted time at which the user made this authorization
+            hold.
+          type: string
+        originalCurrency:
+          description: The original currency in which the hold was created.
+          type: string
+        currencyCode:
+          description: The ISO currency code in which the hold was created. The amounts
+            are stored in the base currency, but the user could have enter it in a
+            foreign currency.
+          type: string
+        status:
+          description: The authorization hold status.
+          enum:
+          - PENDING
+          - REVERSED
+          - SETTLED
+          - EXPIRED
+          readOnly: true
+          type: string
+      required:
+      - advice
+      - amount
+      - externalReferenceId
+      type: object
+    DepositAccountOverdraftInterestSettings:
+      description: Groups all fields related to a deposit account's overdraft interest
+        settings
+      example:
+        interestRateSettings:
+          interestRate: 1.1730742509559433
+          interestSpread: 4.965218492984954
+          interestRateReviewUnit: DAYS
+          interestRateSource: FIXED_INTEREST_RATE
+          interestRateReviewCount: 5
+          interestRateTiers:
+          - interestRate: 1.4658129805029452
+            endingBalance: 6.027456183070403
+            encodedKey: encodedKey
+            endingDay: 5
+          - interestRate: 1.4658129805029452
+            endingBalance: 6.027456183070403
+            encodedKey: encodedKey
+            endingDay: 5
+          interestChargeFrequency: ANNUALIZED
+          encodedKey: encodedKey
+          interestChargeFrequencyCount: 9
+          interestRateTerms: FIXED
+      properties:
+        interestRateSettings:
+          $ref: '#/components/schemas/DepositAccountOverdraftInterestRateSettings'
+      type: object
+    RestError:
+      properties:
+        errorCode:
+          format: int32
+          type: integer
+        errorSource:
+          type: string
+        errorReason:
+          enum:
+          - SUCCESS
+          - INVALID_BASIC_AUTHORIZATION
+          - INVALID_CREDENTIALS
+          - INVALID_API_OPERATION
+          - INVALID_PARAMETERS
+          - METHOD_NOT_IMPLEMENTED
+          - INTERNAL_ERROR
+          - API_NOT_AUTHORIZED
+          - USER_TRANSACTION_LIMIT_EXCEEDED
+          - API_CONFIGURATION_ERROR
+          - INVALID_TENANT_ID
+          - INVALID_PAGINATION_OFFSET_VALUE
+          - OUT_OF_BOUNDS_PAGINATION_OFFSET_VALUE
+          - INVALID_PAGINATION_LIMIT_VALUE
+          - OUT_OF_BOUNDS_PAGINATION_LIMIT_VALUE
+          - INVALID_PERMISSIONS
+          - INVALID_IP_ADDRESS
+          - INACTIVE_USER
+          - NO_API_ACCESS
+          - FEATURE_DISABLED
+          - MAX_FILE_SIZE_EXCEEDED
+          - MAX_FILENAME_LENGTH_EXCEEDED
+          - UNSUPPORTED_CHARACTER_ENCODING
+          - INVALID_API_PROTOCOL
+          - EXCESSIVE_INVALID_REQUESTS
+          - INCONSISTENT_IDENTIFIER_WITH_JSON
+          - INVALID_JSON_SYNTAX
+          - PARAMETER_NOT_ALLOWED
+          - START_DATE_AFTER_END_DATE
+          - OBJECT_NOT_FOUND
+          - MISSING_ENTITY_JSON
+          - MISSING_REQUIRED_PARAMETER
+          - READ_ONLY_MODE
+          - UNSUPPORTED_PAGINATION
+          - BLOCKING_OPERATION_IN_PROGRESS
+          - NON_REVERSIBLE_WRITE_OFF
+          - NON_WEEKLY_LOAN_REPAYMENTS
+          - INCONSISTENT_LINKED_ACCOUNT
+          - INVALID_LOAN_ACCOUNT_ID
+          - INVALID_AMOUNT
+          - INVALID_DATE
+          - INVALID_NOTES
+          - INVALID_TRANSACTION_TYPE_ID
+          - INVALID_ACCOUNT_STATE
+          - INVALID_FEE
+          - LOAN_PRODUCT_MISMATCH
+          - INVALID_FIELD_FOR_TRANSACTION_TYPE
+          - INACTIVE_TRANSACTION_TYPE
+          - EXCESS_REPAYMENT_ERROR
+          - TRANSACTION_LOGGED_AFTER_NOT_DISBURSED_TRANCHE
+          - UNDEFINED_ACCOUNT_FOR_FINANCIAL_RESOURCE_ERROR
+          - INVALID_ACCOUNT_FOR_JOURNAL_ENTRY_ERROR
+          - MISSING_LOAN_ID
+          - MAXIMUM_EXPOSURE_EXCEEDED
+          - INVALID_STATE_TRANSITION
+          - NUMBER_OF_LOANS_EXCEEDED
+          - INVALID_FIRST_REPAYMENT_DUE_DATE
+          - INVALID_REPAYMENT_DUE_DAY
+          - INVALID_INTEREST_RATE
+          - INVALID_INSTALLMENTS
+          - MISSING_LINKED_ACCOUNT
+          - PREPAYMENT_NOT_ALLOWED_ERROR
+          - REPAYMENT_DATE_IN_THE_FUTURE_ERROR
+          - INVALID_DISBURSEMENT_DATE
+          - ILLEGAL_LOAN_PARAMETERS_MODIFICATION
+          - ORIGINAL_ACCOUNT_HAS_FUNDS
+          - INVALID_ACCOUNT_STATE_FOR_REPAYMENTS
+          - DISBURSEMENT_FEES_EXCEED_LOAN_AMOUNT
+          - INTEREST_CANNOT_BE_APPLIED
+          - ENTRY_DATE_BEFORE_OTHER_TRANSACTION
+          - INCONSISTENT_SCHEDULE_PRINCIPAL_DUE_WITH_LOAN_AMOUNT
+          - ACCOUNT_HAS_NO_ACCRUED_INTEREST
+          - INTEREST_ALREADY_APPLIED_ON_DISBURSEMENT_ACCOUNT
+          - INCONSISTENT_WITH_FIXED_DAYS_OF_MONTH
+          - NEGATIVE_PRINCIPAL_FOR_INSTALLMENT
+          - INVALID_TAX_RATE
+          - INSUFFICIENT_GUARANTEES
+          - MISSING_REPAYMENT_PERIOD_COUNT
+          - MISSING_REPAYMENT_INTERVAL
+          - FUTURE_PAYMENT_NOT_ALLOWED_ERROR
+          - DISBURSEMENT_WITH_ZERO_LOAN_AMOUNT_NOT_ALLOWED
+          - MINIMUM_ARREARS_DAYS_NOT_REACHED
+          - ACCOUNT_ALREADY_UNLOCKED
+          - LOAN_AMOUNT_DECIMALS_NOT_ALLOWED_WITH_ROUNDING
+          - RESCHEDULED_LOAN
+          - REFINANCED_LOAN
+          - INVALID_PRODUCT_WITH_FUNDING_SOURCE_DISABLED
+          - INVALID_ID
+          - FAILED_TO_GENERATE_IDENTIFIER
+          - INCONSISTENT_ACCOUNT_ID_WITH_ACCOUNT_HOLDER_TYPE
+          - INVALID_ASSET_NAME
+          - GUARANTOR_KEY_NOT_ALLOWED
+          - GUARANTOR_SAVINGS_KEY_NOT_ALLOWED
+          - INVALID_GUARANTOR_KEY
+          - INVALID_SAVINGS_ACCOUNT_KEY
+          - INVALID_GUARANTOR_STATE
+          - DUPLICATED_GUARANTOR_WITHOUT_SAVINGS_ACCOUNT
+          - DUPLICATED_SAVINGS_ACCOUNT
+          - INSUFFICIENT_SAVINGS_ACCOUNT_BALANCE
+          - INVALID_SAVINGS_ACCOUNT_STATE
+          - DUPLICATED_ASSET
+          - GUARANTOR_ASSET_NAME_NOT_ALLOWED
+          - TRANSACTION_NOT_FOUND
+          - INVALID_TRANSACTION_TYPE
+          - UNREVERSED_TRANSACTION_LOGGED_AFTER_CURRENT_ONE
+          - INVALID_GUARANTOR_PERMISSION
+          - INVALID_CLIENT_ROLE_PERMISSION_FOR_OPENING_ACCOUNTS
+          - MISSING_PENALTY_RATE
+          - INVALID_REPAYMENT_NUMBER
+          - MISSING_REPAYMENT_NUMBER
+          - INVALID_REPAYMENT_STATE
+          - CENTRE_MEETING_DAY_IN_NON_WORKING_DAY
+          - ARBITRARY_FEE_NOT_ALLOWED
+          - INVALID_REPAYMENT_ID
+          - ACCOUNT_BALANCE_OUTSIDE_CONSTRAINTS
+          - EDITING_DATE_NOT_IN_CENTER_MEETING_DAY
+          - CUSTOM_MADE_INSTALLMENT_ADDED_BEFORE_PAID_INSTALLMENT
+          - EDITING_REPAYMENTS_NOT_ALLOWED
+          - INTEREST_BALANCE_CANT_BE_EDITED_AT_SPECIFIED_DATE
+          - INVALID_DUE_DATE
+          - NEGATIVE_BALANCE
+          - NON_POSITIVE_TOTAL_BALANCE
+          - PARAMS_INCONSISTENT_WITH_PRODUCT_RULES
+          - INVALID_GRACE_PERIOD
+          - INVALID_ANTICIPATED_DISBURSEMENT
+          - INVALID_REPAYMENT_FREQUENCY
+          - INVALID_PRINCIPAL_REPAYMENT_INVERVAL
+          - INVALID_PRODUCT_STATE
+          - BALLOON_PAYMENTS_NOT_ALLOWED_BY_PRODUCT
+          - MANDATORY_PERIODIC_PAYMENT
+          - PERIODIC_PAYMENT_GREATER_THAN_LOAN_AMOUNT
+          - MISSING_INTEREST_RATE_SPREAD_ON_PRODUCT
+          - FIRST_REPAYMENT_DATE_BEFORE_EXPECTED_DISBURSEMENT_DATE
+          - INVALID_PENALTY_RATE
+          - CANNOT_EDIT_SOLIDARITY_LOANS
+          - INVALID_INTEREST_SPREAD
+          - INVALID_PERIODIC_PAYMENT
+          - UNKNOWN_LOAN_ACCOUNT_ERROR
+          - MISSING_GROUP_ID
+          - INVALID_GROUP_ID
+          - INVALID_FULL_DETAILS
+          - INVALID_INDICATORS
+          - GROUP_NOT_FOUND
+          - INVALID_PARAMATERS_FOR_PRODUCT
+          - INVALID_USER_WHO_APPROVED_THE_LOAN_CANNOT_DISBURSE_IT
+          - INVALID_GROUP_SIZE
+          - MULTIPLE_GROUP_MEMBERSHIP
+          - INVALID_GROUP_ROLE_NAME_KEY
+          - GROUP_ROLE_CLIENT_NOT_GROUP_MEMBER
+          - TRANSACTION_ALREADY_REVERSED
+          - INVALID_TRANSACTION_ID
+          - TRANSACTION_ID_AND_ACCOUNT_MISMATCH
+          - TRANSACTION_LOGGED_FOR_CLOSED_TILL
+          - TILL_BALANCE_ABOVE_MAX
+          - TILL_BALANCE_UNDER_MIN
+          - TRANSACTION_MADE_FROM_A_TRANSFER
+          - TRANSACTION_MADE_FROM_A_DISBURSEMENT
+          - DEPOSIT_ACCOUNT_HAS_MATURITY_DATE_SET
+          - BALANCE_IS_NULL
+          - GUARANTOR_NOT_ALLOWED_BY_PRODUCT
+          - COLLATERAL_NOT_ALLOWED_BY_PRODUCT
+          - CANNOT_CHANGE_TILL_BALANCE
+          - DEDUCTED_FEES_TOTAL_MORE_THAN_LOAN_AMOUNT
+          - NO_CAPITALIZED_DISBURSEMENT_FESS_WHEN_ZERO_LOAN_AMOUNT
+          - DISBURSE_TO_SAVINGS_NOT_AVALAIBLE_WITH_INVESTOR_FUNDS
+          - TRANSACTION_CHANNEL_IS_MANDATORY
+          - TRANSACTION_CHANNEL_NOT_AVAILABLE_WHEN_DISBURSE_TO_SAVINGS
+          - GUARANTOR_CANNOT_BE_DELETED
+          - CUSTOM_AMOUNT_IS_MANDATORY
+          - INVALID_TRANSACTION_CHANNEL
+          - MISSING_FEE
+          - INCONSISTENT_ACCOUNT_FEE_WITH_PRODUCT_FEE
+          - FULL_TERM_FEE_CANNOT_BE_AMORTIZED_DUE_TO_APPLICATION_DATE
+          - CANNOT_USE_EFFECTIVE_INTEREST_RATE_FEE_WITHOUT_INTEREST_RATE_VALUE
+          - TRANSACTION_DETAILS_NOT_AVAILABLE_FOR_PRODUCT
+          - FEES_NOT_AVAILABLE_FOR_PRODUCT
+          - EXPECTED_DISBURSEMENT_DATE_NOT_AVAILABLE_FOR_PRODUCT
+          - FIRST_REPAYMENT_DATE_NOT_AVAILABLE_FOR_PRODUCT
+          - LOAN_PRODUCT_PREPAYMENT_OPTIONS_MISMATCH
+          - INVALID_LAST_REPAYMENT_DUE_DATE_CHANGE_BECAUSE_ACCOUNT_HAS_FULL_TERM_FEE_APPLIED
+          - INVALID_HOLIDAY_SETUP
+          - REDRAW_DISABLED
+          - INSUFFICIENT_REDRAW_BALANCE
+          - MISSING_FEE_KEY
+          - INVALID_FEE_KEY
+          - INCONSISTENT_FEE_AMOUNT_WITH_PRODUCT_FEE
+          - FEE_AMOUNT_MUST_BE_STRICTLY_POSITIVE
+          - REQUIRED_FEE_MISSING
+          - FEE_NOT_ACTIVE
+          - FEE_NOT_ALLOWED
+          - INCONSISTENT_FIRST_REPAYMENT_DATE_WITH_PRODUCT_OFFSET
+          - MISSING_ORIGINAL_TRANSACTION_ID
+          - REPAYMENT_WAS_FULLY_PAID
+          - REPAYMENT_HAS_INTEREST_APPLIED
+          - DUE_DATE_BEFORE_ACCOUNTING_CLOSURE
+          - DUE_DATE_BEFORE_LOGGED_TRANSACTION
+          - INVALID_PARENT_ACCOUNT_KEY
+          - AUTOMATICALLY_ADDED_INSTALLEMENTS_ARE_NOT_EDITABLE
+          - PURE_GRACE_INSTALLMENT_ARE_NOT_EDITABLE
+          - CUSTOM_PAYMENT_NOT_ALLOWED_BY_PRODUCT
+          - SAME_CUSTOM_PAYMENT_AMOUNT_TYPE_USED_MULTIPLE_TIMES
+          - CUSTOM_PAYMENT_AMOUNT_DIFFERENT_THAN_TOTAL_PAYMENT_AMOUNT
+          - ARREARS_TOLERANCE_PERIOD_OUTSIDE_CONSTRAINTS
+          - NEGATIVE_ARREARS_TOLERANCE_PERIOD
+          - REQUIRED_ARREARS_TOLERANCE_PERIOD_MISSING
+          - DUE_DATE_BEFORE_FEE_AMORTIZATION
+          - MAX_CLIENT_LIMIT_REACHED
+          - PENALTY_METHOD_NOT_ALLOWED_BY_PRODUCT
+          - CANNOT_REVERSE_TECHNICAL_OVERDRAFT
+          - INSUFFICIENT_BALANCE
+          - INVALID_PRODUCT_TYPE
+          - DUPLICATE_DISBURSEMENT_FEE
+          - UNKNOWN_GROUP_ERROR
+          - MISSING_CLIENT_ID
+          - INVALID_CLIENT_ID
+          - INVALID_CLIENT_KEY
+          - INVALID_PICTURE_KEY
+          - INVALID_SIGNATURE_KEY
+          - INVALID_CLIENT_STATE
+          - INVALID_CLIENT_ROLE_KEY
+          - INCONSISTENT_CLIENT_ROLE_WITH_CLIENT_TYPE
+          - INVALID_DEPENDENT_CUSTOM_FIELD_VALUE
+          - INVALID_BIRTH_DATE
+          - DUPLICATE_CLIENT
+          - INVALID_CLIENT_STATE_TYPE
+          - INVALID_CLIENT_STATE_TRANSITION
+          - CLIENT_IS_MEMBER_OF_A_GROUP
+          - CLIENT_IS_GUARANTOR
+          - CLIENT_HAS_ACCOUNTS
+          - CLIENT_ID_ALREADY_IN_USE
+          - GROUP_ID_ALREADY_IN_USE
+          - GROUP_HAS_ACCOUNTS
+          - UNKNOWN_CLIENT_ERROR
+          - INVALID_SAVINGS_ACCOUNT_ID
+          - BALANCE_BELOW_ZERO
+          - MISSING_SAVINGS_ID
+          - BACKDATE_BEFORE_ACTIVATION
+          - BACKDATE_BEFORE_OTHER_OPERATION
+          - BACKDATE_SET_IN_THE_FUTURE
+          - INVALID_DEPOSIT_AMOUNT
+          - INVALID_DEPOSIT_ACCOUNT_STATE
+          - LOCKED_SAVINGS_AMOUNT
+          - SAVINGS_PRODUCT_MISMATCH
+          - SAVINGS_ACCOUNT_INVALID
+          - ACCOUNT_ID_ALREADY_IN_USE
+          - PRODUCT_DOESNT_ALLOW_WITHHOLDING_TAXES
+          - INVALID_WITHHOLDING_TAX_SOURCE_TYPE
+          - INVALID_INTEREST_CHARGE_FREQUENCY
+          - INVALID_INTEREST_CHARGE_FREQUENCY_COUNT
+          - INVALID_SAVINGS_ACCOUNT_STATE_TRANSITION
+          - MAXIMUM_WITHDRAWAL_AMOUNT_EXCEEDED
+          - MAXIMUM_OVERDRAFT_LIMIT_EXCEEDED
+          - OVERDRAFT_NOT_ALLOWED
+          - MISSING_INTEREST_RATE_FROM_SAVINGS_PRODUCT
+          - POSITIVE_SECURED_AMOUNT
+          - MINIMUM_OPENING_BALANCE_ACHIEVED
+          - ACCOUNT_HAS_TRANSACTIONS
+          - INVALID_OVERDRAFT_INTEREST_CHARGE_FREQUENCY
+          - INVALID_OVERDRAFT_INTEREST_CHARGE_FREQUENCY_COUNT
+          - RECOMMENDED_DEPOSIT_AMOUNT_INVALID
+          - MISSING_TYPE_PARAMETER
+          - INVALID_DEPOSIT_ACCOUNT_ID
+          - PRODUCT_SPECIFIES_OVERDRAFT_ALLOWED
+          - PRODUCT_SPECIFIES_OVERDRAFT_NOT_ALLOWED
+          - CURRENT_ACCOUNT_PRODUCT_DISABLED
+          - FIXED_DEPOSIT_PRODUCT_DISABLED
+          - COLLATERAL_FEATURE_DISABLED
+          - CREDIT_OFFICER_DISABLED
+          - DATA_EXPORT_DISABLED
+          - MAX_WITHDRAWAL_CANNOT_BE_NEGATIVE
+          - MAX_WITHDRAWAL_CANNOT_BE_ZERO
+          - WITHHOLDING_TAXES_DISABLED
+          - FUNDING_SOURCE_DISABLED
+          - RESET_DATA_DISABLED
+          - SOLIDARITY_GROUP_DISABLED
+          - SAVINGS_PLAN_DISABLED
+          - SAVINGS_ACCOUNT_DISABLED
+          - REVOLVING_CREDIT_DISABLED
+          - INDICATORS_DISABLED
+          - FIXED_TERM_LOAN_DISABLED
+          - FLAT_INTEREST_DISABLED
+          - EFFECTIVE_INTEREST_RATE_DISABLED
+          - RISK_REPORTING_DISABLED
+          - WITHDRAWAL_PAST_OVERDRAFT_CONSTRAINTS
+          - INTEREST_FREE_LOAN_DISABLED
+          - UNKNOWN_SAVINGS_ACCOUNT_ERROR
+          - TRANSFER_CANT_BE_MADE
+          - CANNOT_MAKE_TRANSFER_TO_SOURCE_ACCOUNT
+          - INVALID_TARGET_ACCOUNTING_STATE
+          - TRANSFER_AMOUNT_IS_NOT_POSITIVE
+          - INVALID_PRODUCT_ID
+          - TRANSFER_AS_POSTDATED_PAYMENT
+          - UNDEFINED_EXCHANGE_RATE_FOR_CURRENCY
+          - INVALID_PRODUCT_KEY
+          - CANNOT_MAKE_TRANSFER_TO_FUNDED_ACCOUNTS_WITH_ACCOUNTING_ENABLED
+          - LINKED_ACCOUNT_DELETION_ERROR
+          - ACCOUNT_HAS_REMAINING_BALANCE
+          - CANNOT_DISBURSE_LOCKED_ACCOUNTS
+          - DISBURSEMENT_DATE_AFTER_LAST_REPAYMENT_DUE_DATE
+          - INTEREST_RATE_NOT_AVAILABLE_FOR_INDEXED_RATES
+          - INTEREST_SPREAD_NOT_AVAILABLE_FOR_FIXED_RATES
+          - TRANCHES_EXPECTED_DISBURSMENT_DATES_NOT_ORDERED
+          - TRANCHES_NOT_ALLOWED
+          - TRANCHES_NOT_DEFINED
+          - MORE_TRANCHES_THAN_ALLOWED
+          - TOTAL_TRANCHES_AMOUNT_MORE_THAN_LOAN_AMOUNT
+          - TOTAL_AMOUNT_NOT_EQUAL_WITH_LOAN_AMOUNT
+          - TRANCHE_AMOUNT_SHOULD_BE_STRICT_POSITIVE
+          - INVALID_TRANCHE_KEY
+          - CANNOT_MODIFY_DISBURSED_TRANCHE
+          - DISBURSEMENT_DATE_BEFORE_NOT_REVERSED_TRANSACTION
+          - CANNOT_MODIFY_TRANCHES_ON_RESCHEDULED_REFINANCED_ACCOUNTS
+          - ALL_TRANCHES_ALREADY_DISBURSED
+          - TRANCHES_CANNOT_BE_EDITED
+          - INTEREST_RATE_SHOULD_BE_ZERO_OR_EMPTY
+          - INTEREST_SPREAD_SHOULD_BE_ZERO_OR_EMPTY
+          - INCONSISTENT_DATE_WITH_NEXT_TRANCHE
+          - INTEREST_RATE_CANNOT_BE_EDITED_FOR_TIERED_INTEREST_RATES
+          - INTEREST_SPREAD_CANNOT_BE_EDITED_FOR_TIERED_INTEREST_RATES
+          - INVALID_INTEREST_RATE_TIERS
+          - INVALID_OVERDRAFT_INTEREST_RATE_TIERS
+          - PAY_OFF_INVALID_INTEREST_PAID
+          - PAY_OFF_INVALID_FEES_PAID
+          - PAY_OFF_INVALID_PENALTY_PAID
+          - INVALID_GL_ACCOUNT_ID
+          - INVALID_GL_ACCOUNT_TYPE
+          - JOURNAL_ENTRY_BEFORE_CLOSURE
+          - DEBITS_DO_NOT_MATCH_CREDITS
+          - JOURNAL_ENTRY_DATE_NOT_DEFINED
+          - GL_ACCOUNT_IS_HEADER
+          - GL_ACCOUNT_DOES_NOT_SUPPORT_MANUALLY_ENTRIES
+          - NO_INTER_BRANCH_GL_ACCOUNT
+          - INVALID_JOURNAL_TRANSACTION_ID
+          - DUPLICATE_JOURNAL_TRANSACTION_ID
+          - INVALID_ACCOUNTING_DATE_ORDER
+          - INVALID_ACCOUNTING_DATE_RANGE
+          - JOURNAL_ENTRY_DATE_IN_THE_FUTURE
+          - JOURNAL_ENTRY_DATE_IN_THE_PAST_BEFORE_THE_ALLOWED_LIMIT
+          - INVALID_BOOKING_DATE
+          - BOOKING_DATE_BEFORE_VALUE_DATE
+          - INVALID_CURRENCY_CODE
+          - CURRENCY_NOT_MATCHING
+          - ACCOUNT_CURRENCY_NOT_MATCH
+          - MISSING_CURRENCY
+          - INVALID_EXCHANGE_RATE_VALUE
+          - INCONSISTENT_START_DATE_WITH_TRANSACTIONS
+          - BUY_RATE_GREATER_THAN_SELL_RATE
+          - RATE_NOT_SET
+          - RATE_TO_SAME_CURRENCY
+          - DATE_BEFORE_LAST_RATE_DATE
+          - START_DATE_IN_FUTURE
+          - DATE_ON_LAST_RATE_DATE
+          - INVALID_USER_NAME
+          - INVALID_USER_ID
+          - INVALID_CREDIT_OFFICER_KEY
+          - INCONSISTENT_CREDIT_OFFICER_WITH_BRANCH
+          - MISSING_CREDIT_OFFICER_KEY
+          - MISSING_BRANCH_KEY
+          - MISSING_CENTRE_KEY
+          - INVALID_USER_ROLE_KEY
+          - USER_IS_LOCKED
+          - INVALID_PASSWORD
+          - EMAIL_ADDRESS_ALREADY_REGISTERED_WITH_ANOTHER_USER
+          - EMAIL_ADDRESS_FORMAT_IS_INVALID
+          - USERNAME_ALREADY_EXISTS
+          - MAX_USER_LIMIT_REACHED
+          - CANNOT_MANAGE_USER_BRANCH
+          - NOT_ENOUGH_PRIVILDGES_FOR_CHANGING_USER_SETTINGS
+          - ONLY_ONE_ROLE_ALLOWED
+          - INVALID_TRANSACTION_LIMIT_TYPE
+          - NOT_ENOUGH_PRIVILEDGES_TO_CREATE_ADMIN_USER
+          - CANNOT_HAVE_NEGATIVE_TRANSACTION_LIMITS
+          - INVALID_VALUE_FOR_MANAGED_BRANCHES
+          - CANNOT_HAVE_ADMIN_WITHOUT_FULL_BRANCHES_ACCESS
+          - CANNOT_HAVE_OFFICER_ADMIN_WITHOUT_MANAGE_OTHER_ENTITIES_ACCESS
+          - INCONSISTENT_CAN_MANAGE_BRANCHES_WITH_CAN_MANAGE_ENTITIES
+          - MISSING_EMAIL_ADDRESS
+          - MISSING_MOBILE_PHONE
+          - INVALID_BRANCH_ID
+          - INVALID_BRANCH_KEY
+          - INVALID_MANAGED_BRANCH_ID
+          - BRANCH_IS_NOT_ACTIVE
+          - INVALID_CENTRE_KEY
+          - INVALID_CENTRE_ID
+          - INCONSISTENT_CENTRE_WITH_BRANCH
+          - CENTRE_IS_NOT_ACTIVE
+          - INCONSISTENT_VALUE_WITH_CUSTOM_FIELD_TYPE
+          - REQUIRED_CUSTOM_FIELD_MISSING
+          - INVALID_CUSTOM_FIELD_ID
+          - MAX_CUSTOM_FIELD_VALUE_LENGTH_EXCEEDED
+          - INVALID_CUSTOM_FIELD_ENTITY_KEY
+          - VIEW_TYPE_NOT_MATCHING_RESOURCE
+          - VIEW_NOT_ACCESSIBLE_FOR_USER
+          - CUSTOM_FIELD_DEACTIVATED
+          - CUSTOM_FIELD_REQUIRED
+          - CUSTOM_FIELD_NOT_AVAILABLE_FOR_ENTITY
+          - INVALID_CUSTOM_FIELD_LINKED_ENTITY_KEY
+          - DEPENDENT_CUSTOM_FIELD_VALUE_REQUIRED
+          - INCONSISTENT_VALUE_WITH_SET_TYPE
+          - GROUPED_INDEXES_NOT_CONSECUTIVE
+          - TO_MANY_VALUES_FOR_SAME_GROUPED_CUSTOM_FIELD
+          - INVALID_CUSTOM_FIELD_GROUP_INDEX
+          - INCONSISTENT_CUSTOM_FIELD_VALUE_WITH_PATTERN
+          - DUPLICATE_CUSTOM_FIELD_VALUES
+          - CUSTOM_FIELD_SET_CHANGE_NOT_ALLOWED
+          - CUSTOM_FIELD_SET_NULL
+          - CUSTOM_FIELD_USAGE_CHANGE_NOT_ALLOWED
+          - DATATYPE_OR_TYPE_CHANGED
+          - CUSTOM_FIELD_NAME_NOT_UNIQUE
+          - ENCODED_KEY_MUST_BE_EMPTY_ON_CREATE
+          - CUSTOM_FIELDS_NEED_CHANNEL_PROVIDED
+          - DUPLICATE_UNIQUE_VALUE
+          - REFERRED_IN_CUSTOM_FIELD
+          - TRANSACTION_TYPE_NOT_ACCEPTING_CUSTOM_FIELDS
+          - INVALID_CUSTOM_FIELD_KEY
+          - BUILT_IN_CUSTOM_FIELD_CHANGE_NOT_ALLOWED
+          - INVALID_ID_DOCUMENT
+          - REQUIRED_ID_DOCUMENT_MISSING
+          - ADDING_OTHER_ID_DOCUMENTS_IS_DISABLED
+          - INVALID_ID_DOCUMENT_TEMPLATE_KEY
+          - INVALID_DOCUMENT_ID
+          - INVALID_FILE_EXTENSION
+          - FILE_EXTENSION_NOT_ALLOWED
+          - INCONSISTENT_EXTENSION_WITH_FILE_CONTENT
+          - MALWARE_CONTENT_DETECTED
+          - INVALID_FILENAME
+          - NO_PROFILE_PICTURE_SET
+          - NO_PROFILE_SIGNATURE_SET
+          - HAS_DOCUMENT_ATTACHED
+          - UNSUPPORTED_IMAGE_TYPE
+          - INVALID_TASK_ID
+          - INVALID_TASK_STATE_AND_COMPLETION_DATE
+          - INVALID_TASK_FIELD_CHANGE
+          - INVALID_TASK_STATUS
+          - INVALID_TASK_TITLE_LENGTH
+          - HAS_TASK_ATTACHED
+          - EDITING_VIEW_TYPE_NOT_ALLOWED
+          - INVALID_CUSTOM_FIELD_SET_ID
+          - TRANSACTION_LINKED_TO_A_REPAYMENT
+          - MISSING_FROM_DATE
+          - MISSING_TO_DATE
+          - MAXIMUM_ONE_FILTER_ALLOWED
+          - TILL_BALANCE_OUTSIDE_CONSTRAINTS
+          - TRANSACTION_IS_NOT_WITHIN_CHANNEL_CONSTRAINTS
+          - INVALID_ADDRESS
+          - CLIENT_ROLE_DOES_NOT_ALLOW_ADDRESS
+          - ADDRESS_CHANGE_NOT_ALLOWED
+          - INVALID_ADDRESS_LINE1
+          - INVALID_ADDRESS_LINE2
+          - INVALID_CITY
+          - INVALID_REGION
+          - INVALID_POSTCODE
+          - INVALID_COUNTRY
+          - DATA_IMPORT_IN_PROGRESS
+          - DATABASE_BACKUP_IN_PROGRESS
+          - DATABASE_BACKUP_NOT_FOUND
+          - CLIENT_IN_MIGRATION
+          - INVALID_NUMBER_OF_SHEETS
+          - UNDEFINED_SHEET
+          - WRONG_SHEET_POSITION
+          - INVALID_NUMBER_OF_COLUMNS_FOR_SHEET
+          - UNDEFINED_COLUMN
+          - WRONG_COLUMN_POSITION
+          - INVALID_ASSIGNMENT
+          - INVALID_INDEX_RATE_SOURCE_ID
+          - START_DATE_BEFORE_LAST_INDEX_REVIEWD_DATE
+          - INVALID_INDEX_RATE_START_DATE
+          - NO_INDEX_RATE_AVAILABLE
+          - NO_TAX_RATE_AVAILABLE
+          - INCONSISTENT_GROUP_MEMBER_PARENT_KEY
+          - INCONSISTENT_GROUP_MEMBER_ENCODED_KEY
+          - INCONSISTENT_GROUP_ROLE_PARENT_KEY
+          - INCONSISTENT_GROUP_ROLE_ENCODED_KEY
+          - PRODUCT_LINE_OF_CREDIT_AFFILIATION_CONSTRAINT_MISMATCH
+          - DISBURSEMENT_DATE_BEFORE_LINE_OF_CREDIT_START_DATE
+          - MATURITY_DATE_AFTER_LINE_OF_CREDIT_END_DATE
+          - LINE_OF_CREDIT_AMOUNT_EXCEEDED
+          - LINE_OF_CREDIT_REQUIRED_EXCEPTION
+          - OVERDRAFT_EXPIRY_DATE_AFTER_LINE_OF_CREDIT_END_DATE
+          - CANNOT_CREATE_ACCOUNT_WITH_LINE_OF_CREDIT
+          - LINE_OF_CREDIT_REQUIRES_OVERDRAFT_MAX_LIMIT
+          - LINE_OF_CREDIT_REQUIRES_OVERDRAFT_EXPIRY_DATE
+          - INVALID_LINE_OF_CREDIT_ID
+          - ACCOUNT_ALREADY_ON_LINE_OF_CREDIT
+          - INCONSISTENT_LINE_OF_CREDIT_CLIENT_WITH_ACCOUNT_OWNER
+          - ACCOUNT_IS_NOT_PART_OF_LINE_OF_CREDIT
+          - INVALID_LINE_OF_CREDIT_STATE
+          - HAS_LINES_OF_CREDIT
+          - LINE_OF_CREDIT_ID_ALREADY_IN_USE
+          - EXPIRE_DATE_BEFORE_START_DATE
+          - INVALID_CLIENT_ROLE_PERMISSION_FOR_OPENING_LINES_OF_CREDIT
+          - MISSING_LINE_OF_CREDIT_START_DATE
+          - MISSING_LINE_OF_CREDIT_EXPIRE_DATE
+          - MISSING_LINE_OF_CREDIT_AMOUNT
+          - LINE_OF_CREDIT_AMOUNT_NOT_STRICTLY_POSITIVE
+          - INVALID_ACCOUNT_HOLDER_ID
+          - MISSING_ACCOUNT_HOLDER_KEY
+          - MISSING_ACCOUNT_HOLDER_TYPE
+          - ACCOUNT_HOLDER_NOT_FOUND
+          - INVALID_ACCOUNT_HOLDER_STATE
+          - NO_ORGANIZATION_ICON
+          - NO_ORGANIZATION_LOGO
+          - MISSING_TEXT
+          - MAX_TEXT_LENGTH_EXCEEDED
+          - NUM_INSTALLMENTS_NOT_AVAILABLE_FOR_REVOLVING_CREDIT
+          - PRINCIPAL_PAYMENT_INCONSISTENT_WITH_PRODUCT
+          - SCHEDULE_PREVIEW_NOT_AVAILABLE_FOR_REVOLVING_CREDIT
+          - AMOUNT_MORE_THAN_CURRENT_AVAILABLE_AMOUNT
+          - INCONSISTENT_WITH_CENTRE_MEETING_DAY
+          - FIELD_IS_NOT_EDITABLE
+          - RESCHEDULED_REPAYMENT_BEFORE_DISBURSEMENT_DATE
+          - FIELD_NOT_ALLOWED
+          - OPERATION_NOT_ALLOWED_ON_FIELD
+          - INVALID_FILTER_VALUES
+          - INVALID_FILTER_SELECTION
+          - INVALID_FILTER_ELEMENT
+          - INVALID_FILTER_VALUE
+          - INVALID_FILTER_SECOND_VALUE
+          - TOO_MANY_FILTERS_PROVIDED
+          - INVALID_FILTER_DATA_ITEM_TYPE
+          - INSUFFICIENT_FUNDS_ACCOUNT_BALANCE
+          - INSUFFICIENT_FUNDS_TOTAL_AMOUNT
+          - FUNDS_NOT_ALLOWED
+          - FUNDING_AMOUNT_MUST_BE_STRICTLY_POSITIVE
+          - FUNDER_INTEREST_COMMISSION_CONSTRAINTS_VALIDATION
+          - MISSING_FUNDER_INTEREST_COMMISSION
+          - INVALID_FUND_ENCODED_KEY
+          - INVESTORS_TOTAL_AMOUNT_MORE_THAN_LOAN_AMOUNT
+          - INVALID_FUND_ID
+          - INACTIVE_FUND_ID
+          - INVALID_FUNDED_ACCOUNT_STATE
+          - FUND_SELL_WITH_NO_PURCHASES
+          - FUND_OVERSELL
+          - INVALID_SELLER_FUND_AMOUNT
+          - INVALID_SELLER_FUND_STATE
+          - INVALID_SELLER_FUNDING_ACCOUNT
+          - INVALID_INVESTMENT_PERCENTAGES_FOR_AMOUNTS
+          - FUND_SELF_SELL
+          - INVALID_BUYER_FUNDING_ACCOUNT
+          - DUPLICATE_BUYER_FUNDING_ACCOUNT
+          - INVALID_BUYER_FUND_AMOUNT
+          - INVALID_FUND_PURCHASE_PRICE
+          - INSUFFICIENT_BUYER_FUNDING_ACCOUNT_FUNDS
+          - LOAN_ACCOUNT_NOT_FUNDED_BY_SAVINGS_ACCOUNT
+          - INVALID_INTEREST_RATE_AGAINST_INTEREST_COMMISSION
+          - INVALID_SAVINGS_ACCOUNT_TYPE_FOR_FUNDING
+          - DUPLICATED_SAVINGS_ACCOUNT_FOR_FUNDING
+          - INVALID_FIXED_DAYS_OF_MONTH
+          - INVALID_SORTING_COLUMN
+          - COLUMN_NOT_SORTABLE
+          - INVALID_SORTING_ORDER
+          - ACCOUNT_TYPE_DOES_NOT_ALLOW_FIELD
+          - INVALID_GUARANTY_ENCODED_KEY
+          - INVALID_GUARANTY_TYPE
+          - INVALID_GUARANTOR_TYPE
+          - GUARANTY_KEY_TYPE_MISMATCH
+          - INVALID_TEMPLATE_ID
+          - INVALID_TEMPLATE_TYPE
+          - MISSING_FIXED_DAYS_OF_MONTH
+          - FIXED_DAYS_OF_MONTH_NOT_ALLOWED
+          - REPAYMENT_FREQUENCY_NOT_ALLOWED
+          - REPAYMENT_PERIOD_COUNT_NOT_ALLOWED
+          - APPLIED_INTEREST_BALANCE_CANNOT_BE_REALLOCATED
+          - INVALID_NEW_TOTAL_LOAN_AMOUNT
+          - NEGATIVE_WRITE_OFF_AMOUNT
+          - CAPITALIZED_AMOUNTS_NOT_ALLOWED_DUE_TO_DIFFERENT_ACCOUNTING
+          - TOP_UP_AMOUNT_IS_MANDATORY
+          - RESTRUCTURE_DETAILS_ARE_MANDATORY
+          - NEGATIVE_TOP_UP_AMOUNT
+          - WRITE_OFF_AMOUNT_MORE_THAN_BALANCE_AMOUNT
+          - CANNOT_REFINANCE_REVOLVING_CREDIT_LOAN
+          - POSITIVE_CAPITALIZED_AMOUNTS_FOR_LOAN_FUNDED_NOT_ALLOWED
+          - WRITE_OFF_AMOUNT_FOR_LOAN_FUNDED_DIFFERENT_BY_BALANCE_AMOUNT
+          - CURRENCY_NOT_AVAILABLE_FOR_PRODUCT
+          - CURRENCY_NOT_EDITABLE
+          - TELLER_CANNOT_POST_TRANSACTION_IN_MULTI_CURRENCY
+          - NOT_ENOUGH_PRINCIPAL_TO_CONTINUE_FEE_AMORTIZATION
+          - SETTINGS_ONLY_AVAILABLE_FOR_REVOLVING_CREDIT_ACCOUNTS
+          - INCONSISTENT_FLAT_AMOUNT_WITH_PRODUCT_CONSTRAINTS
+          - INCONSISTENT_PERCENTANGE_WITH_PRODUCT_CONSTRAINTS
+          - AMOUNT_REQUIRED_FOR_FLAT_PRINCIPAL_PAYMENT_METHOD
+          - PERCENTAGE_REQUIRED_FOR_PRINCIPAL_PAYMENT_PERCENTAGE_METHOD
+          - AMOUNT_ONLY_AVAILABLE_FOR_FLAT_PRINCIPAL_PAYMENT_METHOD
+          - PERCENTAGE_ONLY_AVAILABLE_FOR_OUTSTANDING_PRINCIPAL_PERCENTAGE_METHOD
+          - INVALID_PRINCIPAL_PAYMENT_FLAT_AMOUNT_WITH_DECIMALS
+          - INVALID_PRINCIPAL_PAYMENT_PERCENTAGE_VALUE
+          - CANT_EDIT_LOCKED_OPERATIONS_IN_LOCKED_CAPPING_STATE
+          - CANT_UNLOCK_WHEN_INCOME_BALANCE_IS_OVER_PRINCIPAL_CAPPING_CONSTRAINTS
+          - CANNOT_BULK_REVERSE_INTERNAL_TRANSFER_REPAYMENT
+          - CANNOT_BULK_REAPPLY_TRANSACTION_BECAUSE_LOCKED_TRANSACTIONS_LOGGED_AFTER_IT
+          - CANNOT_BULK_REAPPLY_POSTDATED_REPAYMENTS
+          - CANNOT_BULK_REVERSE_ACTIVATION_TRANSACTION
+          - CLOSURE_DATE_AFTER_MAX_ALLOWED_UNDO_CLOSURE_PERIOD
+          - CLOSURE_DATE_BEFORE_GL_ACCOUNT_CLOSURE
+          - MISSING_ORGANIZATION_INTEREST_COMMISSION
+          - INSUFFICIENT_TRANSACTION_AMOUNT
+          - CANNOT_REVERSE_INTEREST_ON_DISBURSEMENT
+          - TRANSACTION_TYPE_IS_IRREVERSIBLE
+          - INTEREST_APPLIED_WITH_NULL_AMOUNT
+          - CANNOT_REVERSE_OFFSET_DEPOSIT_TRANSACTION
+          - CANNOT_LOCK_CAPPING_ACCOUNT_INVALID_ACCOUNT_ID
+          - CANNOT_LOCK_CAPPING_ACCOUNT_INVALID_ACCOUNT_STATE_FOR_LOCK
+          - INCOME_BALANCE_CONSTRAINTS_EXCEEDED
+          - CANNOT_BULK_REVERSE_LOAN_FRACTION_SOLD
+          - LATE_FEE_TRANSACTIONS_LOGGED_AFTER_REPAYMENT_TO_REAPPLY_ON_FIXED_ACCOUNT
+          - FEE_CANNOT_BE_POSTED_ON_RECOMPUTED_SCHEDULE
+          - INVALID_ORGANIZATION_INTEREST_COMMISSION
+          - ACCOUNT_ALREADY_LOCKED
+          - CANNOT_BULK_ADJUST_ACTIVATION_TRANSACTION
+          - INTEREST_RATE_CHANGED_TRANSACTION_NOT_ALLOWED
+          - INTEREST_RATE_CHANGED_TRANSACTION_NOT_ALLOWED_FOR_LOAN_PRODUCT_TYPE
+          - INSTALLMENT_WITH_INTEREST_APPLIED_CANNOT_BE_EDITED
+          - UNABLE_TO_DETERMINE_DELETED_REPAYMENTS
+          - PAID_OR_PURE_GRACE_INSTALLMENT_CANNOT_BE_DELETED
+          - NON_CUSTOM_MADE_INTALLMENT_CANNOT_BE_DELETED_FOR_REVOLVING_CREDIT_ACCOUNT
+          - INVALID_NUMBER_OF_INSTALLMENTS
+          - INVALID_PRINCIPAL_AMOUNT_WITH_DECIMALS
+          - INCONSISTENT_WITH_LINE_OF_CREDIT_VALID_UNTIL_DATE
+          - DUE_DATES_NOT_UNIQUE
+          - NON_ZERO_PRINCIPAL_REPAYMENT_CANNOT_BE_DELETED
+          - NON_DYNAMIC_ACCOUNT_REPAYMENT_DELETION_NOT_ALLOWED
+          - INVALID_LOAN_ACCOUNT_STATE_FOR_FUNDS_EDIT
+          - ENTRY_DATE_AFTER_MATURITY_DATE_WITH_LATE_FEES_AND_BULK_REVERSAL
+          - DIFFERENT_ACCOUNTING_STATE_BETWEEN_INVOLVED_PRODUCTS
+          - ACCOUNT_ALREADY_LINKED
+          - PRODUCT_DOES_NOT_ALLOW_LINKING
+          - UNLINKABLE_SAVINGS_PRODUCT
+          - INVALID_SAVINGS_ACCOUNT_HOLDER
+          - LINK_BETWEEN_ACCOUNTS_DOES_NOT_EXIST
+          - NON_NATIVE_GRACE_INSTALLMENT_CANNOT_BE_EDITED
+          - NON_NATIVE_GRACE_INSTALLMENT_CANNOT_BE_DELETED
+          - INSUFFICIENT_ACCOUNT_BALANCE
+          - INVALID_SAVINGS_ACCOUNT_TYPE
+          - MATURITY_PERIOD_ALREADY_STARTED
+          - LOAN_PRODUCT_PRINCIPAL_PAID_INSTALLMENT_STATUS_MISMATCH
+          - CANNOT_DELETE_LINK_FOR_ACTIVATED_OFFSET_LOAN
+          - INVALID_LANGUAGE
+          - INVALID_LINKED_SETTLEMENT_ACCOUNT_KEYS
+          - SAVINGS_ACCOUNT_ALREADY_LINKED
+          - INSTALLMENT_WITH_PENALTY_APPLIED_CANNOT_BE_EDITED
+          - INSTALLMENT_DUE_DATE_MOVED_BEFORE_LAST_PENALTY_APPLIED_DATE
+          - MATURITY_PERIOD_NOT_STARTED
+          - RESEND_FAILED_NOTIFICATION_FAILED
+          - INVALID_NOTIFICATION_MESSAGE_STATE
+          - DUPLICATED_NOTIFICATION_ENCODED_KEY
+          - MAXIMUM_NUMBER_OF_NOTIFICATIONS_TO_RESEND_EXCEEDED
+          - DUE_DATES_NOT_IN_ASCENDING_ORDER
+          - ACCOUNT_PRODUCT_BRANCH_AVAILABILITY_MISMATCH
+          - CLIENT_HAS_ACTIVE_ACCOUNTS_WITH_PRODUCT_BRANCH_AVAILABILITY_MISMATCH
+          - PRODUCT_HAS_ASSOCIATED_ACCOUNTS
+          - MAX_NUMBER_OF_FILTERS_REACHED
+          - MAX_NUMBER_OF_COLUMNS_REACHED
+          - USAGE_RIGHTS_ROLE_NOT_AVAILABLE
+          - CURRENCY_NOT_DEFINED
+          - BASE_CURRENCY_CANNOT_BE_REMOVED
+          - CURRENCY_IN_USE_CANNOT_BE_REMOVED
+          - CURRENCY_DOES_NOT_EXIST
+          - INVALID_COMMUNICATION_MESSAGE_ENCODED_KEY
+          - INVALID_EMAIL_SUBJECT
+          - CANNOT_ADJUST_OFFSET_DEPOSIT_TRANSACTION
+          - INVALID_CREDIT_ARRANGEMENT_ID
+          - INVALID_CREDIT_ARRANGEMENT_STATE
+          - CREDIT_ARRANGEMENT_ID_ALREADY_IN_USE
+          - INVALID_CLIENT_ROLE_PERMISSION_FOR_OPENING_CREDIT_ARRANGEMENTS
+          - CREDIT_ARRANGEMENT_AMOUNT_NOT_STRICTLY_POSITIVE
+          - PRODUCT_CREDIT_ARRANGEMENT_AFFILIATION_CONSTRAINT_MISMATCH
+          - ACCOUNT_ALREADY_ON_CREDIT_ARRANGEMENT
+          - INCONSISTENT_CREDIT_ARRANGEMENT_CLIENT_WITH_ACCOUNT_OWNER
+          - CREDIT_ARRANGEMENT_REQUIRES_OVERDRAFT_EXPIRE_DATE
+          - CREDIT_ARRANGEMENT_REQUIRES_OVERDRAFT_MAX_LIMIT
+          - CREDIT_ARRANGEMENT_AMOUNT_EXCEEDED
+          - MATURITY_DATE_AFTER_CREDIT_ARRANGEMENT_END_DATE
+          - OVERDRAFT_EXPIRY_DATE_AFTER_CREDIT_ARRANGEMENT_END_DATE
+          - DISBURSEMENT_DATE_BEFORE_CREDIT_ARRANGEMENT_START_DATE
+          - CREDIT_ARRANGEMENT_REQUIRED_EXCEPTION
+          - ACCOUNT_IS_NOT_PART_OF_CREDIT_ARRANGEMENT
+          - CREDIT_ARRANGEMENT_ILLEGAL_PARAMETER_MODIFICATION
+          - CREDIT_ARRANGEMENT_HAS_NON_CLOSED_ACCOUNTS
+          - BASE_CURRENCY_NOT_UNIQUE
+          - CURRENCY_SYMBOL_LENGTH_OUTSIDE_CONSTRAINTS
+          - INEXISTING_CURRENCY_SYMBOL
+          - INVALID_TO_INSTALLMENT_POSITION
+          - INVALID_PMT_VALUE
+          - PAYMENT_PLAN_NOT_AVAILABLE
+          - AT_LEAST_ONE_PERIODIC_PAYMENT_PLAN_MANDATORY
+          - SUM_OF_PERIODIC_PAYMENTS_LESS_OR_EQUAL_WITH_LOAN_AMOUNT
+          - PAYMENT_PLAN_ENTRIES_NOT_ORDERED
+          - INTEREST_RATE_COMPUTATION_ERROR
+          - INVALID_PERIODIC_PAYMENT_ENCODED_KEY
+          - DUPLICATED_PERIODIC_PAYMENT_ENCODED_KEY
+          - INVALID_INTEREST_CHARGE_FREQUENCY_METHOD_MUST_BE_NULL
+          - INVALID_DAYS_IN_YEARS_METHOD_MUST_BE_NULL
+          - PRODUCT_ID_ALREADY_IN_USE
+          - INVALID_ROUNDING_REPAYMENT_CURRENCY_FOR_PRODUCT
+          - SDK_CLIENT_COULD_NOT_BE_GENERATED
+          - SDK_CLIENT_LANGUAGES_COULD_NOT_BE_OBTAINED
+          - MAXIMUM_NUMBER_OF_COMMUNICATION_MESSAGES_TO_RESEND_EXCEEDED
+          - RESEND_FAILED_COMMUNICATON_FAILED
+          - DUPLICATE_ENCODED_KEY
+          - MESSAGE_STATE_MUST_BE_FAILED
+          - NO_MESSAGE_FOUND
+          - MESSAGE_NOT_FOUND
+          - MISSING_ENCODED_KEY
+          - URL_CONTAINS_QUOTES
+          - MISSING_RECIPIENT
+          - RECIPIENT_NOT_ALLOWED
+          - INVALID_CLIENT_RECIPIENT
+          - INVALID_CREDIT_OFFICER_RECIPIENT
+          - INVALID_GROUP_ROLE_RECIPIENT
+          - INVALID_CUSTOM_FIELD_RECIPIENT
+          - INVALID_EVENT
+          - INVALID_TARGET
+          - INVALID_PLACEHOLDER
+          - INVALID_FIELD_LENGTH
+          - INVALID_WEBHOOK_REQUEST_TYPE
+          - URL_CONTAINS_INVALID_PLACEHOLDERS
+          - CARD_REFERENCE_TOKEN_FORMAT_INVALID
+          - CARD_REFERENCE_TOKEN_ALREADY_IN_USE
+          - CARD_REFERENCE_HAS_ASSOCIATED_HOLDS_OR_TRANSACTIONS
+          - CARD_REFERENCE_NOT_FOUND
+          - DUPLICATE_AUTHORIZATION_HOLD
+          - DUPLICATE_CARD_TRANSACTION
+          - AVAILABLE_BALANCE_BELOW_ZERO
+          - AUTHORIZATION_HOLD_NOT_FOUND
+          - INVALID_AUTHORIZATION_HOLD_STATE
+          - CARD_TRANSACTION_CANNOT_BE_ADJUSTED
+          - TECHNICAL_OVERDRAFT_IS_NOT_ALLOWED_FOR_PRODUCT
+          - CARD_TRANSACTION_NOT_FOUND
+          - CARD_TRANSACTION_MAX_REVERSAL_AMOUNT_EXCEEDED
+          - CARDS_FEATURE_DISABLED
+          - PRODUCT_MUST_BE_ACTIVE
+          - TARGET_AMOUNT_IS_NEGATIVE
+          - MAX_WITHDRAWAL_AMOUNT_OUTSIDE_CONSTRAINTS
+          - ACCOUNT_HOLDER_KEY_INVALID
+          - ACCOUNT_HOLDER_TYPE_INVALID
+          - INVALID_WITHHOLDING_TAX_SOURCE_KEY
+          - INTEREST_RATE_OUTSIDE_CONSTRAINTS
+          - INVALID_INTEREST_PAYMENT_POINT
+          - INVALID_INTEREST_PAYMENT_DATES
+          - REQUIRED_OVERDRAFT_INTEREST_RATE
+          - REQUIRED_OVERDRAFT_EXPIRY_DATE
+          - REQUIRED_OVERDRAFT_LIMIT
+          - DEPOSIT_ACCOUNT_FIELD_NOT_EDITABLE
+          - DEPOSIT_PRODUCT_MISMATCH
+          - ACCOUNT_TYPE_DOES_NOT_ALLOW_RECOMMENDED_DEPOSIT_AMOUNT
+          - ACCOUNT_TYPE_DOES_NOT_ALLOW_MAX_WITHDRAWAL_AMOUNT
+          - ACCOUNT_TYPE_DOES_NOT_ALLOW_TARGET_AMOUNT
+          - REQUIRED_INTEREST_RATE
+          - INTEREST_RATE_SHOULD_BE_NULL
+          - OVERDRAFT_INTEREST_RATE_SHOULD_BE_NULL
+          - OVERDRAFT_INTEREST_SPREAD_SHOULD_BE_NULL
+          - INVALID_ACCOUNT_TYPE
+          - INVALID_ACCOUNT_KEY
+          - UNABLE_TO_RECALCULATE_SCHEDULE
+          - UNABLE_TO_APPRAISE_LOAN_ACCOUNT
+          - TRANSACTION_MADE_BY_A_DISBURSEMENT_FEE
+          - INVALID_TARGET_ACCOUNT_TYPE
+          - NEGATIVE_TARGET_ACCOUNT_BALANCE
+          - ZERO_DISBURSE_AMOUNT
+          - INVESTOR_FUNDED_LOAN_ACCOUNT
+          - INVALID_TARGET_ACCOUNT_HOLDER_KEY
+          - TRANSFER_NOTES_LENGTH_EXCEEDS_MAXIMUM_SIZE
+          - CANNOT_MAKE_TRANSFER_FOR_FOREIGN_CURRENCY_IF_ACCOUNTING_ENABLED
+          - INVALID_AMORTIZATION_PROFILE
+          - AMORTIZATION_PROFILE_NOT_ALLOWED
+          - INVALID_AMORTIZATION_FREQUENCY
+          - INVALID_AMORTIZATION_FREQUENCY_CUSTOM_INTERVAL_PERIOD_COUNT
+          - INVALID_AMORTIZATION_SETTINGS
+          - AMORTIZATION_FREQUENCY_CUSTOM_INTERVAL_TOTAL_STEPS_NOT_ALLOWED
+          - AMORTIZATION_FREQUENCY_CUSTOM_INTERVAL_PERIOD_UNIT_NOT_ALLOWED
+          - AMORTIZATION_FREQUENCY_CUSTOM_INTERVAL_PERIOD_COUNT_NOT_ALLOWED
+          - INVALID_AMORTIZATION_FREQUENCY_CUSTOM_INTERVAL_TOTAL_STEPS
+          - INVALID_AMORTIZATION_FREQUENCY_CUSTOM_INTERVAL_PERIOD_UNIT
+          - AMORTIZATION_SETTINGS_NOT_ALLOWED
+          - INVALID_INTEREST_RATE_TERMS
+          - TRANSACTION_DISBURSEMENT_DATE_DOES_NOT_MATCH_WITH_TRANCH_EXPECTED_DATE
+          - DUPLICATE_TRANSACTION_CHANNEL_NAME
+          - DUPLICATE_TRANSACTION_CHANNEL_ID
+          - TRANSACTION_CHANNEL_ID_CONTAINS_SPACES
+          - INVALID_TRANSACTION_CHANNEL_LOAN_CONSTRAINTS
+          - INVALID_TRANSACTION_CHANNEL_SAVINGS_CONSTRAINTS
+          - INVALID_TRANSACTION_CHANNEL_ACCOUNT_USAGE
+          - CANNOT_DELETE_DEFAULT_TRANSACTION_CHANNEL
+          - TRANSACTION_CHANNEL_IN_USE
+          - TRANSACTION_CHANNEL_CANNOT_BE_DEACTIVATED
+          - INCONSISTENT_TRANSACTION_USER_KEY_WITH_ACCOUNT_USER
+          - INCONSISTENCY_BETWEEN_CHANNEL_KEY_AND_ID
+          - INCONSISTENT_TRANSACTION_PRODUCT_KEY_WITH_ACCOUNT_PRODUCT
+          - DUPLICATE_ID
+          - DUPLICATE_NAME
+          - ID_CONTAINS_SPACES
+          - INVALID_EXTERNAL_ID
+          - EXTERNAL_ID_ALREADY_EXISTS
+          - INVALID_ASSIGNMENT_FROM_NO_MEETING_DAY
+          - HOLDER_HAS_ACCOUNTS_IN_DIFFERENT_BRANCH_WITH_CENTRE_OR_CREDITOFFICER_MISMATCH
+          - ACCOUNT_ALREADY_DISBURSED
+          - AMORTIZATION_FREQUENCY_INTERVAL_TYPE_NOT_ALLOWED
+          - AMORTIZATION_FREQUENCY_INTERVAL_COUNT_NOT_ALLOWED
+          - INVALID_AMORTIZATION_FREQUENCY_INTERVAL_TYPE
+          - INVALID_AMORTIZATION_FREQUENCY_PREDEFINED_INTERVALS_UNIT
+          - NON_POSITIVE_DEFAULT_INTEREST_RATE
+          - NON_POSITIVE_MIN_INTEREST_RATE
+          - NON_POSITIVE_MAX_INTEREST_RATE
+          - INVALID_INTEREST_RATE_MIN_MAX_DEFAULT_TUPLE
+          - DEFAULT_MIN_MAX_NOT_AVAILABLE
+          - INTEREST_RATE_TERMS_ARE_READONLY
+          - INTEREST_CALCULATION_BALANCE_METHOD_READONLY
+          - INTERNAL_TRANSFER_CANNOT_USE_CUSTOM_FIELDS
+          - INCONSISTENT_FEE_CALCULATION_METHOD_WITH_INCLUDE_FEE_IN_FLOOR_AMOUNT_OPTION_ENABLED
+          - INCONSISTENT_FEE_CALCULATION_METHOD_WITH_TOTAL_BALANCE_OPTION_ENABLED
+          - INCONSISTENT_LATE_REPAYMENT_FEE_TRIGGER_WITH_TOTAL_BALANCE_OPTION_ENABLED
+          - INACTIVE_ACCOUNT_BRANCH
+          - INCONSISTENT_ACCOUNT_BRANCH_ASSOCIATION_CENTRE_OR_CREDITOFFICER_MISMATCH
+          - INVALID_ACCOUNT_BRANCH_ASSIGNMENT_DUE_CENTRE_MEETING_DAY_MISMATCH
+          - CANNOT_CHANGE_LOAN_GROUP_BRANCH_FOR_A_SOLIDARITY_GROUP
+          - CANNOT_CHANGE_LOAN_ACCOUNT_BRANCH_WHEN_RESHEDULE_REFINANCE
+          - INVALID_FEE_APPLICATION
+          - INVALID_FEE_AMORTIZATION_UPON_RESCHEDULE_REFINANCE_OPTION
+          - FEE_AMORTIZATION_UPON_RESCHEDULE_REFINANCE_OPTION_IS_MANDATORY
+          - NOT_ADJUSTED_TRANSACTION_LOGGED_AFTER_CURRENT_ONE
+          - CANNOT_ADJUST_INTEREST_ON_DISBURSEMENT
+          - TRANSACTION_TYPE_DOES_NOT_ALLOW_ADJUSTMENT
+          - TRANSACTION_ALREADY_ADJUSTED
+          - FEE_TRIGGER_NOT_ALLOWED
+          - PAYMENT_DUE_FEES_ON_DUE_DATES_TRIGGER_NOT_ALLOWED
+          - EDITING_PAYMENT_DUE_FEES_APPLIED_ON_DUE_DATES_NOT_ALLOWED
+          - DEPOSIT_INTEREST_FEATURE_DISABLED
+          - CANNOT_CREATE_NEW_USER_IN_FEDERATED_CONTEXT
+          - EMPTY_CUSTOM_FIELD_ID
+          - ACCOUNT_ALREADY_CLOSED
+          - INVALID_GUARANTEE_TYPE
+          - ORIGINAL_ACCOUNT_NOT_FOUND
+          - INVALID_ORIGINAL_ACCOUNT_STATE
+          - INCONSISTENT_AMORTIZATION_ACCOUNTING_SETUP
+          - PAYMENT_DUE_FEES_ON_DUE_DATES_NOT_ALLOWED_AT_RESCHEDULE_REFINANCE
+          - CANNOT_APPLY_REPAYMENT_ON_ZERO_BALANCE_ACCOUNT
+          - LOCKED_BALANCE_NOT_ALLOWED
+          - INEXISTING_TOLERANCE_CALCULATION_METHOD
+          - ARREARS_TOLERANCE_DAY_OUTSIDE_CONSTRAINTS
+          - INCONSISTENT_ARREARS_TOLERANCE_VALUES_WITH_ARREARS_TOLERANCE_METHOD
+          - INVALID_SETTLEMENT_ACCOUNT_KEY
+          - INVALID_SETTLEMENT_ACCOUNT_STATE
+          - INVALID_DATA_MIGRATION_EVENT_KEY
+          - ANOTHER_TASK_IN_PROGRESS
+          - INVALID_DATA_IMPORT_TASK_KEY
+          - DEPOSIT_ACCOUNT_LINKED_TO_LOAN_ACCOUNTS_ON_DIFFERENT_BRANCHES
+          - SAVINGS_ACCOUNT_LINKED_TO_LOAN_ACCOUNTS_ON_DIFFERENT_BRANCHES
+          - INVALID_DEPOSIT_ACCOUNT_HOLDER
+          - UNLINKABLE_DEPOSIT_PRODUCT
+          - INEXISTING_DATE_CALCULATION_METHOD
+          - INEXISTING_NON_WORKING_DAYS_METHOD
+          - MESSAGE_SENDING_ERROR
+          - CONNECTION_CLOSING_ERROR
+          - CONSUMER_SERVICE_STARTING_ERROR
+          - CONSUMER_SERVICE_ALREADY_STARTED
+          - CONSUMER_UNSUBSCRIPTION_FAILED
+          - CONSUMER_SUBSCRIPTION_FAILED
+          - INVALID_SUPPORT_ROLE_ASSOCIATION
+          - INVALID_SUPPORT_ROLE_NAME
+          - INVALID_SUPPORT_ROLE_USER_RIGHTS
+          - INVALID_SUPPORT_ROLE_PERMISSIONS
+          - LOAN_ACCOUNT_FIELD_NOT_EDITABLE
+          - INCOMPATIBLE_ARREARS_TOLERANCE_METHOD_AND_PRODUCT_TYPE
+          - TRANSACTION_CHANNEL_NOT_ALLOWED_WHEN_DISBURSE_TO_DEPOSIT
+          - INVALID_TARGET_ACCOUNT_STATE_FOR_DEPOSIT
+          - FEE_AMOUNT_ALREADY_DEFINED_IN_PRODUCT
+          - MANDATORY_FEE_AMOUNT
+          - INVALID_SORTING_SELECTION
+          - BLACKLISTED_CLIENT_NOT_EDITABLE
+          - INVALID_STRING_VALUE
+          - NOTIFICATION_STATE_IS_REQUIRED
+          - NOTIFICATION_EVENT_MESSAGE_IS_REQUIRED
+          - INSTALLMENT_NUMBER_MANDATORY_FOR_FIXED_ACCOUNTS
+          - CLIENT_ID_ANONYMIZATION_ERROR
+          - INSTALLMENT_NUMBER_NOT_ALLOWED_FOR_DYNAMIC_ACCOUNTS
+          - INVALID_INSTALLMENT_NUMBER
+          - CANNOT_APPLY_FEE_ON_PAID_INSTALLMENT
+          - MANDATORY_ACCOUNT_HOLDER_TYPE
+          - CLIENT_DOES_NOT_HAVE_EXITED_STATE
+          - UNSUBSCRIBE_CLIENT_FROM_NOTIFICATIONS_ERROR
+          - CLIENT_PERSONAL_INFORMATION_ANONYMIZATION_ERROR
+          - CLIENT_LOAN_ACCOUNTS_ANONYMIZATION_ERROR
+          - CLIENT_SAVINGS_ACCOUNTS_ANONYMIZATION_ERROR
+          - CLIENT_LINES_OF_CREDIT_ANONYMIZATION_ERROR
+          - CLIENT_GUARANTEES_ANONYMIZATION_ERROR
+          - CLIENT_NOTIFICATION_MESSAGES_ANONYMIZATION_ERROR
+          - CLIENT_ASSOCIATED_TASKS_ANONYMIZATION_ERROR
+          - INVALID_API_KEY
+          - API_KEY_REFRESH_ERROR
+          - FILE_NOT_FOUND
+          - UPLOADED_FILE_NOT_FOUND
+          - MISSING_CLIENT_ROLE
+          - BACKGROUND_PROCESS_STATE_IS_REQUIRED
+          - BACKGROUND_PROCESS_STATE_CANNOT_BE_IN_PROGRESS
+          - NOT_ALLOWED_TO_CREATE_REOPEN_ACCOUNTS_WITH_RECALCULATE_SCHEDULE_KEEP_SAME_TOTAL_REPAYMENT_AMOUNT
+          - NOT_ALLOWED_TO_CREATE_REOPEN_ACCOUNTS_WITH_DEPRECATED_REDUCE_NUMBER_OF_INSTALLMENTS
+          - FEATURE_NOT_ENABLED
+          - AUTOMATIC_END_OF_DAY_PROCESSING
+          - ACCOUNT_NOT_ACTIVE
+          - DUPLICATE_ENTRY_FOR_CUSTOM_FIELD_VALUE
+          - ACCOUNT_ACTIVATION_FAILED
+          - INSUFFICIENT_AVAILABLE_AMOUNT_FOR_AUTHORIZATION_HOLD_ON_LOANS
+          - INVALID_MCC_EXPIRATION_ENTRY
+          - MCC_ALREADY_EXISTS
+          - MCC_EXPIRATION_ENTRY_NOT_FOUND
+          - PRODUCT_DISBURSEMENT_FEES_PREVENT_CARD_ATTACHMENT
+          - INVALID_API_CONSUMER_USERNAME
+          - YAML_PROCESSING_FAILED
+          - INVALID_DECIMAL_SEPARATOR
+          - INVALID_DATE_FORMAT
+          - HAS_INVALID_DATE_CHARACTER
+          - MISSING_REQUIRED_DATE_CHARACTER
+          - INVALID_DATE_TIME_FORMAT
+          - HAS_INVALID_DATE_TIME_CHARACTER
+          - MISSING_REQUIRED_DATE_TIME_CHARACTER
+          type: string
+      type: object
+    ApplyInterestInput:
+      description: 'Represents a request for applying the accrued interest '
+      example:
+        notes: notes
+        interestApplicationDate: 2016-09-06T13:37:50+03:00
+      properties:
+        interestApplicationDate:
+          description: The date up to which interest is to be posted
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        notes:
+          description: Additional information for this action
+          type: string
+      required:
+      - interestApplicationDate
+      type: object
+    PatchOperation:
+      description: A single change that needs to be made to a resource
+      example:
+        op: ADD
+        path: path
+        from: from
+        value: '{}'
+      properties:
+        op:
+          description: The change to perform
+          enum:
+          - ADD
+          - REPLACE
+          - REMOVE
+          - MOVE
+          type: string
+        path:
+          description: The field to perform the operation on
+          type: string
+        from:
+          description: The field from where a value should be moved, when using move
+          type: string
+        value:
+          description: The value of the field, can be null
+          properties: {}
+          type: object
+      required:
+      - op
+      - path
+      type: object
+    DepositAccountInterestRateSettings:
+      description: Interest rate settings for deposit accounts
+      example:
+        interestRate: 0.8008281904610115
+        interestRateTiers:
+        - interestRate: 1.4658129805029452
+          endingBalance: 6.027456183070403
+          encodedKey: encodedKey
+          endingDay: 5
+        - interestRate: 1.4658129805029452
+          endingBalance: 6.027456183070403
+          encodedKey: encodedKey
+          endingDay: 5
+        interestChargeFrequency: ANNUALIZED
+        encodedKey: encodedKey
+        interestChargeFrequencyCount: 5
+        interestRateTerms: FIXED
+      properties:
+        interestRate:
+          description: The interest rate for the deposit account
+          type: number
+        interestRateTiers:
+          description: The list of interest rate tiers. An interest rate tier holds
+            the values to define how the interest is computed
+          items:
+            $ref: '#/components/schemas/DepositAccountInterestRateTier'
+          type: array
+        interestChargeFrequency:
+          description: The interest change frequency. Holds the possible values for
+            how often is interest charged on loan or deposit accounts
+          enum:
+          - ANNUALIZED
+          - EVERY_MONTH
+          - EVERY_FOUR_WEEKS
+          - EVERY_WEEK
+          - EVERY_DAY
+          - EVERY_X_DAYS
+          type: string
+        encodedKey:
+          description: The encoded for this set of interest settings, auto generated,
+            unique
+          readOnly: true
+          type: string
+        interestChargeFrequencyCount:
+          description: The count of units to apply over the interval (e.g. [x] weeks)
+          format: int32
+          type: integer
+        interestRateTerms:
+          description: How is the interest rate determined when being accrued for
+            an account
+          enum:
+          - FIXED
+          - TIERED
+          - TIERED_PERIOD
+          type: string
+      type: object
+    DepositAccountBalances:
+      description: Groups all fields related to a deposit account's balances
+      example:
+        overdraftInterestDue: 9.301444243932576
+        totalBalance: 3.616076749251911
+        lockedBalance: 2.027123023002322
+        technicalOverdraftAmount: 4.145608029883936
+        overdraftAmount: 7.386281948385884
+        holdBalance: 1.2315135367772556
+        technicalOverdraftInterestDue: 1.0246457001441578
+        feesDue: 1.4894159098541704
+        availableBalance: 6.84685269835264
+      properties:
+        overdraftInterestDue:
+          description: How much interest is due to be paid on this account as a result
+            of the authorized overdraft
+          readOnly: true
+          type: number
+        totalBalance:
+          description: The current balance of the account
+          readOnly: true
+          type: number
+        lockedBalance:
+          description: No operation can modify the balance of the account and get
+            it lower than this locked balance
+          readOnly: true
+          type: number
+        technicalOverdraftAmount:
+          description: How much money has been taken out as unplanned overdraft
+          readOnly: true
+          type: number
+        overdraftAmount:
+          description: How much money has been taken out in overdraft
+          readOnly: true
+          type: number
+        holdBalance:
+          description: The sum of all the authorization hold amounts on this account
+          readOnly: true
+          type: number
+        technicalOverdraftInterestDue:
+          description: How much interest is due to be paid on this account as a result
+            of the technical overdraft
+          readOnly: true
+          type: number
+        feesDue:
+          description: How much fees is due to be paid on this account
+          readOnly: true
+          type: number
+        availableBalance:
+          description: The current available balance for deposit transactions
+          readOnly: true
+          type: number
+      type: object
+    PatchOperationsList:
+      items:
+        $ref: '#/components/schemas/PatchOperation'
+      type: array
+    DepositAccountInternalControls:
+      description: Groups all fields related to internal controls
+      example:
+        targetAmount: 6.438423552598547
+        recommendedDepositAmount: 9.018348186070783
+        maxWithdrawalAmount: 3.5571952270680973
+      properties:
+        recommendedDepositAmount:
+          description: Recommended amount for a deposit
+          type: number
+        targetAmount:
+          description: The target amount (the monthly/weekly/daily deposits should/may
+            lead towards a savings goal)
+          type: number
+        maxWithdrawalAmount:
+          description: The maximum amount allowed for a withdrawal
+          type: number
+      type: object
+    DepositAccount__IBAN:
+      description: Account IBAN
+      example:
+        IBAN: IBAN
+      properties:
+        IBAN:
+          description: Account IBAN
+          type: string
+  securitySchemes:
+    basic:
+      description: ""
+      scheme: basic
+      type: http
+

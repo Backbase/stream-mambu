@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.backbase.stream</groupId>
+        <artifactId>stream-processor-starter-parent</artifactId>
+        <version>2.4.0</version>
+        <relativePath/>
+    </parent>
+
+    <artifactId>mambu-products-processor</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <packaging>jar</packaging>
+    <name>Stream :: Mambu Products Processor</name>
+
+    <properties>
+        <sonar.skip>true</sonar.skip>
+        <stream-services.version>2.4.0</stream-services.version>
+
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.backbase.stream.mambu</groupId>
+            <artifactId>mambu-core</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>legal-entity-model</artifactId>
+            <version>${stream-services.version}</version>
+        </dependency>
+
+    </dependencies>
+</project>

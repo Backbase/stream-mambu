@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mambu-outbound-service
+  labels:
+    app: mambu-outbound-service
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mambu-outbound-service
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: mambu-outbound-service
+        tier: backend
+    spec:
+      containers:
+        - name: mambu-outbound-service
+          image: mambu-outbound-service
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: spring.zipkin.baseUrl
+              valueFrom:
+                configMapKeyRef:
+                  key: baseUrl
+                  name: zipkin-config
+            - name: backbase.stream.mambu.base-url
+              valueFrom:
+                configMapKeyRef:
+                  key: MAMBU_BASE_URL
+                  name: mambu-config
+            - name: backbase.stream.mambu.password
+              valueFrom:
+                secretKeyRef:
+                  key: MAMBU_PASSWORD
+                  name: mambu-password
+            - name: backbase.stream.mambu.username
+              valueFrom:
+                configMapKeyRef:
+                  key: MAMBU_USERNAME
+                  name: mambu-config
+            - name: spring.activemq.broker-url
+              valueFrom:
+                configMapKeyRef:
+                  key: AMQ_BROKER_URL
+                  name: mambu-activemq-config
+            - name: spring.activemq.user
+              valueFrom:
+                configMapKeyRef:
+                  key: AMQ_USER
+                  name: mambu-activemq-config
+            - name: spring.activemq.password
+              valueFrom:
+                secretKeyRef:
+                  key: ACTIVEMQ_PASSWORD
+                  name: activemq-password
+            - name: spring.r2dbc.name
+              value: mambu
+            - name: spring.r2dbc.password
+              valueFrom:
+                secretKeyRef:
+                  key: mysql-password
+                  name: backbase-env-mysql
+            - name: spring.r2dbc.url
+              valueFrom:
+                configMapKeyRef:
+                  key: R2DBC_URL
+                  name: mambu-mysql-config
+            - name: spring.r2dbc.username
+              valueFrom:
+                configMapKeyRef:
+                  key: R2DBC_USERNAME
+                  name: mambu-mysql-config
+            - name: JAVA_TOOL_OPTIONS
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y -Deureka.client.enabled=true"

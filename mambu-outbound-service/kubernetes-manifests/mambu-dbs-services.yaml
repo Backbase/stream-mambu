@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mambu-outbound-service
+  labels:
+    app: mambu-outbound-service
+    tier: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: mambu-outbound-service
+    tier: backend
+  ports:
+    - port: 8080
+      targetPort: http

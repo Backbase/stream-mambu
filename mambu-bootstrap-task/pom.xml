@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.backbase.stream</groupId>
+        <artifactId>stream-task-starter-parent</artifactId>
+        <version>2.4.0</version>
+        <relativePath/>
+    </parent>
+
+    <artifactId>mambu-bootstrap-task</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <packaging>jar</packaging>
+    <name>Stream :: Mambu Bootstrap Task</name>
+
+    <properties>
+        <stream-services.version>2.4.0</stream-services.version>
+    </properties>
+
+    <dependencies>
+
+        <!-- Spring Boot Tasks require a database to be present to write task execution state -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>legal-entity-core</artifactId>
+            <version>${stream-services.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>transactions-core</artifactId>
+            <version>${stream-services.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream.mambu</groupId>
+            <artifactId>mambu-core</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.mambu</groupId>
+            <artifactId>mambu-deposit-accounts-client</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+
+    </dependencies>
+</project>

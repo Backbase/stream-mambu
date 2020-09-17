@@ -1,0 +1,1286 @@
+openapi: 3.0.1
+info:
+  title: Payment Orders
+  description: |+
+    # Payments API Documentation
+
+    Currently the Payments API contains the following operations
+
+    * Create a payment
+
+  version: 2.6.1
+servers:
+- url: /payment-order-integration-external-outbound-service/
+  description: The server
+tags:
+- name: payment orders
+paths:
+  /service-api/v2/payment-orders:
+    summary: Payment Orders
+    description: Payment Orders
+    post:
+      tags:
+      - payment-orders
+      summary: Start a new Payment Order initiation process.
+      description: Start a new Payment Order initiation process
+      operationId: postPaymentorders
+      requestBody:
+        description: Start a new Payment Order initiation process
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentorderPost'
+            examples:
+              sepa-payment-post:
+                summary: sepa-payment-post
+                value:
+                  id: 7d34169c-6714-11e7-907b-a6006ad3dba0
+                  originator:
+                    name: Debtor account name
+                    postalAddress:
+                      country: NL
+                  originatorAccount:
+                    identification:
+                      identification: NL18INGB0664923638
+                      schemeName: IBAN
+                    arrangementId: 7d34169c-6714-11e7-907b-a6006ad3dba0
+                    externalArrangementId: "7341696714117907600630"
+                  batchBooking: true
+                  instructionPriority: NORM
+                  requestedExecutionDate: 2017-08-11
+                  paymentMode: RECURRING
+                  paymentType: SEPA_CREDIT_TRANSFER
+                  schedule:
+                    transferFrequency: MONTHLY
+                    "on": 1
+                    startDate: 2017-08-11
+                    every: 1
+                  transferTransactionInformation:
+                    instructedAmount:
+                      amount: "100.00"
+                      currencyCode: EUR
+                    counterparty:
+                      name: P. Aymont
+                      postalAddress:
+                        addressLine1: Some street 100, 1100 AB, Amsterdam
+                        country: NL
+                    counterpartyAccount:
+                      identification:
+                        identification: NL21ABNA0136371124
+                        schemeName: IBAN
+                    remittanceInformation:
+                      type: UNSTRUCTURED
+                      content: Salary
+                    endToEndIdentification: 5e1a3da132cc
+              us-wire-payment-post:
+                summary: us-wire-payment-post
+                value:
+                  id: 7d34169c-6714-11e7-907b-a6006ad3dba0
+                  originator:
+                    name: Debtor account name
+                    postalAddress:
+                      country: NL
+                  originatorAccount:
+                    identification:
+                      identification: NL18INGB0664923638
+                      schemeName: IBAN
+                    arrangementId: 729190df-a421-4937-94fd-5e1a3da132
+                    externalArrangementId: "7341696714117907600630"
+                  batchBooking: true
+                  instructionPriority: NORM
+                  requestedExecutionDate: 2017-08-11
+                  paymentMode: RECURRING
+                  paymentType: US_DOMESTIC_WIRE
+                  schedule:
+                    transferFrequency: MONTHLY
+                    "on": 1
+                    startDate: 2017-08-11
+                    every: 1
+                  transferTransactionInformation:
+                    instructedAmount:
+                      amount: "100.00"
+                      currencyCode: EUR
+                    counterparty:
+                      name: M. Linson
+                      postalAddress:
+                        addressLine1: Some street 100, 1100 AB, Amsterdam
+                        country: NL
+                    counterpartyAccount:
+                      identification:
+                        identification: NL21ABNA0136371124
+                        schemeName: IBAN
+                    remittanceInformation:
+                      type: UNSTRUCTURED
+                      content: Salary
+                    counterpartyBank:
+                      bankBranchCode: "601613"
+                      name: INGBank
+                      postalAddress:
+                        addressLine1: Jacob Bontiusplaats 9, 1018LL, Amsterdam
+                        country: NL
+                    correspondentBank:
+                      bankBranchCode: ABNA015
+                      name: Abn Amro
+                    messageToBank: My us domestic wire payment explanation.
+                    endToEndIdentification: 5e1a3da132cc
+              us-international-payment-post:
+                summary: us-international-payment-post
+                value:
+                  id: 6e1be6fa-189c-11e8-accf-0ed5f89f718b
+                  originator:
+                    name: Debtor account name
+                    postalAddress:
+                      country: NL
+                  originatorAccount:
+                    identification:
+                      identification: NL67RABO0664923638
+                      schemeName: IBAN
+                    arrangementId: "945732038593466693217"
+                    externalArrangementId: ext-945732038593466693217
+                  batchBooking: true
+                  instructionPriority: NORM
+                  requestedExecutionDate: 2018-01-11
+                  paymentMode: RECURRING
+                  paymentType: US_FOREIGN_WIRE
+                  schedule:
+                    transferFrequency: MONTHLY
+                    "on": 1
+                    startDate: 2018-01-12
+                    every: 1
+                  transferTransactionInformation:
+                    instructedAmount:
+                      amount: "340.00"
+                      currencyCode: EUR
+                    counterparty:
+                      name: P. Aymont
+                      postalAddress:
+                        addressLine1: Some street 100, 1100 AB, Amsterdam
+                        country: NL
+                    counterpartyAccount:
+                      identification:
+                        identification: NL34ABNA4021516340
+                        schemeName: IBAN
+                      arrangementId: "402151634089010450205"
+                      externalArrangementId: ext-402151634089010450205
+                    remittanceInformation:
+                      type: UNSTRUCTURED
+                      content: Salary
+                    counterpartyBank:
+                      bankBranchCode: "601613"
+                      name: INGBank
+                      postalAddress:
+                        addressLine1: Jacob Bontiusplaats 9, 1018LL, Amsterdam
+                        country: NL
+                    correspondentBank:
+                      bankBranchCode: ABNA015
+                      name: Abn Amro
+                    intermediaryBank:
+                      bic: DABAIE2D
+                      bankBranchCode: SNSB
+                      name: SNSB2886803298
+                    targetCurrency: USD
+                    messageToBank: My international wire payment explanation.
+                    endToEndIdentification: 5e1a3da132cc
+              us-international-payment-with-transfer-fee-post:
+                summary: us-international-payment-with-transfer-fee-post
+                value:
+                  id: 6e1be6fa-189c-11e8-accf-0ed5f89f718b
+                  originator:
+                    name: Debtor account name
+                    postalAddress:
+                      country: NL
+                  originatorAccount:
+                    identification:
+                      identification: NL67RABO0664923638
+                      schemeName: IBAN
+                    arrangementId: "945732038593466693217"
+                    externalArrangementId: ext-945732038593466693217
+                  batchBooking: true
+                  instructionPriority: NORM
+                  requestedExecutionDate: 2018-01-11
+                  paymentMode: RECURRING
+                  paymentType: US_FOREIGN_WIRE
+                  schedule:
+                    transferFrequency: MONTHLY
+                    "on": 1
+                    startDate: 2018-01-12
+                    every: 1
+                  transferTransactionInformation:
+                    instructedAmount:
+                      amount: "340.00"
+                      currencyCode: EUR
+                    counterparty:
+                      name: P. Aymont
+                      postalAddress:
+                        addressLine1: Some street 100, 1100 AB, Amsterdam
+                        country: NL
+                    counterpartyAccount:
+                      identification:
+                        identification: NL34ABNA4021516340
+                        schemeName: IBAN
+                      arrangementId: "402151634089010450205"
+                      externalArrangementId: ext-402151634089010450205
+                    remittanceInformation:
+                      type: UNSTRUCTURED
+                      content: Salary
+                    counterpartyBank:
+                      bankBranchCode: "601613"
+                      name: INGBank
+                      postalAddress:
+                        addressLine1: Jacob Bontiusplaats 9, 1018LL, Amsterdam
+                        country: NL
+                    correspondentBank:
+                      bankBranchCode: ABNA015
+                      name: Abn Amro
+                    intermediaryBank:
+                      bic: DABAIE2D
+                      bankBranchCode: SNSB
+                      name: SNSB2886803298
+                    targetCurrency: USD
+                    messageToBank: My international wire payment explanation.
+                    endToEndIdentification: 5e1a3da132cc
+                    chargeBearer: SHA
+                    transferFee:
+                      amount: "3.4"
+                      currencyCode: EUR
+              ach-debit-post:
+                summary: ach-debit-post
+                value:
+                  id: 7d34169c-6714-11e7-907b-a6006ad3dba0
+                  originator:
+                    name: Creditor account name
+                    postalAddress:
+                      country: US
+                  originatorAccount:
+                    identification:
+                      identification: "1902231375"
+                      schemeName: BBAN
+                    arrangementId: "7341696714117907699630"
+                    externalArrangementId: ext-7341696714117907770630
+                  instructionPriority: NORM
+                  requestedExecutionDate: 2019-01-11
+                  paymentMode: RECURRING
+                  paymentType: ACH_DEBIT
+                  schedule:
+                    transferFrequency: MONTHLY
+                    "on": 1
+                    startDate: 2019-01-12
+                    every: 1
+                  transferTransactionInformation:
+                    instructedAmount:
+                      amount: "100.00"
+                      currencyCode: USD
+                    counterparty:
+                      name: P. Aymont
+                      postalAddress:
+                        addressLine1: Some street 100, 1100 AB, Amsterdam
+                        country: NL
+                    counterpartyAccount:
+                      identification:
+                        identification: "4902331374"
+                        schemeName: BBAN
+                      counterpartyBank:
+                        bankBranchCode: "082000549"
+                        name: INGBank
+                        postalAddress:
+                          addressLine1: Jacob Bontiusplaats 9, 1018LL, Amsterdam
+                          country: US
+                      arrangementId: "1179076006307341696714"
+                      externalArrangementId: ext-1179076006307341696714
+                    remittanceInformation:
+                      type: UNSTRUCTURED
+                      content: My payment explanation to client
+                    messageToBank: My payment explanation to bank.
+                    endToEndIdentification: 5e1a3da132aa
+                    mandateIdentifier: MNDTREF1231-032
+              ach-credit-post:
+                summary: ach-credit-post
+                value:
+                  id: 7d34169c-6714-11e7-907b-a6006ad3dba0
+                  originator:
+                    name: Debtor account name
+                    postalAddress:
+                      country: US
+                  originatorAccount:
+                    identification:
+                      identification: "1902231375"
+                      schemeName: BBAN
+                    arrangementId: "7341696714117907699630"
+                    externalArrangementId: ext-7341696714117907770630
+                  instructionPriority: NORM
+                  requestedExecutionDate: 2019-01-11
+                  paymentMode: RECURRING
+                  paymentType: ACH_CREDIT
+                  entryClass: CCD
+                  schedule:
+                    transferFrequency: MONTHLY
+                    "on": 1
+                    startDate: 2019-01-12
+                    every: 1
+                  transferTransactionInformation:
+                    instructedAmount:
+                      amount: "100.00"
+                      currencyCode: USD
+                    counterparty:
+                      name: P. Aymont
+                      postalAddress:
+                        addressLine1: Some street 100, 1100 AB, Amsterdam
+                        country: NL
+                      recipientId: "123456"
+                    counterpartyAccount:
+                      identification:
+                        identification: "4902331374"
+                        schemeName: BBAN
+                      counterpartyBank:
+                        bankBranchCode: "082000549"
+                        name: INGBank
+                        postalAddress:
+                          addressLine1: Jacob Bontiusplaats 9, 1018LL, Amsterdam
+                          country: US
+                      arrangementId: "1179076006307341696714"
+                      externalArrangementId: ext-1179076006307341696714
+                      accountType: SAVINGS
+                    remittanceInformation:
+                      type: UNSTRUCTURED
+                      content: My payment explanation to client
+                    messageToBank: My payment explanation to bank.
+                    endToEndIdentification: 5e1a3da132aa
+      responses:
+        "202":
+          description: PaymentAccepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentOrdersPostResponseBody'
+              examples:
+                example:
+                  value:
+                    bankReferenceId: "12312312"
+                    bankStatus: ACCEPTEDTECHNICALVALIDATION
+                    reasonCode: AC01
+                    reasonText: Accepted by bank
+                    reasonDescription: Accepted by bank.
+                    nextExecutionDate: 2018-12-23
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              examples:
+                example:
+                  value:
+                    message: Bad Request
+                    errors:
+                    - message: Value Exceeded. Must be between {min} and {max}.
+                      key: common.api.shoesize
+                      context:
+                        max: "50"
+                        min: "1"
+  /service-api/v2/payment-orders/{bankReferenceId}/cancel:
+    summary: Cancel payment order
+    description: The operations on the single payment order identified by the bank
+      reference id
+    post:
+      tags:
+      - payment-orders
+      summary: Cancel a single payment order.
+      description: Cancel a single payment order
+      operationId: postCancelByBankReferenceId
+      responses:
+        "200":
+          description: No description available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentordercancelresponsePost'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              examples:
+                example:
+                  value:
+                    message: Bad Request
+                    errors:
+                    - message: Value Exceeded. Must be between {min} and {max}.
+                      key: common.api.shoesize
+                      context:
+                        max: "50"
+                        min: "1"
+    parameters:
+    - name: bankReferenceId
+      in: path
+      description: No description available
+      required: true
+      schema:
+        maxLength: 64
+        type: string
+      examples:
+        example:
+          summary: example
+components:
+  schemas:
+    AccountIdentification:
+      required:
+      - identification
+      type: object
+      properties:
+        identification:
+          required:
+          - identification
+          type: object
+          properties:
+            identification:
+              maxLength: 34
+              type: string
+            schemeName:
+              $ref: '#/components/schemas/SchemeNames'
+        name:
+          maxLength: 140
+          type: string
+    AccountType:
+      maxLength: 10
+      type: string
+      description: The type of the account, e.g. for ACH we have CHECKING/SAVINGS
+    ArrangementId:
+      maxLength: 36
+      minLength: 1
+      type: string
+      description: The unique arrangement id.
+    BadRequestError:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    Bank:
+      type: object
+      properties:
+        bankBranchCode:
+          $ref: '#/components/schemas/BankBranchCode'
+        name:
+          $ref: '#/components/schemas/BankName'
+        postalAddress:
+          $ref: '#/components/schemas/PostalAddress'
+        bic:
+          $ref: '#/components/schemas/Bic'
+      description: This object is used to identify the counterparty or correspondent
+        bank.
+    BankBranchCode:
+      maxLength: 11
+      type: string
+      description: Some code to identify a bank office, p.e. ABA routing transit number
+        (9) or Swift BIC code (11)
+    BankName:
+      maxLength: 140
+      type: string
+      description: The name of a bank
+    Bic:
+      pattern: ^([A-Z0-9]){4}([A-Z]){2}([A-Z0-9]){2}([A-Z0-9]{3})?$
+      type: string
+      description: Business identifier code as specified by ISO 9362:2014
+    ChargeBearer:
+      type: string
+      description: 'Indicated who pays the fees for an international transfer. Possible
+        values: OUR(originator), BEN(beneficiary or SHA(shared).'
+      enum:
+      - OUR
+      - BEN
+      - SHA
+    CounterpartyAccount:
+      required:
+      - identification
+      properties:
+        arrangementId:
+          $ref: '#/components/schemas/ArrangementId'
+        externalArrangementId:
+          $ref: '#/components/schemas/ExternalArrangementId'
+        accountType:
+          $ref: '#/components/schemas/AccountType'
+        identification:
+          required:
+          - identification
+          type: object
+          properties:
+            identification:
+              maxLength: 34
+              type: string
+            schemeName:
+              $ref: '#/components/schemas/SchemeNames'
+        name:
+          maxLength: 140
+          type: string
+      description: The product identification of the counterparty.
+    Currency:
+      title: Monetary Amount
+      required:
+      - amount
+      - currencyCode
+      type: object
+      properties:
+        amount:
+          type: string
+          description: The amount in the specified currency
+        currencyCode:
+          pattern: ^[A-Z]{3}$
+          type: string
+          description: The alpha-3 code (complying with ISO 4217) of the currency
+            that qualifies the amount
+      description: Schema defining monetary amount in given currency.
+    CurrencyCode:
+      pattern: ^[A-Z]{3}$
+      type: string
+      description: The alpha-3 code (complying with ISO 4217) of the currency
+    EntryClass:
+      maxLength: 3
+      type: string
+      description: Used for ACH Standard Entry Class (SEC) Code to designate how the
+        transaction was authorized by the originator.
+    ErrorItem:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Default Message. Any further information.
+        key:
+          type: string
+          description: '{capability-name}.api.{api-key-name}. For generated validation
+            errors this is the path in the document the error resolves to. e.g. object
+            name + ''.'' + field'
+        context:
+          type: object
+          description: Context can be anything used to construct localised messages.
+      description: A validation error
+    ExternalArrangementId:
+      maxLength: 70
+      minLength: 1
+      type: string
+      description: The external unique arrangement id.
+    ForbiddenError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    InternalServerError:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+          description: Further Information
+      description: Represents HTTP 500 Internal Server Error
+    InvolvedParty:
+      required:
+      - name
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/InvolvedPartyRole'
+        name:
+          type: string
+        postalAddress:
+          $ref: '#/components/schemas/PostalAddress'
+        recipientId:
+          $ref: '#/components/schemas/RecipientId'
+    InvolvedPartyRole:
+      type: string
+      description: These are the possible values the role of an involved party can
+        have.
+      enum:
+      - CREDITOR
+      - DEBTOR
+    MandateIdentifier:
+      maxLength: 15
+      type: string
+    MessageToBank:
+      maxLength: 140
+      type: string
+      description: The message to the bank used for US domestic wire payments
+    NotAcceptableError:
+      type: object
+      properties:
+        message:
+          type: string
+        supportedMediaTypes:
+          type: array
+          description: List of supported media types for this endpoint
+          items:
+            type: string
+    NotFoundError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    OriginatorAccount:
+      required:
+      - arrangementId
+      - identification
+      properties:
+        arrangementId:
+          $ref: '#/components/schemas/ArrangementId'
+        externalArrangementId:
+          $ref: '#/components/schemas/ExternalArrangementId'
+        identification:
+          required:
+          - identification
+          type: object
+          properties:
+            identification:
+              maxLength: 34
+              type: string
+            schemeName:
+              $ref: '#/components/schemas/SchemeNames'
+        name:
+          maxLength: 140
+          type: string
+      description: The product identification of the originator
+    PaymentId:
+      pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+      type: string
+      description: Unique identification of the payment order.
+    PaymentordercancelresponsePost:
+      required:
+      - accepted
+      type: object
+      properties:
+        accepted:
+          type: boolean
+          description: Indication if the cancel request was accepted
+      example:
+        accepted: true
+    PaymentorderPost:
+      required:
+      - id
+      - requestedExecutionDate
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/PaymentId'
+        originator:
+          $ref: '#/components/schemas/InvolvedParty'
+        originatorAccount:
+          $ref: '#/components/schemas/OriginatorAccount'
+        batchBooking:
+          type: boolean
+          description: Indicate whenever there should be only one debit posting for
+            the whole set of instructions
+        instructionPriority:
+          type: string
+          description: Specify the priority of execution of the payment order
+          enum:
+          - NORM
+          - HIGH
+        requestedExecutionDate:
+          type: string
+          format: date
+        paymentMode:
+          type: string
+          description: Denotes whether payment will be single or will be recurring
+          enum:
+          - SINGLE
+          - RECURRING
+        paymentType:
+          $ref: '#/components/schemas/PaymentType'
+        schedule:
+          $ref: '#/components/schemas/Schedule'
+        entryClass:
+          $ref: '#/components/schemas/EntryClass'
+        transferTransactionInformation:
+          $ref: '#/components/schemas/TransferTransactionInformation'
+      x-examples:
+      - summary: sepa-payment-post
+        value:
+          id: 7d34169c-6714-11e7-907b-a6006ad3dba0
+          originator:
+            name: Debtor account name
+            postalAddress:
+              country: NL
+          originatorAccount:
+            identification:
+              identification: NL18INGB0664923638
+              schemeName: IBAN
+            arrangementId: 7d34169c-6714-11e7-907b-a6006ad3dba0
+            externalArrangementId: "7341696714117907600630"
+          batchBooking: true
+          instructionPriority: NORM
+          requestedExecutionDate: 2017-08-11
+          paymentMode: RECURRING
+          paymentType: SEPA_CREDIT_TRANSFER
+          schedule:
+            transferFrequency: MONTHLY
+            "on": 1
+            startDate: 2017-08-11
+            every: 1
+          transferTransactionInformation:
+            instructedAmount:
+              amount: "100.00"
+              currencyCode: EUR
+            counterparty:
+              name: P. Aymont
+              postalAddress:
+                addressLine1: Some street 100, 1100 AB, Amsterdam
+                country: NL
+            counterpartyAccount:
+              identification:
+                identification: NL21ABNA0136371124
+                schemeName: IBAN
+            remittanceInformation:
+              type: UNSTRUCTURED
+              content: Salary
+            endToEndIdentification: 5e1a3da132cc
+      - summary: us-wire-payment-post
+        value:
+          id: 7d34169c-6714-11e7-907b-a6006ad3dba0
+          originator:
+            name: Debtor account name
+            postalAddress:
+              country: NL
+          originatorAccount:
+            identification:
+              identification: NL18INGB0664923638
+              schemeName: IBAN
+            arrangementId: 729190df-a421-4937-94fd-5e1a3da132
+            externalArrangementId: "7341696714117907600630"
+          batchBooking: true
+          instructionPriority: NORM
+          requestedExecutionDate: 2017-08-11
+          paymentMode: RECURRING
+          paymentType: US_DOMESTIC_WIRE
+          schedule:
+            transferFrequency: MONTHLY
+            "on": 1
+            startDate: 2017-08-11
+            every: 1
+          transferTransactionInformation:
+            instructedAmount:
+              amount: "100.00"
+              currencyCode: EUR
+            counterparty:
+              name: M. Linson
+              postalAddress:
+                addressLine1: Some street 100, 1100 AB, Amsterdam
+                country: NL
+            counterpartyAccount:
+              identification:
+                identification: NL21ABNA0136371124
+                schemeName: IBAN
+            remittanceInformation:
+              type: UNSTRUCTURED
+              content: Salary
+            counterpartyBank:
+              bankBranchCode: "601613"
+              name: INGBank
+              postalAddress:
+                addressLine1: Jacob Bontiusplaats 9, 1018LL, Amsterdam
+                country: NL
+            correspondentBank:
+              bankBranchCode: ABNA015
+              name: Abn Amro
+            messageToBank: My us domestic wire payment explanation.
+            endToEndIdentification: 5e1a3da132cc
+      - summary: us-international-payment-post
+        value:
+          id: 6e1be6fa-189c-11e8-accf-0ed5f89f718b
+          originator:
+            name: Debtor account name
+            postalAddress:
+              country: NL
+          originatorAccount:
+            identification:
+              identification: NL67RABO0664923638
+              schemeName: IBAN
+            arrangementId: "945732038593466693217"
+            externalArrangementId: ext-945732038593466693217
+          batchBooking: true
+          instructionPriority: NORM
+          requestedExecutionDate: 2018-01-11
+          paymentMode: RECURRING
+          paymentType: US_FOREIGN_WIRE
+          schedule:
+            transferFrequency: MONTHLY
+            "on": 1
+            startDate: 2018-01-12
+            every: 1
+          transferTransactionInformation:
+            instructedAmount:
+              amount: "340.00"
+              currencyCode: EUR
+            counterparty:
+              name: P. Aymont
+              postalAddress:
+                addressLine1: Some street 100, 1100 AB, Amsterdam
+                country: NL
+            counterpartyAccount:
+              identification:
+                identification: NL34ABNA4021516340
+                schemeName: IBAN
+              arrangementId: "402151634089010450205"
+              externalArrangementId: ext-402151634089010450205
+            remittanceInformation:
+              type: UNSTRUCTURED
+              content: Salary
+            counterpartyBank:
+              bankBranchCode: "601613"
+              name: INGBank
+              postalAddress:
+                addressLine1: Jacob Bontiusplaats 9, 1018LL, Amsterdam
+                country: NL
+            correspondentBank:
+              bankBranchCode: ABNA015
+              name: Abn Amro
+            intermediaryBank:
+              bic: DABAIE2D
+              bankBranchCode: SNSB
+              name: SNSB2886803298
+            targetCurrency: USD
+            messageToBank: My international wire payment explanation.
+            endToEndIdentification: 5e1a3da132cc
+      - summary: us-international-payment-with-transfer-fee-post
+        value:
+          id: 6e1be6fa-189c-11e8-accf-0ed5f89f718b
+          originator:
+            name: Debtor account name
+            postalAddress:
+              country: NL
+          originatorAccount:
+            identification:
+              identification: NL67RABO0664923638
+              schemeName: IBAN
+            arrangementId: "945732038593466693217"
+            externalArrangementId: ext-945732038593466693217
+          batchBooking: true
+          instructionPriority: NORM
+          requestedExecutionDate: 2018-01-11
+          paymentMode: RECURRING
+          paymentType: US_FOREIGN_WIRE
+          schedule:
+            transferFrequency: MONTHLY
+            "on": 1
+            startDate: 2018-01-12
+            every: 1
+          transferTransactionInformation:
+            instructedAmount:
+              amount: "340.00"
+              currencyCode: EUR
+            counterparty:
+              name: P. Aymont
+              postalAddress:
+                addressLine1: Some street 100, 1100 AB, Amsterdam
+                country: NL
+            counterpartyAccount:
+              identification:
+                identification: NL34ABNA4021516340
+                schemeName: IBAN
+              arrangementId: "402151634089010450205"
+              externalArrangementId: ext-402151634089010450205
+            remittanceInformation:
+              type: UNSTRUCTURED
+              content: Salary
+            counterpartyBank:
+              bankBranchCode: "601613"
+              name: INGBank
+              postalAddress:
+                addressLine1: Jacob Bontiusplaats 9, 1018LL, Amsterdam
+                country: NL
+            correspondentBank:
+              bankBranchCode: ABNA015
+              name: Abn Amro
+            intermediaryBank:
+              bic: DABAIE2D
+              bankBranchCode: SNSB
+              name: SNSB2886803298
+            targetCurrency: USD
+            messageToBank: My international wire payment explanation.
+            endToEndIdentification: 5e1a3da132cc
+            chargeBearer: SHA
+            transferFee:
+              amount: "3.4"
+              currencyCode: EUR
+      - summary: ach-debit-post
+        value:
+          id: 7d34169c-6714-11e7-907b-a6006ad3dba0
+          originator:
+            name: Creditor account name
+            postalAddress:
+              country: US
+          originatorAccount:
+            identification:
+              identification: "1902231375"
+              schemeName: BBAN
+            arrangementId: "7341696714117907699630"
+            externalArrangementId: ext-7341696714117907770630
+          instructionPriority: NORM
+          requestedExecutionDate: 2019-01-11
+          paymentMode: RECURRING
+          paymentType: ACH_DEBIT
+          schedule:
+            transferFrequency: MONTHLY
+            "on": 1
+            startDate: 2019-01-12
+            every: 1
+          transferTransactionInformation:
+            instructedAmount:
+              amount: "100.00"
+              currencyCode: USD
+            counterparty:
+              name: P. Aymont
+              postalAddress:
+                addressLine1: Some street 100, 1100 AB, Amsterdam
+                country: NL
+            counterpartyAccount:
+              identification:
+                identification: "4902331374"
+                schemeName: BBAN
+              counterpartyBank:
+                bankBranchCode: "082000549"
+                name: INGBank
+                postalAddress:
+                  addressLine1: Jacob Bontiusplaats 9, 1018LL, Amsterdam
+                  country: US
+              arrangementId: "1179076006307341696714"
+              externalArrangementId: ext-1179076006307341696714
+            remittanceInformation:
+              type: UNSTRUCTURED
+              content: My payment explanation to client
+            messageToBank: My payment explanation to bank.
+            endToEndIdentification: 5e1a3da132aa
+            mandateIdentifier: MNDTREF1231-032
+      - summary: ach-credit-post
+        value:
+          id: 7d34169c-6714-11e7-907b-a6006ad3dba0
+          originator:
+            name: Debtor account name
+            postalAddress:
+              country: US
+          originatorAccount:
+            identification:
+              identification: "1902231375"
+              schemeName: BBAN
+            arrangementId: "7341696714117907699630"
+            externalArrangementId: ext-7341696714117907770630
+          instructionPriority: NORM
+          requestedExecutionDate: 2019-01-11
+          paymentMode: RECURRING
+          paymentType: ACH_CREDIT
+          entryClass: CCD
+          schedule:
+            transferFrequency: MONTHLY
+            "on": 1
+            startDate: 2019-01-12
+            every: 1
+          transferTransactionInformation:
+            instructedAmount:
+              amount: "100.00"
+              currencyCode: USD
+            counterparty:
+              name: P. Aymont
+              postalAddress:
+                addressLine1: Some street 100, 1100 AB, Amsterdam
+                country: NL
+              recipientId: "123456"
+            counterpartyAccount:
+              identification:
+                identification: "4902331374"
+                schemeName: BBAN
+              counterpartyBank:
+                bankBranchCode: "082000549"
+                name: INGBank
+                postalAddress:
+                  addressLine1: Jacob Bontiusplaats 9, 1018LL, Amsterdam
+                  country: US
+              arrangementId: "1179076006307341696714"
+              externalArrangementId: ext-1179076006307341696714
+              accountType: SAVINGS
+            remittanceInformation:
+              type: UNSTRUCTURED
+              content: My payment explanation to client
+            messageToBank: My payment explanation to bank.
+            endToEndIdentification: 5e1a3da132aa
+    PaymentOrdersPostResponseBody:
+      required:
+      - bankReferenceId
+      - bankStatus
+      type: object
+      properties:
+        bankReferenceId:
+          maxLength: 64
+          type: string
+          description: This is the internal identifier from the bank that represents
+            the payment order
+        bankStatus:
+          maxLength: 35
+          type: string
+          description: Status the core banking system gave us. This status will be
+            mapped to one of the following internal statuses ACCEPTED, PROCESSED or
+            REJECTED according to the mapping configuration defined in the integration
+            service.
+        reasonCode:
+          maxLength: 4
+          type: string
+          description: Reason code the core banking system accepted/rejected the payment.
+        reasonText:
+          maxLength: 35
+          type: string
+          description: Human readable reason the core banking system accepted/rejected
+            the payment.
+        errorDescription:
+          maxLength: 105
+          type: string
+          description: Additional information from the core banking system on why
+            the payment was refused.
+        nextExecutionDate:
+          type: string
+          format: date
+        paymentSetupId:
+          $ref: '#/components/schemas/PaymentSetupId'
+        paymentSubmissionId:
+          $ref: '#/components/schemas/PaymentSubmissionId'
+      example:
+        bankReferenceId: "12312312"
+        bankStatus: ACCEPTEDTECHNICALVALIDATION
+        reasonCode: AC01
+        reasonText: Accepted by bank
+        reasonDescription: Accepted by bank.
+        nextExecutionDate: 2018-12-23
+    PaymentSetupId:
+      maxLength: 128
+      type: string
+      description: Generated when the PISP sets up the payments before the Backbase
+        authorization flow.
+    PaymentSubmissionId:
+      maxLength: 128
+      type: string
+      description: Generated when the PISP submits the payment which is after the
+        Backbase authorization flow.
+    PaymentType:
+      maxLength: 22
+      minLength: 1
+      type: string
+      description: The type of payment.
+    PostalAddress:
+      type: object
+      properties:
+        addressLine1:
+          maxLength: 70
+          type: string
+        addressLine2:
+          maxLength: 70
+          type: string
+        streetName:
+          maxLength: 70
+          type: string
+        postCode:
+          maxLength: 16
+          type: string
+        town:
+          maxLength: 35
+          type: string
+        countrySubDivision:
+          maxLength: 35
+          type: string
+        country:
+          maxLength: 2
+          type: string
+      description: Postal address object with fields
+    RecipientId:
+      maxLength: 15
+      type: string
+      description: Used for ACH Credit to indicate the id of the recipient
+    RemittanceInformation:
+      required:
+      - content
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          description: When type is structured it consists of some XML tags used when
+            the transaction was uploaded.
+          enum:
+          - STRUCTURED
+          - UNSTRUCTURED
+        content:
+          maxLength: 140
+          type: string
+          description: The content of the remittance information.
+      description: This is the object representation of the remittance info and can
+        contain different types of remittance info.
+    Schedule:
+      required:
+      - every
+      - "on"
+      - startDate
+      - transferFrequency
+      type: object
+      properties:
+        nonWorkingDayExecutionStrategy:
+          type: string
+          description: Strategy for executing payments on non-working days
+          enum:
+          - BEFORE
+          - AFTER
+          - NONE
+        transferFrequency:
+          type: string
+          description: Denotes how frequently the transfer should be made
+          enum:
+          - ONCE
+          - DAILY
+          - WEEKLY
+          - BIWEEKLY
+          - MONTHLY
+          - QUARTERLY
+          - YEARLY
+        "on":
+          type: integer
+          description: Denotes day on which transfer should be executed. For WEEKLY
+            transferFrequency it will be 1..7 indicating weekday. For BIWEEKLY it
+            will be 1..14 indicating the day of the two week period. For MONTHLY it
+            will be 1..31 indicating day of month. For YEARLY it will be 1..12 indicating
+            month of the year.
+          format: int32
+        startDate:
+          type: string
+          description: When to start executing the schedule. First transfer will be
+            executed on first calculated date by schedule after this date
+          format: date
+        endDate:
+          type: string
+          description: When to stop transfers. Transfers will not be executed after
+            this date. Only one of endDate and repeat is possible. If neither repeat
+            nor endDate is provided transfer will be executed until canceled
+          format: date
+        repeat:
+          type: integer
+          description: Number of transfer to be executed. Only one of endDate and
+            repeat is possible. If neither repeat nor endDate is provided transfer
+            will be executed until canceled
+          format: int32
+        every:
+          type: integer
+          description: Indicates skip interval of transfer. 1 would mean execute every
+            time, 2 - every other time
+          format: int32
+          enum:
+          - 1
+          - 2
+        nextExecutionDate:
+          type: string
+          description: Date when the next payment will be executed, taking in consideration
+            bank holidays and cut-off times. It will be only retrieved when getting
+            payments, it will be dismissed when creating or updating.
+          format: date
+      description: Schedule for recurring transfer. Mandatory if paymentMode is RECURRING
+    SchemeNames:
+      type: string
+      description: This describes the type of the account identifier. It only supports
+        IBAN and BBAN and not the internal ID like the other specs because the internal/external
+        arrangement ID are put in a separate field.
+      enum:
+      - IBAN
+      - BBAN
+    TransferTransactionInformation:
+      required:
+      - instructedAmount
+      type: object
+      properties:
+        instructedAmount:
+          $ref: '#/components/schemas/Currency'
+        counterparty:
+          $ref: '#/components/schemas/InvolvedParty'
+        counterpartyAccount:
+          $ref: '#/components/schemas/CounterpartyAccount'
+        counterpartyBank:
+          $ref: '#/components/schemas/Bank'
+        correspondentBank:
+          $ref: '#/components/schemas/Bank'
+        intermediaryBank:
+          $ref: '#/components/schemas/Bank'
+        messageToBank:
+          $ref: '#/components/schemas/MessageToBank'
+        targetCurrency:
+          $ref: '#/components/schemas/CurrencyCode'
+        remittanceInformation:
+          $ref: '#/components/schemas/RemittanceInformation'
+        endToEndIdentification:
+          maxLength: 35
+          type: string
+        mandateIdentifier:
+          $ref: '#/components/schemas/MandateIdentifier'
+        chargeBearer:
+          $ref: '#/components/schemas/ChargeBearer'
+        transferFee:
+          $ref: '#/components/schemas/Currency'
+      description: The object defining the transfer instruction of the payment order
+    UnauthorizedAltError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    UnauthorizedError:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+    UnsupportedMediaTypeError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'

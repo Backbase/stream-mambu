@@ -1,0 +1,452 @@
+openapi: 3.0.1
+info:
+  title: Pull Transactions
+  description: No description available
+  version: 1.1.23
+servers:
+- url: /transaction-integration-external-pull-service/
+  description: The server
+tags:
+- name: pull transactions
+paths:
+  /service-api/v2/transactions/filter:
+    summary: /filter
+    description: No description available
+    post:
+      tags:
+      - transactions
+      summary: Request the latest transactions from the external system (e.g. core)
+        for a given set of arrangement and specified datetime.
+      description: Request the latest transactions from the external system (e.g.
+        core) for a given set of arrangement and specified datetime.
+      operationId: postFilter
+      requestBody:
+        description: Request the latest transactions from the external system (e.g.
+          core) for a given set of arrangement and specified datetime.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionsFilterPostResponse'
+            examples:
+              example:
+                value:
+                - arrangementId: a5b0fe7d-c4dd-40a7-bd80-dfc7869327e1
+                  fromDatetime: 2017-06-01T16:41:41.090Z
+                - arrangementId: a5b0fe6d-e4dd-40a7-bd80-dfc7869356af
+                  fromDatetime: 2017-06-01T09:00:00.090Z
+                - arrangementId: a5b0fe5d-b4dd-40a7-bd80-dfc7869388e2
+                  fromDatetime: 2017-06-01T11:15:00.090Z
+      responses:
+        "200":
+          description: No description available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionsFilterPostPostResponseBody'
+              examples:
+                example:
+                  value:
+                  - id: TRANS0000000000001
+                    arrangementId: 1cdb2224-8926-4b4d-a99f-1c9dfbbb4699
+                    reference: BCA-123445
+                    description: Meal @ Burger King
+                    type: Cash
+                    typeGroup: Payment
+                    category: Category
+                    bookingDate: 2016-05-16
+                    valueDate: 2016-05-17
+                    creditDebitIndicator: DBIT
+                    transactionAmountCurrency:
+                      amount: "10.29"
+                      currencyCode: EUR
+                    instructedAmountCurrency:
+                      amount: "321.20"
+                      currencyCode: USD
+                    currencyExchangeRate: 2.2
+                    counterPartyName: AF Chagal
+                    counterPartyAccountNumber: "2732"
+                    counterPartyBIC: ING00000001
+                    counterPartyCity: Amsterdam
+                    counterPartyAddress: Stationsplein, 1012 AB
+                    counterPartyCountry: NL
+                    counterPartyBankName: ING
+                    creditorId: "764532"
+                    mandateReference: "6541235478"
+                    billingStatus: BILLED
+                    checkSerialNumber: 123
+                    sequenceNumber: "1234"
+                  - id: TRANS0000000000002
+                    arrangementId: 1cdb2224-8926-4b4d-a99f-1c9dfbbb4699
+                    reference: BCA-123445
+                    description: Meal @ Burger King
+                    type: Cash
+                    typeGroup: Payment
+                    category: Category
+                    bookingDate: 2016-05-16
+                    valueDate: 2016-05-17
+                    creditDebitIndicator: DBIT
+                    currencyExchangeRate: 2.2
+                    counterPartyName: AF Chagal
+                    transactionAmountCurrency:
+                      amount: "10.29"
+                      currencyCode: EUR
+                    instructedAmountCurrency:
+                      amount: "321.20"
+                      currencyCode: USD
+                    counterPartyAccountNumber: "2732"
+                    counterPartyBIC: ING00000001
+                    counterPartyCity: Amsterdam
+                    counterPartyAddress: Stationsplein, 1012 AB
+                    counterPartyCountry: NL
+                    counterPartyBankName: ING
+                    creditorId: "764532"
+                    mandateReference: "6541235478"
+                    billingStatus: BILLED
+                    checkSerialNumber: 123
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              examples:
+                example:
+                  value:
+                    message: Bad Request
+                    errors:
+                    - message: Value Exceeded. Must be between {min} and {max}.
+                      key: common.api.shoesize
+                      context:
+                        max: "50"
+                        min: "1"
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+components:
+  schemas:
+    BadRequestError:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    Currency:
+      title: Monetary Amount
+      required:
+      - amount
+      - currencyCode
+      type: object
+      properties:
+        amount:
+          type: string
+          description: The amount in the specified currency
+        currencyCode:
+          pattern: ^[A-Z]{3}$
+          type: string
+          description: The alpha-3 code (complying with ISO 4217) of the currency
+            that qualifies the amount
+      description: Schema defining monetary amount in given currency.
+    ErrorItem:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Default Message. Any further information.
+        key:
+          type: string
+          description: '{capability-name}.api.{api-key-name}. For generated validation
+            errors this is the path in the document the error resolves to. e.g. object
+            name + ''.'' + field'
+        context:
+          type: object
+          description: Context can be anything used to construct localised messages.
+      description: A validation error
+    FilterItem:
+      required:
+      - arrangementId
+      type: object
+      properties:
+        arrangementId:
+          type: string
+          description: External arrangementId.
+        fromDatetime:
+          type: string
+          description: Indicates the date-time from when the transactions will be
+            requested from the external system (e.g. core).
+          format: date-time
+    ForbiddenError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    InternalServerError:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+          description: Further Information
+      description: Represents HTTP 500 Internal Server Error
+    NotAcceptableError:
+      type: object
+      properties:
+        message:
+          type: string
+        supportedMediaTypes:
+          type: array
+          description: List of supported media types for this endpoint
+          items:
+            type: string
+    NotFoundError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    TransactionItem:
+      required:
+      - arrangementId
+      - bookingDate
+      - creditDebitIndicator
+      - description
+      - id
+      - transactionAmountCurrency
+      - type
+      - typeGroup
+      type: object
+      properties:
+        id:
+          maxLength: 300
+          type: string
+          description: Unique identification for the transaction as used in the external
+            system
+        arrangementId:
+          maxLength: 50
+          type: string
+          description: Reference to the instance of the product in the external system
+            to which the transactions belongs.
+        reference:
+          maxLength: 36
+          type: string
+          description: A tag/label issued by the initiator of the transaction in order
+            to be able to refer to the respective transaction
+        description:
+          maxLength: 140
+          type: string
+        typeGroup:
+          maxLength: 36
+          type: string
+          description: Indicates the group of related transactions types (eg payments
+            is the transaction group for transaction types like Bill payment , Wire,
+            ACH etc)
+        type:
+          maxLength: 36
+          type: string
+          description: Indicates the type of the transaction (eg Bill Payment , ATM
+            , Wire , ACH etc).
+        category:
+          maxLength: 50
+          type: string
+          description: Transaction category
+        bookingDate:
+          type: string
+          description: The date the amount is posted to the balance of an account
+            from a book keeping perspective.
+          format: date
+        valueDate:
+          type: string
+          description: The date on which an amount posted to an account becomes interest
+            bearing
+          format: date
+        transactionAmountCurrency:
+          $ref: '#/components/schemas/Currency'
+        instructedAmountCurrency:
+          $ref: '#/components/schemas/Currency'
+        currencyExchangeRate:
+          type: number
+          description: The exchange rate (between both account and transaction currency)
+            that was used for the conversion. To be used if those currencies are not
+            the same
+        counterPartyName:
+          maxLength: 128
+          type: string
+          description: The name of the counterparty
+        counterPartyAccountNumber:
+          maxLength: 36
+          type: string
+          description: The account number of the counter party involved in the transaction
+        counterPartyBIC:
+          maxLength: 11
+          type: string
+          description: The BIC of the counterparty
+        counterPartyCity:
+          maxLength: 35
+          type: string
+          description: City of the counterparty
+        counterPartyAddress:
+          maxLength: 140
+          type: string
+          description: Address of the counterparty
+        counterPartyCountry:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: ISO Country code
+        counterPartyBankName:
+          maxLength: 128
+          type: string
+          description: The bank name of the counterparty
+        creditorId:
+          maxLength: 19
+          type: string
+          description: Id of the creditor (Only for SEPA DD)
+        mandateReference:
+          maxLength: 128
+          type: string
+          description: Mandate Reference (Only for SEPA DD)
+        billingStatus:
+          maxLength: 8
+          type: string
+          description: Indicates the status of the transaction (e.g. pending , posted)
+        checkSerialNumber:
+          type: integer
+          description: Serial number of the check. Each check has a different number
+            for identification purposes.
+          format: int32
+        runningBalance:
+          type: number
+          description: Indicates the balance of the account at that moment when the
+            transaction was executed
+        creditDebitIndicator:
+          type: string
+          enum:
+          - CRDT
+          - DBIT
+    TransactionsFilterPostPostResponseBody:
+      type: array
+      example:
+      - id: TRANS0000000000001
+        arrangementId: 1cdb2224-8926-4b4d-a99f-1c9dfbbb4699
+        reference: BCA-123445
+        description: Meal @ Burger King
+        type: Cash
+        typeGroup: Payment
+        category: Category
+        bookingDate: 2016-05-16
+        valueDate: 2016-05-17
+        creditDebitIndicator: DBIT
+        transactionAmountCurrency:
+          amount: "10.29"
+          currencyCode: EUR
+        instructedAmountCurrency:
+          amount: "321.20"
+          currencyCode: USD
+        currencyExchangeRate: 2.2
+        counterPartyName: AF Chagal
+        counterPartyAccountNumber: "2732"
+        counterPartyBIC: ING00000001
+        counterPartyCity: Amsterdam
+        counterPartyAddress: Stationsplein, 1012 AB
+        counterPartyCountry: NL
+        counterPartyBankName: ING
+        creditorId: "764532"
+        mandateReference: "6541235478"
+        billingStatus: BILLED
+        checkSerialNumber: 123
+        sequenceNumber: "1234"
+      - id: TRANS0000000000002
+        arrangementId: 1cdb2224-8926-4b4d-a99f-1c9dfbbb4699
+        reference: BCA-123445
+        description: Meal @ Burger King
+        type: Cash
+        typeGroup: Payment
+        category: Category
+        bookingDate: 2016-05-16
+        valueDate: 2016-05-17
+        creditDebitIndicator: DBIT
+        currencyExchangeRate: 2.2
+        counterPartyName: AF Chagal
+        transactionAmountCurrency:
+          amount: "10.29"
+          currencyCode: EUR
+        instructedAmountCurrency:
+          amount: "321.20"
+          currencyCode: USD
+        counterPartyAccountNumber: "2732"
+        counterPartyBIC: ING00000001
+        counterPartyCity: Amsterdam
+        counterPartyAddress: Stationsplein, 1012 AB
+        counterPartyCountry: NL
+        counterPartyBankName: ING
+        creditorId: "764532"
+        mandateReference: "6541235478"
+        billingStatus: BILLED
+        checkSerialNumber: 123
+      items:
+        $ref: '#/components/schemas/TransactionItem'
+    TransactionsFilterPostResponse:
+      type: array
+      example:
+      - arrangementId: a5b0fe7d-c4dd-40a7-bd80-dfc7869327e1
+        fromDatetime: 2017-06-01T16:41:41.090Z
+      - arrangementId: a5b0fe6d-e4dd-40a7-bd80-dfc7869356af
+        fromDatetime: 2017-06-01T09:00:00.090Z
+      - arrangementId: a5b0fe5d-b4dd-40a7-bd80-dfc7869388e2
+        fromDatetime: 2017-06-01T11:15:00.090Z
+      items:
+        $ref: '#/components/schemas/FilterItem'
+    UnauthorizedAltError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    UnauthorizedError:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+    UnsupportedMediaTypeError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'

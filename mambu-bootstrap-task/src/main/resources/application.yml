@@ -1,0 +1,263 @@
+# Stream config
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          dbs:
+            authorization-grant-type: client_credentials
+            client-id: bb-client
+            client-secret: bb-secret
+            client-authentication-method: post
+        provider:
+          dbs:
+            token-uri: http://token-converter:8080/oauth/token
+backbase:
+  stream:
+    dbs:
+      user-manager-base-url: http://user-manager:8080
+      access-control-base-url: http://access-control:8080
+      arrangement-manager-base-url: http://arrangement-manager:8080
+      transaction-manager-base-url: http://transaction-manager:8080
+      limits-manager-base-url: http://limits-manager:8080
+    mambu:
+      base-url: ${MAMBU_BASE_URL}
+      username: ${MAMBU_USERNAME}
+      password: ${MAMBU_PASSWORD}
+      mapping:
+        product:
+          deposit-account-type-mapping:
+            CURRENT_ACCOUNT: "Current Account"
+            REGULAR_SAVINGS: "Savings Account"
+            FIXED_DEPOSIT: "Term Deposit"
+            SAVINGS_PLAN: "Savings Account"
+            INVESTOR_ACCOUNT: "Investment Account"
+          loan-account-type-mapping:
+            FIXED_TERM_LOAN: "Loan"
+            DYNAMIC_TERM_LOAN: "Loan"
+            INTEREST_FREE_LOAN: "Loan"
+            TRANCHED_LOAN: "Loan"
+            REVOLVING_CREDIT: "Loan"
+        transactions:
+          transaction-type-group-map:
+            IMPORT: "Payment"
+            WRITE_OFF: "Withdrawal"
+            WRITE_OFF_ADJUSTMENT: "Fees"
+            DEPOSIT: "Payment"
+            ADJUSTMENT: "Fees"
+            WITHDRAWAL: "Withdrawal"
+            WITHDRAWAL_ADJUSTMENT: "Fees"
+            CARD_TRANSACTION_REVERSAL: "Fees"
+            TRANSFER: "Payment"
+            TRANSFER_ADJUSTMENT: "Fees"
+            FEE_APPLIED: "Fees"
+            FEE_ADJUSTED: "Fees"
+            FEES_DUE_REDUCED: "Fees"
+            INTEREST_APPLIED: "Fees"
+            INTEREST_APPLIED_ADJUSTMENT: "Fees"
+            FEE_REDUCTION_ADJUSTMENT: "Fees"
+            WITHHOLDING_TAX: "Fees"
+            WITHHOLDING_TAX_ADJUSTMENT: "Fees"
+            INTEREST_RATE_CHANGED: "Fees"
+            OVERDRAFT_INTEREST_RATE_CHANGED: "Fees"
+            OVERDRAFT_LIMIT_CHANGED: "Fees"
+            BRANCH_CHANGED: "Fees"
+            LOAN_FUNDED: "Loans"
+            LOAN_FUNDED_ADJUSTMENT: "Loans"
+            LOAN_REPAID: "Loans"
+            LOAN_REPAID_ADJUSTMENT: "Loans"
+            LOAN_FRACTION_BOUGHT: "Loans"
+            LOAN_FRACTION_BOUGHT_ADJUSTMENT: "Loans"
+            LOAN_FRACTION_SOLD: "Loans"
+            LOAN_FRACTION_SOLD_ADJUSTMENT: "Loans"
+          transaction-type-map:
+            IMPORT: "Withdrawal"
+            WRITE_OFF: "Withdrawal"
+            WRITE_OFF_ADJUSTMENT: "Fee"
+            DEPOSIT: "Deposit"
+            ADJUSTMENT: "Fee"
+            WITHDRAWAL: "Withdrawal"
+            WITHDRAWAL_ADJUSTMENT: "Fee"
+            CARD_TRANSACTION_REVERSAL: "Fee"
+            TRANSFER: "Withdrawal"
+            TRANSFER_ADJUSTMENT: "Fee"
+            FEE_APPLIED: "Fee"
+            FEE_ADJUSTED: "Fee"
+            FEES_DUE_REDUCED: "Fee"
+            INTEREST_APPLIED: "Fee"
+            INTEREST_APPLIED_ADJUSTMENT: "Fee"
+            FEE_REDUCTION_ADJUSTMENT: "Fee"
+            WITHHOLDING_TAX: "Fee"
+            WITHHOLDING_TAX_ADJUSTMENT: "Fee"
+            INTEREST_RATE_CHANGED: "Fee"
+            OVERDRAFT_INTEREST_RATE_CHANGED: "Fee"
+            OVERDRAFT_LIMIT_CHANGED: "Fee"
+            BRANCH_CHANGED: "Fee"
+            LOAN_FUNDED: "Deposit"
+            LOAN_FUNDED_ADJUSTMENT: "Fee"
+            LOAN_REPAID: "Withdrawal"
+            LOAN_REPAID_ADJUSTMENT: "Fee"
+            LOAN_FRACTION_BOUGHT: "Fee"
+            LOAN_FRACTION_BOUGHT_ADJUSTMENT: "Fee"
+            LOAN_FRACTION_SOLD: "Fee"
+            LOAN_FRACTION_SOLD_ADJUSTMENT: "Fee"
+    legalentity:
+      sink:
+        use-identity-integration: true
+
+bootstrap:
+  ingest-mambu-clients: true
+  parent-legal-entity-external-id: mambu-bank
+
+  default-loan-currency: EUR
+  mambu-branch-id: "dope"
+  legal-entity:
+    name: "Backbase Root Bank"
+    realmName: "backbase"
+    externalId: "backbase"
+    legalEntityType: "BANK"
+    referenceJobRoles:
+      - name: User Profile Manager
+        description: "User Profile administration"
+        functionGroups:
+          - name: "User Profiles"
+            functions:
+              - functionId: "1035"
+                functionCode: "manage.user.profiles"
+                resourceName: "User Profiles"
+                resourceCode: "user.profiles"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "edit"
+      - name: Entitlements - Manager
+        description: Full Entitlements administration.
+        functionGroups:
+          - name: "Manage Entitlements"
+            functions:
+              - functionId: "1019"
+                functionCode: "manage.data.groups"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+                  - privilege: "approve"
+              - functionId: "1020"
+                functionCode: "manage.function.groups"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+                  - privilege: "approve"
+      - name: Retail User - USA
+        description: Retail User Permissions for USA
+        functionGroups:
+          - name: "Products, Payments, Transactions, Contacts"
+            functions:
+              - functionId: "1006"
+                functionCode: "product.summary"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1003"
+                functionCode: "transactions"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "edit"
+              - functionId: "1017"
+                functionCode: "us.domestic.wire"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1018"
+                functionCode: "us.foreign.wire"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1005"
+                functionCode: "contacts"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+      - name: Retail User - EU
+        description: Retail User Permissions for EU
+        functionGroups:
+          - name: "Products, Payments, Transactions, Contacts, Messages"
+            functions:
+              - functionId: "1006"
+                functionCode: "product.summary"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1003"
+                functionCode: "transactions"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "edit"
+              - functionId: "1002"
+                functionCode: "payments.sepa"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1043"
+                functionCode: "sepa.credit.transfer.intc"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1005"
+                functionCode: "contacts"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+              - functionId: "1038"
+                functionCode: "manage.messages"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+              - functionId: "1016"
+                functionCode: "manage.statements"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1030"
+                functionCode: "manage.notifications"
+                privileges:
+                  - privilege: "approve"
+                  - privilege: "edit"
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "delete"
+    administrators:
+      - externalId: "mambu-admin"
+        fullName: "Backbase Root Admin"
+        identityLinkStrategy: "CREATE_IN_IDENTITY"
+        emailAddress:
+          address: "bartv+mambu@backbase.com"
+        mobileNumber:
+          number: "0643379539"
+    users:
+      - user:
+          externalId: "mambu-admin"
+          fullName: "Backbase Root Admin"
+          identityLinkStrategy: "CREATE_IN_IDENTITY"
+          emailAddress:
+            address: "bartv+mambu@backbase.com"
+          mobileNumber:
+            number: "0643379539"
+        referenceJobRoleNames:
+          - "Entitlements - Manager"
+    subsidiaries:
+      - name: "Mambu Bank"
+        realmName: "backbase"
+        externalId: "mambu-bank"
+
+logging:
+  level:
+    root: INFO
+
+
+

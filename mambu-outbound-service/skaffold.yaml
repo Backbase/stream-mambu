@@ -1,0 +1,16 @@
+apiVersion: skaffold/v1
+kind: Config
+build:
+  tagPolicy:
+    sha256: {}
+  artifacts:
+    - image: "mambu-outbound-service"
+      context: .
+      jib: {}
+deploy:
+  kubectl:
+    flags:
+      global:
+        - --namespace=dope
+    manifests:
+      - ./kubernetes-manifests/**.yaml

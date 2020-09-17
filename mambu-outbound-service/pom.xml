@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.backbase.stream</groupId>
+        <artifactId>stream-http-starter-parent</artifactId>
+        <version>2.4.0</version>
+        <relativePath/>
+    </parent>
+
+    <artifactId>mambu-outbound-service</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <packaging>jar</packaging>
+    <name>Stream :: Mambu Outbound APIs App for DBS 2.18.x</name>
+
+    <properties>
+        <payment-order-persistence-spec.version>1.10.0</payment-order-persistence-spec.version>
+        <codegen.generated-sources-dir>${project.build.directory}/generated-sources/raml</codegen.generated-sources-dir>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.backbase.dbs</groupId>
+                <artifactId>banking-services-bom</artifactId>
+                <version>2.19.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.backbase.stream.mambu</groupId>
+            <artifactId>mambu-core</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.mambu</groupId>
+            <artifactId>mambu-deposit-transactions-client</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>cursor-publishers</artifactId>
+            <version>2.4.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-ui -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-webflux-ui</artifactId>
+            <version>1.4.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-r2dbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.miku</groupId>
+            <artifactId>r2dbc-mysql</artifactId>
+            <version>0.8.2.RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- JMS Dependencies -->
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.jms</groupId>
+            <artifactId>javax.jms-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-jms</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>transactions-core</artifactId>
+            <version>2.4.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>building-blocks-common</artifactId>
+            <version>11.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.5</version>
+        </dependency>
+
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>unpack-payment-spec</id>
+                        <phase>generate-sources</phase>
+                        <goals><goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <includes>**/*.raml,**/*.json,**/*.md,**/*.csv</includes>
+                            <artifactItems>
+                                <artifactItem>
+                                <groupId>com.backbase.dbs.paymentorder</groupId>
+                                <artifactId>payment-order-persistence-spec</artifactId>
+                                <version>${payment-order-persistence-spec.version}</version>
+                                <outputDirectory>${project.build.directory}/payment-order-persistence-spec                                </outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.backbase.codegen</groupId>
+                <artifactId>jsonschema-events-maven-plugin</artifactId>
+                <version>11.0.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-events-payment-order-persistence-spec</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>events-generation</goal>
+                        </goals>
+                        <configuration>
+                            <useJavaTime>true</useJavaTime>
+                            <packageName>paymentorder</packageName>
+                            <packageVersion>1</packageVersion>
+                            <inputFile>${project.build.directory}/payment-order-persistence-spec/events</inputFile>
+                            <outputFile>${codegen.generated-sources-dir}</outputFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+<!--            <plugin>-->
+<!--            <groupId>org.openapitools</groupId>-->
+<!--            <artifactId>openapi-generator-maven-plugin</artifactId>-->
+<!--            &lt;!&ndash; RELEASE_VERSION &ndash;&gt;-->
+<!--            <version>4.3.1</version>-->
+            <plugin>
+                <groupId>com.backbase.oss</groupId>
+                <artifactId>boat-maven-plugin</artifactId>
+                <version>0.2.2</version>
+                <executions>
+                    <execution>
+                        <id>account-integration-spec</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generatorName>spring</generatorName>
+                            <inputSpec>
+                                ${project.basedir}/api/com/backbase/dbs/account/account-integration-spec/service-api/service-api/openapi.yaml
+                            </inputSpec>
+                            <generateApiTests>false</generateApiTests>
+                            <generateApis>true</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <configOptions>
+                                <library>spring-boot</library>
+                                <useTags>true</useTags>
+                                <reactive>true</reactive>
+                                <java8>true</java8>
+                                <dateLibrary>java8</dateLibrary>
+                                <interfaceOnly>true</interfaceOnly>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <modelPackage>com.backbase.stream.dbs.account.outbound.model</modelPackage>
+                                <apiPackage>com.backbase.stream.dbs.account.outbound.api</apiPackage>
+                            </configOptions>
+                            <typeMappings>
+                                <typeMapping>Double=java.math.BigDecimal</typeMapping>
+                            </typeMappings>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>payment</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <generatorName>spring</generatorName>
+                            <inputSpec>
+                                ${project.basedir}/api/com/backbase/dbs/paymentorder/payment-order-integration-external-outbound-spec/service-api/service-api/openapi.yaml
+                            </inputSpec>
+                            <generateApiTests>false</generateApiTests>
+                            <generateApis>true</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <configOptions>
+                                <library>spring-boot</library>
+                                <useTags>true</useTags>
+                                <reactive>true</reactive>
+                                <java8>true</java8>
+                                <dateLibrary>java8</dateLibrary>
+                                <interfaceOnly>true</interfaceOnly>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <modelPackage>com.backbase.stream.dbs.paymentorder.outbound.model</modelPackage>
+                                <apiPackage>com.backbase.stream.dbs.paymentorder.outbound.api</apiPackage>
+                            </configOptions>
+                            <typeMappings>
+                                <typeMapping>Double=java.math.BigDecimal</typeMapping>
+                            </typeMappings>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>transactions-pull</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <generatorName>spring</generatorName>
+                            <inputSpec>
+                                ${project.basedir}/api/com/backbase/dbs/transaction/transaction-integration-external-pull-spec/service-api/service-api/openapi.yaml
+                            </inputSpec>
+                            <generateApiTests>false</generateApiTests>
+                            <generateApis>true</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <configOptions>
+                                <library>spring-boot</library>
+                                <useTags>true</useTags>
+                                <reactive>true</reactive>
+                                <java8>true</java8>
+                                <dateLibrary>java8</dateLibrary>
+                                <interfaceOnly>true</interfaceOnly>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <modelPackage>com.backbase.stream.dbs.transactions.pull.model</modelPackage>
+                                <apiPackage>com.backbase.stream.dbs.transactions.pull.api</apiPackage>
+                            </configOptions>
+                            <typeMappings>
+                                <typeMapping>Double=java.math.BigDecimal</typeMapping>
+                            </typeMappings>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>transactions-external-outbound</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <generatorName>spring</generatorName>
+                            <inputSpec>${project.basedir}/api/com/backbase/dbs/transaction/transaction-integration-external-outbound-spec/service-api/service-api/openapi.yaml</inputSpec>
+                            <generateApiTests>false</generateApiTests>
+                            <generateApis>true</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <configOptions>
+                                <library>spring-boot</library>
+                                <useTags>true</useTags>
+                                <reactive>true</reactive>
+                                <java8>true</java8>
+                                <dateLibrary>java8</dateLibrary>
+                                <interfaceOnly>true</interfaceOnly>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <modelPackage>com.backbase.stream.dbs.transactions.outbound.model</modelPackage>
+                                <apiPackage>com.backbase.stream.dbs.transactions.outbound.api</apiPackage>
+                            </configOptions>
+                            <typeMappings>
+                                <typeMapping>Double=java.math.BigDecimal</typeMapping>
+                            </typeMappings>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>generate-openapi</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.backbase.dbs.account</groupId>
+                    <artifactId>account-integration-spec</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.backbase.dbs.transaction</groupId>
+                    <artifactId>transaction-integration-external-inbound-spec</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.backbase.dbs.transaction</groupId>
+                    <artifactId>transaction-integration-external-outbound-spec</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.backbase.dbs.transaction</groupId>
+                    <artifactId>transaction-integration-external-pull-spec</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.backbase.dbs.paymentorder</groupId>
+                    <artifactId>payment-order-integration-external-outbound-spec</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.backbase.oss</groupId>
+                        <artifactId>boat-maven-plugin</artifactId>
+                        <version>0.2.2</version>
+                        <configuration>
+                            <includeVersionInOutputDirectory>false</includeVersionInOutputDirectory>
+                            <removeDeprecated>true</removeDeprecated>
+                            <addJavaTypeExtensions>false</addJavaTypeExtensions>
+                            <output>${project.basedir}/api</output>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

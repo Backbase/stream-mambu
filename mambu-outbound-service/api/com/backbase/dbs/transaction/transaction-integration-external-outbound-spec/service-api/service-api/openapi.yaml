@@ -1,0 +1,583 @@
+openapi: 3.0.1
+info:
+  title: Transactions
+  description: |
+    # Transactions Integration External API Documentation
+
+    Currently the External Outbound Transactions API will contain the following operations.
+
+    * Get Transaction
+  version: 1.21.15
+servers:
+- url: /transaction-integration-external-outbound-service/
+  description: The server
+tags:
+- name: transactions
+paths:
+  /service-api/v2/transactions:
+    summary: Transactions
+    description: Retrieve all transactions.
+    get:
+      tags:
+      - transactions
+      summary: Retrieves a list of pages limited in size and number by the page selection
+        parameters, sorted and filtered.
+      description: Retrieves a list of pages limited in size and number by the page
+        selection parameters, sorted and filtered
+      operationId: getTransactions
+      parameters:
+      - name: amountGreaterThan
+        in: query
+        description: Amount greater than
+        required: false
+        schema:
+          type: number
+        examples:
+          example:
+            summary: example
+            value: 5
+      - name: amountLessThan
+        in: query
+        description: Amount less than
+        required: false
+        schema:
+          type: number
+        examples:
+          example:
+            summary: example
+            value: 5
+      - name: bookingDateGreaterThan
+        in: query
+        description: Date greater than
+        required: false
+        schema:
+          type: string
+        examples:
+          example:
+            summary: example
+            value: 2016-05-16
+      - name: bookingDateLessThan
+        in: query
+        description: Date less than
+        required: false
+        schema:
+          type: string
+        examples:
+          example:
+            summary: example
+            value: 2016-05-16
+      - name: arrangementIds
+        in: query
+        description: Array of arrangement ids
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+        examples:
+          example:
+            summary: example
+            value:
+            - 8a48e0585f49dfcb015f57e92e2d0040
+            - 8a48e0585f49dfcb015f4ea2eabb001c
+      - name: types
+        in: query
+        description: Type Categories of the transactions
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+        examples:
+          example:
+            summary: example
+            value:
+            - Cheques
+            - ATM
+      - name: description
+        in: query
+        description: The description of transaction
+        required: false
+        schema:
+          type: string
+        examples:
+          example:
+            summary: example
+            value: description
+      - name: reference
+        in: query
+        description: reference
+        required: false
+        schema:
+          type: string
+        examples:
+          example:
+            summary: example
+            value: reference
+      - name: typeGroups
+        in: query
+        description: Type Groups of the transactions
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+        examples:
+          example:
+            summary: example
+            value:
+            - Payment
+            - Withdrawal
+      - name: counterPartyName
+        in: query
+        description: The name of the counterparty
+        required: false
+        schema:
+          type: string
+        examples:
+          example:
+            summary: example
+            value: counterPartyName
+      - name: counterPartyAccountNumber
+        in: query
+        description: The International Bank Account Number of the counterparty
+        required: false
+        schema:
+          type: string
+        examples:
+          example:
+            summary: example
+            value: counterPartyAccountNumber
+      - name: creditDebitIndicator
+        in: query
+        description: Indicates whether the amount is credited or debited
+        required: false
+        schema:
+          type: string
+        examples:
+          example:
+            summary: example
+            value: InCRDT
+      - name: query
+        in: query
+        description: The search term used to search for transactions
+        required: false
+        schema:
+          type: string
+        examples:
+          example:
+            summary: example
+      - name: billingStatus
+        in: query
+        description: Billing status of the transaction
+        required: false
+        schema:
+          type: string
+        examples:
+          example:
+            summary: example
+            value: BILLED
+      - name: billingStatuses
+        in: query
+        description: Billing statuses of the transactions
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - BILLED
+            - UNBILLED
+            - PENDING
+        examples:
+          example:
+            summary: example
+            value:
+            - UNBILLED
+            - PENDING
+      - name: currency
+        in: query
+        description: Transaction currency
+        required: false
+        schema:
+          pattern: AED|AFN|ALL|AMD|ANG|AOA|ARS|AUD|AWG|AZN|BAM|BBD|BDT|BGN|BHD|BIF|BMD|BND|BOB|BOV|BRL|BSD|BTN|BWP|BYN|BZD|CAD|CDF|CHE|CHW|CLF|CLP|CNY|COP|COU|CRC|CUC|CUP|CVE|CZK|DJF|DKK|DOP|DZD|EGP|ERN|ETB|EUR|FJD|FKP|GBP|GEL|GHS|GIP|GMD|GNF|GTQ|GYD|HKD|HNL|HRK|HTG|HUF|IDR|ILS|INR|IQD|IRR|ISK|JMD|JOD|JPY|KES|KGS|KHR|KMF|KPW|KWD|KYD|KZT|LAK|LBP|LKR|LRD|LSL|LYD|MAD|MDL|MGA|MKD|MMK|MNT|MOP|MRO|MUR|MVR|MWK|MXN|MXV|MYR|MZN|NAD|NGN|NIO|NOK|NPR|NZD|OMR|PAB|PEN|PGK|PHP|PKR|PLN|PYG|QAR|RON|RSD|RUB|RWF|SAR|SBD|SCR|SDG|SEK|SGD|SHP|SLL|SOS|SRD|SSP|STD|SVC|SYP|SZL|THB|TJS|TMT|TND|TOP|TRY|TTD|TWD|TZS|UAH|UGX|USD|USN|UYI|UYU|UZS|VEF|VND|VUV|WST|YER|ZAR|ZMW|ZWL
+          type: string
+        examples:
+          example:
+            summary: example
+            value: EUR
+      - name: fromCheckSerialNumber
+        in: query
+        description: checkSerialNumber greater than or equal to
+        required: false
+        schema:
+          type: number
+        examples:
+          example:
+            summary: example
+            value: 52444
+      - name: toCheckSerialNumber
+        in: query
+        description: checkSerialNumber less than or equal to
+        required: false
+        schema:
+          type: number
+        examples:
+          example:
+            summary: example
+            value: 78543
+      - name: checkSerialNumbers
+        in: query
+        description: Array of checkSerialNumbers
+        required: false
+        schema:
+          type: array
+          items:
+            type: number
+        examples:
+          example:
+            summary: example
+            value:
+            - 32124234
+            - 5423534
+      - name: from
+        in: query
+        description: Page Number. Skip over pages of elements by specifying a start
+          value for the query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+        examples:
+          example:
+            summary: example
+            value: 20
+      - name: cursor
+        in: query
+        description: |
+          Record UUID. As an alternative for specifying 'from' this allows to point to the record to start the selection from.
+        required: false
+        schema:
+          type: string
+          default: ""
+        examples:
+          example:
+            summary: example
+            value: 76d5be8b-e80d-4842-8ce6-ea67519e8f74
+      - name: size
+        in: query
+        description: |
+          Limit the number of elements on the response. When used in combination with cursor, the value
+          is allowed to be a negative number to indicate requesting records upwards from the starting point indicated
+          by the cursor.
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+        examples:
+          example:
+            summary: example
+            value: 80
+      - name: orderBy
+        in: query
+        description: |
+          Order by field: bookingDate
+        required: false
+        schema:
+          type: string
+        examples:
+          example:
+            summary: example
+      - name: direction
+        in: query
+        description: Direction
+        required: false
+        schema:
+          type: string
+          default: DESC
+          enum:
+          - ASC
+          - DESC
+        examples:
+          example:
+            summary: example
+      responses:
+        "200":
+          description: "# Transactions Get\n\nInitial call to pull a transaction to\
+            \ the backbase platform.\n\nThis supports pulling transactions for an\
+            \ authorized array of arrangement IDs "
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionsGet'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionsInternalServerError'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              examples:
+                example:
+                  value:
+                    message: Bad Request
+                    errors:
+                    - message: Value Exceeded. Must be between {min} and {max}.
+                      key: common.api.shoesize
+                      context:
+                        max: "50"
+                        min: "1"
+components:
+  schemas:
+    BadRequestError:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    Currency:
+      title: Monetary Amount
+      required:
+      - amount
+      - currencyCode
+      type: object
+      properties:
+        amount:
+          type: string
+          description: The amount in the specified currency
+        currencyCode:
+          pattern: ^[A-Z]{3}$
+          type: string
+          description: The alpha-3 code (complying with ISO 4217) of the currency
+            that qualifies the amount
+      description: Schema defining monetary amount in given currency.
+    ErrorItem:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Default Message. Any further information.
+        key:
+          type: string
+          description: '{capability-name}.api.{api-key-name}. For generated validation
+            errors this is the path in the document the error resolves to. e.g. object
+            name + ''.'' + field'
+        context:
+          type: object
+          description: Context can be anything used to construct localised messages.
+      description: A validation error
+    ForbiddenError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    InternalServerError:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+          description: Further Information
+      description: Represents HTTP 500 Internal Server Error
+    NotAcceptableError:
+      type: object
+      properties:
+        message:
+          type: string
+        supportedMediaTypes:
+          type: array
+          description: List of supported media types for this endpoint
+          items:
+            type: string
+    NotFoundError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    TransactionItem:
+      required:
+      - arrangementId
+      - bookingDate
+      - creditDebitIndicator
+      - description
+      - id
+      - transactionAmountCurrency
+      - type
+      - typeGroup
+      type: object
+      properties:
+        id:
+          type: string
+          description: 'Transaction identifier '
+        arrangementId:
+          type: string
+          description: Reference to the product to which the transaction belongs
+        reference:
+          type: string
+          description: A tag/label issued by the initiator of the transaction in order
+            to be able to refer to the respective transaction
+        description:
+          type: string
+        typeGroup:
+          maxLength: 36
+          type: string
+          description: Bank specific code of the group the transaaction type belangs
+            to this to be mapped to in integration
+        type:
+          maxLength: 36
+          type: string
+          description: Bank specific code to be mapped to generic type in integration
+        category:
+          type: string
+          description: Transaction category
+        bookingDate:
+          type: string
+          description: The date the amount is posted to the balance of an account
+            from a book keeping perspective.
+          format: date
+        valueDate:
+          type: string
+          description: The date on which an amount posted to an account becomes interest
+            bearing
+          format: date
+        creditDebitIndicator:
+          type: string
+          description: Indicates whether the amount is credited or debited.
+          enum:
+          - CRDT
+          - DBIT
+        transactionAmountCurrency:
+          $ref: '#/components/schemas/Currency'
+        instructedAmountCurrency:
+          $ref: '#/components/schemas/Currency'
+        currencyExchangeRate:
+          type: number
+          description: The exchange rate (between both account and transaction currency)
+            that was used for the conversion. To be used if those currencies are not
+            the same
+        counterPartyName:
+          type: string
+        counterPartyAccountNumber:
+          type: string
+          description: This will include sortcode/bankleizahl or other additional
+            numbers to identify the account
+        counterPartyBIC:
+          type: string
+          description: The BIC of the counterparty
+        counterPartyCity:
+          maxLength: 35
+          type: string
+          description: City of the counterparty
+        counterPartyAddress:
+          maxLength: 140
+          type: string
+          description: Address of the counterparty
+        counterPartyCountry:
+          type: string
+          description: ISO Country code
+        counterPartyBankName:
+          type: string
+          description: The bank name of the counterparty
+        creditorId:
+          type: string
+          description: Id of the creditor (Only for SEPA DD)
+        mandateReference:
+          type: string
+          description: Mandate Reference (Only for SEPA DD)
+        billingStatus:
+          maxLength: 8
+          type: string
+        checkSerialNumber:
+          type: number
+          description: Serial number of the check. Each check has a different number
+            for identification purposes.
+        notes:
+          maxLength: 4000
+          type: string
+        runningBalance:
+          type: number
+          description: Indicates the balance of the account at that moment when the
+            transaction was executed
+    TransactionsBadRequest:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+    TransactionsGet:
+      required:
+      - totalElements
+      - transaction-items
+      type: object
+      properties:
+        totalElements:
+          type: number
+          description: total number of elements matching the query
+        transaction-items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionItem'
+    TransactionsInternalServerError:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+    UnauthorizedAltError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    UnauthorizedError:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+    UnsupportedMediaTypeError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'

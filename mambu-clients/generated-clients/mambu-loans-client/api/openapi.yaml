@@ -1,0 +1,3238 @@
+openapi: 3.0.1
+info:
+  title: loans
+  version: v2
+servers:
+- url: https://localhost:8889/api
+- url: http://localhost:8889/api
+tags:
+- description: Allows you to retrieve, create, update, delete loan accounts and it
+    also allows to execute some other actions like state changing, undo a refinance,
+    undo a reschedule, reject, withdraw or close of a loan account and also undo reject,
+    undo withdraw and undo close.
+  name: LoanAccounts
+paths:
+  /loans/{loanAccountId}:
+    delete:
+      operationId: delete
+      parameters:
+      - description: The id or encoded key of the loan account
+        in: path
+        name: loanAccountId
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          content: {}
+          description: Loan account deleted
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Loan account not found
+      security:
+      - basic: []
+      summary: Delete a loan account
+      tags:
+      - LoanAccounts
+      x-accepts: application/vnd.mambu.v2+json
+    get:
+      operationId: getById
+      parameters:
+      - description: The id or encoded key of the loan account
+        in: path
+        name: loanAccountId
+        required: true
+        schema:
+          type: string
+      - description: The level of details to retrieve, FULL means the full details
+          of the object will be retrieved (custom fields, address, contact info or
+          any other related object), BASIC will return only the first level elements
+          of the object
+        in: query
+        name: detailsLevel
+        schema:
+          enum:
+          - BASIC
+          - FULL
+          type: string
+      responses:
+        "200":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/LoanAccount'
+          description: Loan account retrieved
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Loan account not found
+      security:
+      - basic: []
+      summary: Allows retrieval of a single loan account via id or encoded key
+      tags:
+      - LoanAccounts
+      x-accepts: application/vnd.mambu.v2+json
+    patch:
+      operationId: patch
+      parameters:
+      - description: The id or encoded key of the loan account
+        in: path
+        name: loanAccountId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/PatchOperation'
+              type: array
+        description: Patch operations to be applied to a resource
+        required: true
+      responses:
+        "204":
+          content: {}
+          description: Loan account updated
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Loan account not found
+      security:
+      - basic: []
+      summary: Partially update an existing loan account
+      tags:
+      - LoanAccounts
+      x-codegen-request-body-name: body
+      x-contentType: application/json
+      x-accepts: application/vnd.mambu.v2+json
+    put:
+      operationId: update
+      parameters:
+      - description: The id or encoded key of the loan account
+        in: path
+        name: loanAccountId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanAccount'
+        description: Loan account to be updated
+        required: true
+      responses:
+        "200":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/LoanAccount'
+          description: Loan account updated
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Loan account not found
+      security:
+      - basic: []
+      summary: Update an existing loan account
+      tags:
+      - LoanAccounts
+      x-codegen-request-body-name: body
+      x-contentType: application/json
+      x-accepts: application/vnd.mambu.v2+json
+  /loans/{loanAccountId}:payOff:
+    post:
+      operationId: payOff
+      parameters:
+      - description: Key that can be used to support idempotency on this POST. Must
+          be a valid UUID(version 4 is recommended) string and can only be used with
+          the exact same request. Can be used in retry mechanisms to prevent double
+          posting.
+        in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+      - description: The id or encoded key of the loan account
+        in: path
+        name: loanAccountId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanAccountPayOffInput'
+        description: Allows specifying the input for loan account pay off
+        required: true
+      responses:
+        "102":
+          content: {}
+          description: Your idempotent request was already submitted and is currently
+            being processed, try again later.
+        "204":
+          content: {}
+          description: Pay off action posted
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Loan account not found
+      security:
+      - basic: []
+      summary: Allows to pay off a loan account
+      tags:
+      - LoanAccounts
+      x-codegen-request-body-name: body
+      x-contentType: application/json
+      x-accepts: application/vnd.mambu.v2+json
+  /loans/{loanAccountId}:undoReschedule:
+    post:
+      operationId: undoReschedule
+      parameters:
+      - description: Key that can be used to support idempotency on this POST. Must
+          be a valid UUID(version 4 is recommended) string and can only be used with
+          the exact same request. Can be used in retry mechanisms to prevent double
+          posting.
+        in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+      - description: The id or encoded key of the loan account
+        in: path
+        name: loanAccountId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanActionDetails'
+        description: Allows specifying the action details for a loan account
+        required: false
+      responses:
+        "102":
+          content: {}
+          description: Your idempotent request was already submitted and is currently
+            being processed, try again later.
+        "204":
+          content: {}
+          description: Undo reschedule action posted
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Loan account not found
+      security:
+      - basic: []
+      summary: Allows to undo reschedule a loan account
+      tags:
+      - LoanAccounts
+      x-codegen-request-body-name: body
+      x-contentType: application/json
+      x-accepts: application/vnd.mambu.v2+json
+  /loans/{loanAccountId}:changeInterestRate:
+    post:
+      operationId: changeInterestRate
+      parameters:
+      - description: Key that can be used to support idempotency on this POST. Must
+          be a valid UUID(version 4 is recommended) string and can only be used with
+          the exact same request. Can be used in retry mechanisms to prevent double
+          posting.
+        in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+      - description: The id or encoded key of the loan account
+        in: path
+        name: loanAccountId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeInterestRateLoanAccountInput'
+        description: Allows specifying the action details for a loan account
+        required: false
+      responses:
+        "102":
+          content: {}
+          description: Your idempotent request was already submitted and is currently
+            being processed, try again later.
+        "204":
+          content: {}
+          description: Change interest rate action posted
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Loan account not found
+      security:
+      - basic: []
+      summary: Allows to change the interest rate for a loan account
+      tags:
+      - LoanAccounts
+      x-codegen-request-body-name: body
+      x-contentType: application/json
+      x-accepts: application/vnd.mambu.v2+json
+  /loans:
+    get:
+      operationId: getAll
+      parameters:
+      - description: Pagination, index to start searching at when retrieving elements,
+          used in combination with limit to paginate results
+        in: query
+        name: offset
+        schema:
+          format: int32
+          type: integer
+      - description: Pagination, the number of elements to retrieve, used in combination
+          with offset to paginate results
+        in: query
+        name: limit
+        schema:
+          format: int32
+          type: integer
+      - description: Flag specifying whether the pagination should be enabled or not.
+          Please note that by default it is disabled (OFF), in order to improve the
+          performance of the APIs
+        in: query
+        name: paginationDetails
+        schema:
+          default: "OFF"
+          enum:
+          - "ON"
+          - "OFF"
+          type: string
+      - description: The level of details to retrieve, FULL means the full details
+          of the object will be retrieved (custom fields, address, contact info or
+          any other related object), BASIC will return only the first level elements
+          of the object
+        in: query
+        name: detailsLevel
+        schema:
+          enum:
+          - BASIC
+          - FULL
+          type: string
+      - description: The username of the credit officer to whom the entities are assigned
+          to
+        in: query
+        name: creditOfficerUsername
+        schema:
+          type: string
+      - description: The id/encodedKey of the branch to which the entities are assigned
+          to
+        in: query
+        name: branchId
+        schema:
+          type: string
+      - description: The id/encodedKey of the centre to which the entities are assigned
+          to
+        in: query
+        name: centreId
+        schema:
+          type: string
+      - description: The state of the loan account to search for
+        in: query
+        name: accountState
+        schema:
+          enum:
+          - PARTIAL_APPLICATION
+          - PENDING_APPROVAL
+          - APPROVED
+          - ACTIVE
+          - ACTIVE_IN_ARREARS
+          - CLOSED
+          type: string
+      - description: 'The type of the account holder: CLIENT/GROUP'
+        in: query
+        name: accountHolderType
+        schema:
+          enum:
+          - CLIENT
+          - GROUP
+          type: string
+      - description: The id of the account holder
+        in: query
+        name: accountHolderId
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/LoanAccount'
+                type: array
+          description: Loan accounts list retrieved
+          headers:
+            Items-Offset:
+              description: Pagination details, the index of the first returned item
+              schema:
+                format: int32
+                type: integer
+            Items-Limit:
+              description: Pagination details, the requested page size
+              schema:
+                format: int32
+                type: integer
+            Items-Total:
+              description: Pagination details, the total available items
+              schema:
+                format: int32
+                type: integer
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      security:
+      - basic: []
+      summary: Allows retrieval of loan accounts using various query parameters. It's
+        possible to look up loans by their state, branch, centre or by a credit officer
+        to which the loans are assigned.
+      tags:
+      - LoanAccounts
+      x-accepts: application/vnd.mambu.v2+json
+    post:
+      operationId: create
+      parameters:
+      - description: Key that can be used to support idempotency on this POST. Must
+          be a valid UUID(version 4 is recommended) string and can only be used with
+          the exact same request. Can be used in retry mechanisms to prevent double
+          posting.
+        in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanAccount'
+        description: Loan account to be created
+        required: true
+      responses:
+        "102":
+          content: {}
+          description: Your idempotent request was already submitted and is currently
+            being processed, try again later.
+        "201":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/LoanAccount'
+          description: Loan account created
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      security:
+      - basic: []
+      summary: Creates a new loan account
+      tags:
+      - LoanAccounts
+      x-codegen-request-body-name: body
+      x-contentType: application/json
+      x-accepts: application/vnd.mambu.v2+json
+  /loans/{loanAccountId}:undoRefinance:
+    post:
+      operationId: undoRefinance
+      parameters:
+      - description: Key that can be used to support idempotency on this POST. Must
+          be a valid UUID(version 4 is recommended) string and can only be used with
+          the exact same request. Can be used in retry mechanisms to prevent double
+          posting.
+        in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+      - description: The id or encoded key of the loan account
+        in: path
+        name: loanAccountId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanActionDetails'
+        description: Allows specifying the action details for a loan account
+        required: false
+      responses:
+        "102":
+          content: {}
+          description: Your idempotent request was already submitted and is currently
+            being processed, try again later.
+        "204":
+          content: {}
+          description: Undo refinance action posted
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Loan account not found
+      security:
+      - basic: []
+      summary: Allows to undo refinance a loan account
+      tags:
+      - LoanAccounts
+      x-codegen-request-body-name: body
+      x-contentType: application/json
+      x-accepts: application/vnd.mambu.v2+json
+  /loans/{loanAccountId}:changeState:
+    post:
+      operationId: changeState
+      parameters:
+      - description: Key that can be used to support idempotency on this POST. Must
+          be a valid UUID(version 4 is recommended) string and can only be used with
+          the exact same request. Can be used in retry mechanisms to prevent double
+          posting.
+        in: header
+        name: Idempotency-Key
+        schema:
+          type: string
+      - description: The id or encoded key of the loan account
+        in: path
+        name: loanAccountId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanAccountAction'
+        description: Allows specifying the action details for a loan account
+        required: true
+      responses:
+        "102":
+          content: {}
+          description: Your idempotent request was already submitted and is currently
+            being processed, try again later.
+        "200":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/LoanAccount'
+          description: Loan account action posted
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+        "404":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Loan account not found
+      security:
+      - basic: []
+      summary: Allows posting an action such as approve/reject/withdraw/close loan
+        account
+      tags:
+      - LoanAccounts
+      x-codegen-request-body-name: body
+      x-contentType: application/json
+      x-accepts: application/vnd.mambu.v2+json
+components:
+  schemas:
+    CustomPredefinedFee:
+      description: The custom predefined fees, they may be used as the expected predefined
+        fees that will be applied on the disbursement.
+      example:
+        amount: 0.8008281904610115
+        predefinedFeeEncodedKey: predefinedFeeEncodedKey
+        encodedKey: encodedKey
+      properties:
+        predefinedFeeEncodedKey:
+          description: The encoded key of the predefined fee
+          type: string
+        encodedKey:
+          description: The encoded key of the custom predefined fee, auto generated,
+            unique.
+          readOnly: true
+          type: string
+        amount:
+          description: The amount of the custom fee.
+          type: number
+      type: object
+    LoanAccount:
+      description: Represents the amount that your organization lends to a customer.
+        An account associated to a borrower with terms and conditions defined by a
+        loan product. In a loan account Mambu stores all the information related to
+        disbursements, repayments, interest rates and withdrawals.
+      example:
+        accountState: PARTIAL_APPLICATION
+        prepaymentSettings:
+          applyInterestOnPrepaymentMethod: AUTOMATIC
+          elementsRecalculationMethod: PRINCIPAL_EXPECTED_FIXED
+          principalPaidInstallmentStatus: PARTIALLY_PAID
+          prepaymentRecalculationMethod: NO_RECALCULATION
+        migrationEventKey: migrationEventKey
+        lastSetToArrearsDate: 2016-09-06T13:37:50+03:00
+        notes: notes
+        disbursementDetails:
+          transactionDetails:
+            encodedKey: encodedKey
+            internalTransfer: true
+            transactionChannelKey: transactionChannelKey
+            transactionChannelId: transactionChannelId
+            targetDepositAccountKey: targetDepositAccountKey
+          expectedDisbursementDate: 2016-09-06T13:37:50+03:00
+          fees:
+          - amount: 0.8008281904610115
+            predefinedFeeEncodedKey: predefinedFeeEncodedKey
+            encodedKey: encodedKey
+          - amount: 0.8008281904610115
+            predefinedFeeEncodedKey: predefinedFeeEncodedKey
+            encodedKey: encodedKey
+          firstRepaymentDate: 2016-09-06T13:37:50+03:00
+          disbursementDate: 2016-09-06T13:37:50+03:00
+          encodedKey: encodedKey
+        daysInArrears: 6
+        accountSubState: PARTIALLY_DISBURSED
+        loanName: loanName
+        interestSettings:
+          interestRateReviewUnit: DAYS
+          interestRate: 1.4658129805029452
+          interestSpread: 5.962133916683182
+          interestCalculationMethod: FLAT
+          interestRateSource: FIXED_INTEREST_RATE
+          interestRateReviewCount: 5
+          interestApplicationMethod: AFTER_DISBURSEMENT
+          interestChargeFrequency: ANNUALIZED
+          interestType: SIMPLE_INTEREST
+          accrueInterestAfterMaturity: true
+          interestBalanceCalculationMethod: ONLY_PRINCIPAL
+          accrueLateInterest: true
+        assets:
+        - amount: 2.3021358869347655
+          depositAccountKey: depositAccountKey
+          assetName: assetName
+          encodedKey: encodedKey
+          guarantorKey: guarantorKey
+          guarantorType: CLIENT
+        - amount: 2.3021358869347655
+          depositAccountKey: depositAccountKey
+          assetName: assetName
+          encodedKey: encodedKey
+          guarantorKey: guarantorKey
+          guarantorType: CLIENT
+        lastInterestReviewDate: 2016-09-06T13:37:50+03:00
+        id: id
+        assignedUserKey: assignedUserKey
+        futurePaymentsAcceptance: NO_FUTURE_PAYMENTS
+        originalAccountKey: originalAccountKey
+        lockedOperations:
+        - APPLY_INTEREST
+        - APPLY_INTEREST
+        accruedInterest: 7.061401241503109
+        accruedPenalty: 9.301444243932576
+        creationDate: 2016-09-06T13:37:50+03:00
+        assignedCentreKey: assignedCentreKey
+        tranches:
+        - amount: 3.616076749251911
+          disbursementDetails:
+            expectedDisbursementDate: 2016-09-06T13:37:50+03:00
+            disbursementTransactionKey: disbursementTransactionKey
+          encodedKey: encodedKey
+          trancheNumber: 2
+        - amount: 3.616076749251911
+          disbursementDetails:
+            expectedDisbursementDate: 2016-09-06T13:37:50+03:00
+            disbursementTransactionKey: disbursementTransactionKey
+          encodedKey: encodedKey
+          trancheNumber: 2
+        approvedDate: 2016-09-06T13:37:50+03:00
+        taxRate: 4.145608029883936
+        lastTaxRateReviewDate: 2016-09-06T13:37:50+03:00
+        interestFromArrearsAccrued: 7.386281948385884
+        scheduleSettings:
+          gracePeriod: 1
+          periodicPayment: 1.0246457001441578
+          repaymentScheduleMethod: NONE
+          paymentPlan:
+          - toInstallment: 1
+            amount: 6.84685269835264
+            encodedKey: encodedKey
+          - toInstallment: 1
+            amount: 6.84685269835264
+            encodedKey: encodedKey
+          shortMonthHandlingMethod: LAST_DAY_IN_MONTH
+          repaymentInstallments: 7
+          gracePeriodType: NONE
+          principalRepaymentInterval: 1
+          hasCustomSchedule: true
+          repaymentPeriodUnit: DAYS
+          fixedDaysOfMonth:
+          - 4
+          - 4
+          scheduleDueDatesMethod: INTERVAL
+          repaymentPeriodCount: 5
+          defaultFirstRepaymentDueDateOffset: 9
+        daysLate: 9
+        paymentMethod: HORIZONTAL
+        accountHolderKey: accountHolderKey
+        latePaymentsRecalculationMethod: OVERDUE_INSTALLMENTS_INCREASE
+        fundingSources:
+        - amount: 6.683562403749608
+          interestCommission: 8.762042012749001
+          depositAccountKey: depositAccountKey
+          assetName: assetName
+          encodedKey: encodedKey
+          id: id
+          guarantorKey: guarantorKey
+          guarantorType: CLIENT
+          sharePercentage: 9.018348186070783
+        - amount: 6.683562403749608
+          interestCommission: 8.762042012749001
+          depositAccountKey: depositAccountKey
+          assetName: assetName
+          encodedKey: encodedKey
+          id: id
+          guarantorKey: guarantorKey
+          guarantorType: CLIENT
+          sharePercentage: 9.018348186070783
+        accountHolderType: CLIENT
+        arrearsTolerancePeriod: 6
+        lastInterestAppliedDate: 2016-09-06T13:37:50+03:00
+        rescheduledAccountKey: rescheduledAccountKey
+        activationTransactionKey: activationTransactionKey
+        assignedBranchKey: assignedBranchKey
+        balances:
+          interestFromArrearsPaid: 3.5571952270680973
+          principalDue: 6.965117697638846
+          interestBalance: 1.284659006116532
+          holdBalance: 2.8841621266687802
+          principalPaid: 6.778324963048013
+          penaltyDue: 6.878052220127876
+          feesBalance: 5.944895607614016
+          penaltyBalance: 6.704019297950036
+          redrawBalance: 3.353193347011243
+          interestFromArrearsBalance: 3.0937452626664474
+          principalBalance: 7.143538047012306
+          interestDue: 0.8851374739011653
+          penaltyPaid: 7.058770351582356
+          feesPaid: 6.519180951018382
+          interestFromArrearsDue: 0.10263654006109402
+          feesDue: 4.652396432933246
+          interestPaid: 8.969578798196912
+        creditArrangementKey: creditArrangementKey
+        interestCommission: 7.740351818741173
+        encodedKey: encodedKey
+        lastAccountAppraisalDate: 2016-09-06T13:37:50+03:00
+        penaltySettings:
+          loanPenaltyCalculationMethod: NONE
+          penaltyRate: 3.0205796992916243
+        settlementAccountKey: settlementAccountKey
+        lastModifiedDate: 2016-09-06T13:37:50+03:00
+        principalPaymentSettings:
+          includeInterestInFloorAmount: true
+          totalDuePayment: FLAT
+          amount: 3.0576100241049344
+          principalFloorValue: 7.04836565559697
+          principalPaymentMethod: FLAT
+          percentage: 5.533258397034986
+          includeFeesInFloorAmount: true
+          encodedKey: encodedKey
+          totalDueAmountFloor: 3.2588565619047607
+          principalCeilingValue: 4.078845849666752
+        lastLockedDate: 2016-09-06T13:37:50+03:00
+        loanAmount: 0.2025324113236393
+        closedDate: 2016-09-06T13:37:50+03:00
+        productTypeKey: productTypeKey
+        allowOffset: true
+        guarantors:
+        - amount: 6.628464275087742
+          depositAccountKey: depositAccountKey
+          assetName: assetName
+          encodedKey: encodedKey
+          guarantorKey: guarantorKey
+          guarantorType: CLIENT
+        - amount: 6.628464275087742
+          depositAccountKey: depositAccountKey
+          assetName: assetName
+          encodedKey: encodedKey
+          guarantorKey: guarantorKey
+          guarantorType: CLIENT
+        accountArrearsSettings:
+          monthlyToleranceDay: 4
+          nonWorkingDaysMethod: INCLUDED
+          tolerancePeriod: 1
+          encodedKey: encodedKey
+          toleranceCalculationMethod: ARREARS_TOLERANCE_PERIOD
+          dateCalculationMethod: ACCOUNT_FIRST_WENT_TO_ARREARS
+      properties:
+        accountState:
+          description: The state of the loan account
+          enum:
+          - PARTIAL_APPLICATION
+          - PENDING_APPROVAL
+          - APPROVED
+          - ACTIVE
+          - ACTIVE_IN_ARREARS
+          - CLOSED
+          type: string
+        prepaymentSettings:
+          $ref: '#/components/schemas/PrepaymentSettings'
+        migrationEventKey:
+          description: The migration event encoded key associated with this loan account.
+            If this account was imported, track which 'migration event' they came
+            from.
+          type: string
+        lastSetToArrearsDate:
+          description: Date when the loan account was set to last standing, or null
+            if never set (as Organization Time)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        notes:
+          description: Extra notes about this loan account.
+          type: string
+        disbursementDetails:
+          $ref: '#/components/schemas/DisbursementDetails'
+        daysInArrears:
+          description: The number of days in arrears
+          format: int32
+          readOnly: true
+          type: integer
+        accountSubState:
+          description: This field holds a second state for the account. Beside the
+            account state, we might need to hold sometimes a different information
+            to actually represent the correct life-cycle step in which the account
+            is at that moment. The account behaves as the main state implies, but
+            it  can have either some limitations either some extra behavior rules.
+            For example, even if the account is Active, it can also be Locked in the
+            same time which impliessome limitations over the actions which can be
+            performed with the account.
+          enum:
+          - PARTIALLY_DISBURSED
+          - LOCKED
+          - LOCKED_CAPPING
+          - REFINANCED
+          - RESCHEDULED
+          - WITHDRAWN
+          - REPAID
+          - REJECTED
+          - WRITTEN_OFF
+          type: string
+        loanName:
+          description: The name of the loan account.
+          type: string
+        interestSettings:
+          $ref: '#/components/schemas/InterestSettings'
+        assets:
+          description: A list of assets associated with the current loan account
+          items:
+            $ref: '#/components/schemas/Asset'
+          type: array
+        lastInterestReviewDate:
+          description: The last interest review date. Indicates the date the interest
+            was reviewed last time. Stored as Organization Time.
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        id:
+          description: The id of the loan, can be generated and customized, unique
+          type: string
+        assignedUserKey:
+          description: Key of the user this loan is assigned to
+          type: string
+        futurePaymentsAcceptance:
+          description: Shows whether the future payments are allowed or not for this
+            account (repayment transactions with entry date set in the future)
+          enum:
+          - NO_FUTURE_PAYMENTS
+          - ACCEPT_FUTURE_PAYMENTS
+          - ACCEPT_OVERPAYMENTS
+          type: string
+        originalAccountKey:
+          description: Key of the original rescheduled/refinanced account
+          type: string
+        lockedOperations:
+          description: A list with operations which are locked when the account is
+            in sub-state AccountState.LOCKED.
+          items:
+            enum:
+            - APPLY_INTEREST
+            - APPLY_FEES
+            - APPLY_PENALTIES
+            type: string
+          type: array
+        accruedInterest:
+          description: The accrued interest. Represents the amount of interest that
+            has been accrued in the account.
+          type: number
+        accruedPenalty:
+          description: The accrued penalty, represents the amount of penalty that
+            has been accrued in the account.
+          type: number
+        creationDate:
+          description: The date this loan account was created
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        assignedCentreKey:
+          description: Key of the centre this account is assigned to
+          type: string
+        tranches:
+          description: A list of disbursement tranches available for the current loan
+            account.
+          items:
+            $ref: '#/components/schemas/LoanTranche'
+          type: array
+        approvedDate:
+          description: The date this loan account was approved
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        taxRate:
+          description: The tax rate.
+          type: number
+        lastTaxRateReviewDate:
+          description: The last tax rate review date. Indicates When/if the account
+            had last tax rate checked (as Organization Time).
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        interestFromArrearsAccrued:
+          description: The interest from arrears accrued. Represents the amount of
+            interest from arrears that has been accrued in the account.
+          readOnly: true
+          type: number
+        scheduleSettings:
+          $ref: '#/components/schemas/ScheduleSettings'
+        daysLate:
+          description: The number of days late
+          format: int32
+          readOnly: true
+          type: integer
+        paymentMethod:
+          description: ' The payment method. Represents the interest payment method
+            that determines whether the payments are made Horizontally (on the Repayments)
+            or Vertically (on the Loan Account)'
+          enum:
+          - HORIZONTAL
+          - VERTICAL
+          type: string
+        accountHolderKey:
+          description: The encodedKey of the client (a.k.a account holder)
+          type: string
+        latePaymentsRecalculationMethod:
+          description: Overdue payments recalculation method copied from the loan
+            product on which this account is based
+          enum:
+          - OVERDUE_INSTALLMENTS_INCREASE
+          - LAST_INSTALLMENT_INCREASE
+          type: string
+        fundingSources:
+          description: A list of funds associated with the current loan account
+          items:
+            $ref: '#/components/schemas/InvestorFund'
+          type: array
+        accountHolderType:
+          description: The type of the account holder (i.e CLIENT)
+          enum:
+          - CLIENT
+          - GROUP
+          type: string
+        arrearsTolerancePeriod:
+          description: The arrears tolerance (period or day of month) depending on
+            the product settings
+          format: int32
+          type: integer
+        lastInterestAppliedDate:
+          description: The last interest applied date. Indicates when/if the account
+            had last interest applied (stored to interest balance) (as Organization
+            Time)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        rescheduledAccountKey:
+          description: Key pointing to where this account was rescheduled/refinanced
+            to. only not null if rescheduled
+          type: string
+        activationTransactionKey:
+          description: The encoded key of the transaction that activated this account
+          type: string
+        assignedBranchKey:
+          description: Key of the branch this loan account is assigned to. Loan account's
+            branch is set to unassigned if no branch field is set
+          type: string
+        balances:
+          $ref: '#/components/schemas/Balances'
+        creditArrangementKey:
+          description: The key to the line of credit where this account is registered
+            to.
+          type: string
+        interestCommission:
+          description: The value of the interest booked by the organization from the
+            accounts funded by investors. Null if the funds are not enable
+          type: number
+        encodedKey:
+          description: The encoded key of the loan account, auto generated, unique
+          readOnly: true
+          type: string
+        lastAccountAppraisalDate:
+          description: When/if the account had last been evaluated for interest, principal,
+            fees and penalties calculations (as Organization Time)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        penaltySettings:
+          $ref: '#/components/schemas/PenaltySettings'
+        settlementAccountKey:
+          description: The encodedKey of the settlement account
+          type: string
+        lastModifiedDate:
+          description: The last date the loan was updated
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        principalPaymentSettings:
+          $ref: '#/components/schemas/PrincipalPaymentAccountSettings'
+        lastLockedDate:
+          description: Holds the date when the account was set for the last time in
+            the LOCKED state. If null, the account is not locked anymore. Stored as
+            Organization Time
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        loanAmount:
+          description: The loan amount
+          type: number
+        closedDate:
+          description: The date this loan was closed
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        productTypeKey:
+          description: The key to the type of product that this account is based on.
+          type: string
+        allowOffset:
+          description: Specify if the account is allowing offset links.
+          type: boolean
+        guarantors:
+          description: A list of guarantees associated with the current loan account
+          items:
+            $ref: '#/components/schemas/Guarantor'
+          type: array
+        accountArrearsSettings:
+          $ref: '#/components/schemas/AccountArrearsSettings'
+      required:
+      - accountHolderKey
+      - accountHolderType
+      - loanAmount
+      - productTypeKey
+      - scheduleSettings
+      type: object
+    CardAcceptor:
+      description: The details of the card acceptor (merchant) in a transaction hold.
+      properties:
+        zip:
+          description: The ZIP code of the location in which the card acceptor has
+            the business.
+          type: string
+        country:
+          description: The country in which the card acceptor has the business.
+          type: string
+        city:
+          description: The city in which the card acceptor has the business.
+          type: string
+        street:
+          description: The street in which the card acceptor has the business.
+          type: string
+        name:
+          description: The name of the card acceptor.
+          type: string
+        state:
+          description: The state in which the card acceptor has the business.
+          type: string
+        mcc:
+          description: The Merchant Category Code of the card acceptor.
+          format: int32
+          type: integer
+      type: object
+    AccountArrearsSettings:
+      description: The account arrears settings, holds the required information for
+        the arrears settings of an account.
+      example:
+        monthlyToleranceDay: 4
+        nonWorkingDaysMethod: INCLUDED
+        tolerancePeriod: 1
+        encodedKey: encodedKey
+        toleranceCalculationMethod: ARREARS_TOLERANCE_PERIOD
+        dateCalculationMethod: ACCOUNT_FIRST_WENT_TO_ARREARS
+      properties:
+        monthlyToleranceDay:
+          description: Defines monthly arrears tolerance day value.
+          format: int32
+          type: integer
+        nonWorkingDaysMethod:
+          description: Shows whether the non working days are taken in consideration
+            or not when applying penaltees/late fees or when setting an account into
+            arrears
+          enum:
+          - INCLUDED
+          - EXCLUDED
+          type: string
+        tolerancePeriod:
+          description: Defines the arrears tolerance period value.
+          format: int32
+          type: integer
+        encodedKey:
+          description: The encoded key of the arrears base settings, auto generated,
+            unique.
+          readOnly: true
+          type: string
+        toleranceCalculationMethod:
+          description: Defines the tolerance calculation method
+          enum:
+          - ARREARS_TOLERANCE_PERIOD
+          - MONTHLY_ARREARS_TOLERANCE_DAY
+          type: string
+        dateCalculationMethod:
+          description: The arrears date calculation method.
+          enum:
+          - ACCOUNT_FIRST_WENT_TO_ARREARS
+          - LAST_LATE_REPAYMENT
+          type: string
+      type: object
+    LoanAccountPayOffInput:
+      description: Allows specifying the input for loan account pay off
+      example:
+        transactionDetails:
+          transactionChannelKey: transactionChannelKey
+          transactionChannelId: transactionChannelId
+        notes: notes
+        payOffAdjustableAmounts:
+          penaltyPaid: 6.027456183070403
+          feesPaid: 0.8008281904610115
+          interestPaid: 1.4658129805029452
+        externalId: externalId
+      properties:
+        transactionDetails:
+          $ref: '#/components/schemas/TransactionDetails'
+        externalId:
+          description: External id for Repayment transaction
+          type: string
+        notes:
+          description: Extra notes for Repayment transaction logged for Pay Off action
+          type: string
+        payOffAdjustableAmounts:
+          $ref: '#/components/schemas/PayOffAdjustableAmounts'
+      type: object
+    InterestSettings:
+      description: The interest settings, holds all the properties regarding interests
+        for the loan account.
+      example:
+        interestRateReviewUnit: DAYS
+        interestRate: 1.4658129805029452
+        interestSpread: 5.962133916683182
+        interestCalculationMethod: FLAT
+        interestRateSource: FIXED_INTEREST_RATE
+        interestRateReviewCount: 5
+        interestApplicationMethod: AFTER_DISBURSEMENT
+        interestChargeFrequency: ANNUALIZED
+        interestType: SIMPLE_INTEREST
+        accrueInterestAfterMaturity: true
+        interestBalanceCalculationMethod: ONLY_PRINCIPAL
+        accrueLateInterest: true
+      properties:
+        interestRateReviewUnit:
+          description: The interest rate review unit. Defines the interest rate update
+            frequency measurement unit.
+          enum:
+          - DAYS
+          - WEEKS
+          - MONTHS
+          type: string
+        interestRate:
+          description: The interest rate. Represents the interest rate for the loan
+            account. The interest on loans is accrued on a daily basis, which allows
+            charging the clients only for the days they actually used the loan amount.
+          type: number
+        interestRateSource:
+          description: 'The interest rate source. Represents the interest calculation
+            method: fixed or (interest spread + active organization index interest
+            rate)'
+          enum:
+          - FIXED_INTEREST_RATE
+          - INDEX_INTEREST_RATE
+          type: string
+        interestApplicationMethod:
+          description: The interest application method. Represents the interest application
+            method that determines whether the interest gets applied on the account's
+            disbursement or on each repayment.
+          enum:
+          - AFTER_DISBURSEMENT
+          - REPAYMENT_DUE_DATE
+          type: string
+        interestChargeFrequency:
+          description: The interest change frequency. Holds the possible values for
+            how often is interest charged on loan or deposit accounts
+          enum:
+          - ANNUALIZED
+          - EVERY_MONTH
+          - EVERY_FOUR_WEEKS
+          - EVERY_WEEK
+          - EVERY_DAY
+          - EVERY_X_DAYS
+          type: string
+        interestType:
+          description: The possible values for how we compute and apply the interest
+          enum:
+          - SIMPLE_INTEREST
+          - CAPITALIZED_INTEREST
+          type: string
+        accrueInterestAfterMaturity:
+          description: The accrue interest after maturity. If the product support
+            this option, specify if the interest should be accrued after the account
+            maturity date.
+          type: boolean
+        interestBalanceCalculationMethod:
+          description: The interest balance calculation method. Represents the option
+            which determines the way the balance for the account's interest is computed.
+          enum:
+          - ONLY_PRINCIPAL
+          - PRINCIPAL_AND_INTEREST
+          type: string
+        interestSpread:
+          description: Interest to be added to active organization index interest
+            rate in order to find out actual interest rate
+          type: number
+        interestCalculationMethod:
+          description: The interest calculation method. Holds the type of interest
+            calculation method.
+          enum:
+          - FLAT
+          - DECLINING_BALANCE
+          - DECLINING_BALANCE_DISCOUNTED
+          type: string
+        interestRateReviewCount:
+          description: Interest rate update frequency unit count.
+          format: int32
+          type: integer
+        accrueLateInterest:
+          description: Indicates whether late interest is accrued for this loan account
+          readOnly: true
+          type: boolean
+      type: object
+    ScheduleSettings:
+      description: The schedule settings, holds all schedule properties.
+      example:
+        gracePeriod: 1
+        periodicPayment: 1.0246457001441578
+        repaymentScheduleMethod: NONE
+        paymentPlan:
+        - toInstallment: 1
+          amount: 6.84685269835264
+          encodedKey: encodedKey
+        - toInstallment: 1
+          amount: 6.84685269835264
+          encodedKey: encodedKey
+        shortMonthHandlingMethod: LAST_DAY_IN_MONTH
+        repaymentInstallments: 7
+        gracePeriodType: NONE
+        principalRepaymentInterval: 1
+        hasCustomSchedule: true
+        repaymentPeriodUnit: DAYS
+        fixedDaysOfMonth:
+        - 4
+        - 4
+        scheduleDueDatesMethod: INTERVAL
+        repaymentPeriodCount: 5
+        defaultFirstRepaymentDueDateOffset: 9
+      properties:
+        gracePeriod:
+          description: The grace period. Represents the grace period for loan repayment
+            - in number of installments.
+          format: int32
+          type: integer
+        periodicPayment:
+          description: The periodic payment amount for the accounts which have balloon
+            payments or Reduce Number of Installments and Optimized Payments
+          type: number
+        repaymentScheduleMethod:
+          description: The repayment schedule method. Represents the method that determines
+            whether the schedule will be fixed all over the loan account's life cycle
+            or will be dynamically recomputed when required.
+          enum:
+          - NONE
+          - FIXED
+          - DYNAMIC
+          type: string
+        paymentPlan:
+          description: A list of periodic payments for the current loan account.
+          items:
+            $ref: '#/components/schemas/PeriodicPayment'
+          type: array
+        shortMonthHandlingMethod:
+          description: The short handling method. Determines how to handle the short
+            months, if they select a fixed day of month > 28. Will be null if no such
+            date is selected and also for the Interval methodology. Only available
+            if the Repayment Methodology is FIXED_DAYS_OF_MONTH.
+          enum:
+          - LAST_DAY_IN_MONTH
+          - FIRST_DAY_OF_NEXT_MONTH
+          type: string
+        repaymentInstallments:
+          description: The repayment installments. Represents how many installments
+            are required to pay back the loan.
+          format: int32
+          type: integer
+        gracePeriodType:
+          description: The grace period type. Representing the type of grace period
+            which is possible for a loan account.
+          enum:
+          - NONE
+          - PAY_INTEREST_ONLY
+          - INTEREST_FORGIVENESS
+          type: string
+        principalRepaymentInterval:
+          description: The principal repayment interval. Indicates the interval of
+            repayments that the principal has to be paid.
+          format: int32
+          type: integer
+        hasCustomSchedule:
+          description: Flag used when the repayments schedule for the current account
+            was determined by the user, by editing the due dates or the principal
+            due
+          type: boolean
+        repaymentPeriodUnit:
+          description: The repayment period unit. Represents the frequency of loan
+            repayment.
+          enum:
+          - DAYS
+          - WEEKS
+          - MONTHS
+          - YEARS
+          type: string
+        fixedDaysOfMonth:
+          description: Specifies the days of the month when the repayment due dates
+            should be. Only available if the Repayment Methodology is FIXED_DAYS_OF_MONTH.
+          items:
+            format: int32
+            type: integer
+          type: array
+        scheduleDueDatesMethod:
+          description: The schedule due dates method. Represents the methodology used
+            by this account to compute the due dates of the repayments.
+          enum:
+          - INTERVAL
+          - FIXED_DAYS_OF_MONTH
+          type: string
+        repaymentPeriodCount:
+          description: 'The repayment period count. Represents how often the loan
+            is to be repaid: stored based on the type repayment option.'
+          format: int32
+          type: integer
+        defaultFirstRepaymentDueDateOffset:
+          description: The default first repayment due date offset, indicates how
+            many days the first repayment due date should be extended(all other due
+            dates from the schedule are relative to first repayment due date - they
+            will also be affected by the offset)
+          format: int32
+          type: integer
+      required:
+      - gracePeriod
+      type: object
+    PenaltySettings:
+      description: The penalty settings, holds all the fields regarding penalties
+      example:
+        loanPenaltyCalculationMethod: NONE
+        penaltyRate: 3.0205796992916243
+      properties:
+        loanPenaltyCalculationMethod:
+          description: The last penalty calculation method, represents on what amount
+            are the penalties calculated.
+          enum:
+          - NONE
+          - OVERDUE_BALANCE
+          - OVERDUE_BALANCE_AND_INTEREST
+          - OUTSTANDING_PRINCIPAL
+          type: string
+        penaltyRate:
+          description: The penalty rate, represents the rate (in percent) which is
+            charged as a penalty.
+          type: number
+      type: object
+    InvestorFund:
+      description: Contains the details about an investor fund including fields like
+        encoded key, guarantor type, amount and guarantor key
+      example:
+        amount: 6.683562403749608
+        interestCommission: 8.762042012749001
+        depositAccountKey: depositAccountKey
+        assetName: assetName
+        encodedKey: encodedKey
+        id: id
+        guarantorKey: guarantorKey
+        guarantorType: CLIENT
+        sharePercentage: 9.018348186070783
+      properties:
+        amount:
+          description: The amount used by the client for the guaranty
+          type: number
+        interestCommission:
+          description: The constraint minimum value
+          type: number
+        depositAccountKey:
+          description: The key of the deposit account used by the guarantor (populated
+            when the guaranty type is GUARANTOR). It can be null.
+          type: string
+        assetName:
+          description: The name of a value the client guarantees with (populated when
+            the guaranty type is ASSET)
+          type: string
+        encodedKey:
+          description: The encoded key of the entity, generated, globally unique
+          readOnly: true
+          type: string
+        id:
+          description: Investor fund unique identifier. All versions of an investor
+            fund will have same id.
+          type: string
+        guarantorKey:
+          description: The key of the client/group used as the guarantor.
+          type: string
+        guarantorType:
+          description: The type of the guarantor (client/group)
+          enum:
+          - CLIENT
+          - GROUP
+          type: string
+        sharePercentage:
+          description: Percentage of loan shares this investor owns
+          type: number
+      required:
+      - amount
+      - guarantorKey
+      - guarantorType
+      type: object
+    PeriodicPayment:
+      description: For fixed term loans there is the possibility to define a payment
+        plan. A payment plan consists of multiple periodic payments. This class holds
+        information about a periodic payment.
+      example:
+        toInstallment: 1
+        amount: 6.84685269835264
+        encodedKey: encodedKey
+      properties:
+        toInstallment:
+          description: The installment's position up to which the PMT will be used
+          format: int32
+          type: integer
+        encodedKey:
+          description: The encoded key of the periodic payment, auto generated, unique.
+          readOnly: true
+          type: string
+        amount:
+          description: The PMT value used in periodic payment
+          type: number
+      required:
+      - amount
+      - toInstallment
+      type: object
+    PrincipalPaymentAccountSettings:
+      description: The principal payment account settings, holds the required information
+        for the principal payment process of an account.
+      example:
+        includeInterestInFloorAmount: true
+        totalDuePayment: FLAT
+        amount: 3.0576100241049344
+        principalFloorValue: 7.04836565559697
+        principalPaymentMethod: FLAT
+        percentage: 5.533258397034986
+        includeFeesInFloorAmount: true
+        encodedKey: encodedKey
+        totalDueAmountFloor: 3.2588565619047607
+        principalCeilingValue: 4.078845849666752
+      properties:
+        includeInterestInFloorAmount:
+          description: Boolean flag, if true, the interest will be included along
+            with the principal in the repayment floor amount, for a revolving credit
+            account
+          type: boolean
+        totalDuePayment:
+          description: The method of total due payment for revolving credit
+          enum:
+          - FLAT
+          - OUTSTANDING_PRINCIPAL_PERCENTAGE
+          - TOTAL_BALANCE_PERCENTAGE
+          type: string
+        amount:
+          description: Fixed amount for being used for the repayments principal due.
+          type: number
+        principalFloorValue:
+          description: The minimum principal due amount a repayment made with this
+            settings can have
+          type: number
+        principalPaymentMethod:
+          description: The method of principal payment for revolving credit.
+          enum:
+          - FLAT
+          - OUTSTANDING_PRINCIPAL_PERCENTAGE
+          - TOTAL_BALANCE_PERCENTAGE
+          type: string
+        percentage:
+          description: Percentage of principal amount used for the repayments principal
+            due.
+          type: number
+        includeFeesInFloorAmount:
+          description: Boolean flag, if true, the fees will be included along with
+            the principal in the repayment floor amount, for a revolving credit account
+          type: boolean
+        encodedKey:
+          description: The encoded key of the principal payment base settings, auto
+            generated, unique.
+          readOnly: true
+          type: string
+        totalDueAmountFloor:
+          description: The minimum total due amount a repayment made with this settings
+            can have
+          type: number
+        principalCeilingValue:
+          description: The maximum principal due amount a repayment made with this
+            settings can have
+          type: number
+      type: object
+    RestError:
+      properties:
+        errorCode:
+          format: int32
+          type: integer
+        errorSource:
+          type: string
+        errorReason:
+          enum:
+          - SUCCESS
+          - INVALID_BASIC_AUTHORIZATION
+          - INVALID_CREDENTIALS
+          - INVALID_API_OPERATION
+          - INVALID_PARAMETERS
+          - METHOD_NOT_IMPLEMENTED
+          - INTERNAL_ERROR
+          - API_NOT_AUTHORIZED
+          - USER_TRANSACTION_LIMIT_EXCEEDED
+          - API_CONFIGURATION_ERROR
+          - INVALID_TENANT_ID
+          - INVALID_PAGINATION_OFFSET_VALUE
+          - OUT_OF_BOUNDS_PAGINATION_OFFSET_VALUE
+          - INVALID_PAGINATION_LIMIT_VALUE
+          - OUT_OF_BOUNDS_PAGINATION_LIMIT_VALUE
+          - INVALID_PERMISSIONS
+          - INVALID_IP_ADDRESS
+          - INACTIVE_USER
+          - NO_API_ACCESS
+          - FEATURE_DISABLED
+          - MAX_FILE_SIZE_EXCEEDED
+          - MAX_FILENAME_LENGTH_EXCEEDED
+          - UNSUPPORTED_CHARACTER_ENCODING
+          - INVALID_API_PROTOCOL
+          - EXCESSIVE_INVALID_REQUESTS
+          - INCONSISTENT_IDENTIFIER_WITH_JSON
+          - INVALID_JSON_SYNTAX
+          - PARAMETER_NOT_ALLOWED
+          - START_DATE_AFTER_END_DATE
+          - OBJECT_NOT_FOUND
+          - MISSING_ENTITY_JSON
+          - MISSING_REQUIRED_PARAMETER
+          - READ_ONLY_MODE
+          - UNSUPPORTED_PAGINATION
+          - BLOCKING_OPERATION_IN_PROGRESS
+          - NON_REVERSIBLE_WRITE_OFF
+          - NON_WEEKLY_LOAN_REPAYMENTS
+          - INCONSISTENT_LINKED_ACCOUNT
+          - INVALID_LOAN_ACCOUNT_ID
+          - INVALID_AMOUNT
+          - INVALID_DATE
+          - INVALID_NOTES
+          - INVALID_TRANSACTION_TYPE_ID
+          - INVALID_ACCOUNT_STATE
+          - INVALID_FEE
+          - LOAN_PRODUCT_MISMATCH
+          - INVALID_FIELD_FOR_TRANSACTION_TYPE
+          - INACTIVE_TRANSACTION_TYPE
+          - EXCESS_REPAYMENT_ERROR
+          - TRANSACTION_LOGGED_AFTER_NOT_DISBURSED_TRANCHE
+          - UNDEFINED_ACCOUNT_FOR_FINANCIAL_RESOURCE_ERROR
+          - INVALID_ACCOUNT_FOR_JOURNAL_ENTRY_ERROR
+          - MISSING_LOAN_ID
+          - MAXIMUM_EXPOSURE_EXCEEDED
+          - INVALID_STATE_TRANSITION
+          - NUMBER_OF_LOANS_EXCEEDED
+          - INVALID_FIRST_REPAYMENT_DUE_DATE
+          - INVALID_REPAYMENT_DUE_DAY
+          - INVALID_INTEREST_RATE
+          - INVALID_INSTALLMENTS
+          - MISSING_LINKED_ACCOUNT
+          - PREPAYMENT_NOT_ALLOWED_ERROR
+          - REPAYMENT_DATE_IN_THE_FUTURE_ERROR
+          - INVALID_DISBURSEMENT_DATE
+          - ILLEGAL_LOAN_PARAMETERS_MODIFICATION
+          - ORIGINAL_ACCOUNT_HAS_FUNDS
+          - INVALID_ACCOUNT_STATE_FOR_REPAYMENTS
+          - DISBURSEMENT_FEES_EXCEED_LOAN_AMOUNT
+          - INTEREST_CANNOT_BE_APPLIED
+          - ENTRY_DATE_BEFORE_OTHER_TRANSACTION
+          - INCONSISTENT_SCHEDULE_PRINCIPAL_DUE_WITH_LOAN_AMOUNT
+          - ACCOUNT_HAS_NO_ACCRUED_INTEREST
+          - INTEREST_ALREADY_APPLIED_ON_DISBURSEMENT_ACCOUNT
+          - INCONSISTENT_WITH_FIXED_DAYS_OF_MONTH
+          - NEGATIVE_PRINCIPAL_FOR_INSTALLMENT
+          - INVALID_TAX_RATE
+          - INSUFFICIENT_GUARANTEES
+          - MISSING_REPAYMENT_PERIOD_COUNT
+          - MISSING_REPAYMENT_INTERVAL
+          - FUTURE_PAYMENT_NOT_ALLOWED_ERROR
+          - DISBURSEMENT_WITH_ZERO_LOAN_AMOUNT_NOT_ALLOWED
+          - MINIMUM_ARREARS_DAYS_NOT_REACHED
+          - ACCOUNT_ALREADY_UNLOCKED
+          - LOAN_AMOUNT_DECIMALS_NOT_ALLOWED_WITH_ROUNDING
+          - RESCHEDULED_LOAN
+          - REFINANCED_LOAN
+          - INVALID_PRODUCT_WITH_FUNDING_SOURCE_DISABLED
+          - INVALID_ID
+          - FAILED_TO_GENERATE_IDENTIFIER
+          - INCONSISTENT_ACCOUNT_ID_WITH_ACCOUNT_HOLDER_TYPE
+          - INVALID_ASSET_NAME
+          - GUARANTOR_KEY_NOT_ALLOWED
+          - GUARANTOR_SAVINGS_KEY_NOT_ALLOWED
+          - INVALID_GUARANTOR_KEY
+          - INVALID_SAVINGS_ACCOUNT_KEY
+          - INVALID_GUARANTOR_STATE
+          - DUPLICATED_GUARANTOR_WITHOUT_SAVINGS_ACCOUNT
+          - DUPLICATED_SAVINGS_ACCOUNT
+          - INSUFFICIENT_SAVINGS_ACCOUNT_BALANCE
+          - INVALID_SAVINGS_ACCOUNT_STATE
+          - DUPLICATED_ASSET
+          - GUARANTOR_ASSET_NAME_NOT_ALLOWED
+          - TRANSACTION_NOT_FOUND
+          - INVALID_TRANSACTION_TYPE
+          - UNREVERSED_TRANSACTION_LOGGED_AFTER_CURRENT_ONE
+          - INVALID_GUARANTOR_PERMISSION
+          - INVALID_CLIENT_ROLE_PERMISSION_FOR_OPENING_ACCOUNTS
+          - MISSING_PENALTY_RATE
+          - INVALID_REPAYMENT_NUMBER
+          - MISSING_REPAYMENT_NUMBER
+          - INVALID_REPAYMENT_STATE
+          - CENTRE_MEETING_DAY_IN_NON_WORKING_DAY
+          - ARBITRARY_FEE_NOT_ALLOWED
+          - INVALID_REPAYMENT_ID
+          - ACCOUNT_BALANCE_OUTSIDE_CONSTRAINTS
+          - EDITING_DATE_NOT_IN_CENTER_MEETING_DAY
+          - CUSTOM_MADE_INSTALLMENT_ADDED_BEFORE_PAID_INSTALLMENT
+          - EDITING_REPAYMENTS_NOT_ALLOWED
+          - INTEREST_BALANCE_CANT_BE_EDITED_AT_SPECIFIED_DATE
+          - INVALID_DUE_DATE
+          - NEGATIVE_BALANCE
+          - NON_POSITIVE_TOTAL_BALANCE
+          - PARAMS_INCONSISTENT_WITH_PRODUCT_RULES
+          - INVALID_GRACE_PERIOD
+          - INVALID_ANTICIPATED_DISBURSEMENT
+          - INVALID_REPAYMENT_FREQUENCY
+          - INVALID_PRINCIPAL_REPAYMENT_INVERVAL
+          - INVALID_PRODUCT_STATE
+          - BALLOON_PAYMENTS_NOT_ALLOWED_BY_PRODUCT
+          - MANDATORY_PERIODIC_PAYMENT
+          - PERIODIC_PAYMENT_GREATER_THAN_LOAN_AMOUNT
+          - MISSING_INTEREST_RATE_SPREAD_ON_PRODUCT
+          - FIRST_REPAYMENT_DATE_BEFORE_EXPECTED_DISBURSEMENT_DATE
+          - INVALID_PENALTY_RATE
+          - CANNOT_EDIT_SOLIDARITY_LOANS
+          - INVALID_INTEREST_SPREAD
+          - INVALID_PERIODIC_PAYMENT
+          - UNKNOWN_LOAN_ACCOUNT_ERROR
+          - MISSING_GROUP_ID
+          - INVALID_GROUP_ID
+          - INVALID_FULL_DETAILS
+          - INVALID_INDICATORS
+          - GROUP_NOT_FOUND
+          - INVALID_PARAMATERS_FOR_PRODUCT
+          - INVALID_USER_WHO_APPROVED_THE_LOAN_CANNOT_DISBURSE_IT
+          - INVALID_GROUP_SIZE
+          - MULTIPLE_GROUP_MEMBERSHIP
+          - INVALID_GROUP_ROLE_NAME_KEY
+          - GROUP_ROLE_CLIENT_NOT_GROUP_MEMBER
+          - TRANSACTION_ALREADY_REVERSED
+          - INVALID_TRANSACTION_ID
+          - TRANSACTION_ID_AND_ACCOUNT_MISMATCH
+          - TRANSACTION_LOGGED_FOR_CLOSED_TILL
+          - TILL_BALANCE_ABOVE_MAX
+          - TILL_BALANCE_UNDER_MIN
+          - TRANSACTION_MADE_FROM_A_TRANSFER
+          - TRANSACTION_MADE_FROM_A_DISBURSEMENT
+          - DEPOSIT_ACCOUNT_HAS_MATURITY_DATE_SET
+          - BALANCE_IS_NULL
+          - GUARANTOR_NOT_ALLOWED_BY_PRODUCT
+          - COLLATERAL_NOT_ALLOWED_BY_PRODUCT
+          - CANNOT_CHANGE_TILL_BALANCE
+          - DEDUCTED_FEES_TOTAL_MORE_THAN_LOAN_AMOUNT
+          - NO_CAPITALIZED_DISBURSEMENT_FESS_WHEN_ZERO_LOAN_AMOUNT
+          - DISBURSE_TO_SAVINGS_NOT_AVALAIBLE_WITH_INVESTOR_FUNDS
+          - TRANSACTION_CHANNEL_IS_MANDATORY
+          - TRANSACTION_CHANNEL_NOT_AVAILABLE_WHEN_DISBURSE_TO_SAVINGS
+          - GUARANTOR_CANNOT_BE_DELETED
+          - CUSTOM_AMOUNT_IS_MANDATORY
+          - INVALID_TRANSACTION_CHANNEL
+          - MISSING_FEE
+          - INCONSISTENT_ACCOUNT_FEE_WITH_PRODUCT_FEE
+          - FULL_TERM_FEE_CANNOT_BE_AMORTIZED_DUE_TO_APPLICATION_DATE
+          - CANNOT_USE_EFFECTIVE_INTEREST_RATE_FEE_WITHOUT_INTEREST_RATE_VALUE
+          - TRANSACTION_DETAILS_NOT_AVAILABLE_FOR_PRODUCT
+          - FEES_NOT_AVAILABLE_FOR_PRODUCT
+          - EXPECTED_DISBURSEMENT_DATE_NOT_AVAILABLE_FOR_PRODUCT
+          - FIRST_REPAYMENT_DATE_NOT_AVAILABLE_FOR_PRODUCT
+          - LOAN_PRODUCT_PREPAYMENT_OPTIONS_MISMATCH
+          - INVALID_LAST_REPAYMENT_DUE_DATE_CHANGE_BECAUSE_ACCOUNT_HAS_FULL_TERM_FEE_APPLIED
+          - INVALID_HOLIDAY_SETUP
+          - REDRAW_DISABLED
+          - INSUFFICIENT_REDRAW_BALANCE
+          - INVALID_FEES_DETAILS
+          - PRODUCT_DOES_NOT_ALLOW_WITHDRAWAL_TRANSACTIONS
+          - EXCESS_PAYMENT_MADE_AMOUNT
+          - PRODUCT_DOES_NOT_ALLOW_PAYMENT_MADE_TRANSACTIONS
+          - MISSING_FEE_KEY
+          - INVALID_FEE_KEY
+          - INCONSISTENT_FEE_AMOUNT_WITH_PRODUCT_FEE
+          - FEE_AMOUNT_MUST_BE_STRICTLY_POSITIVE
+          - REQUIRED_FEE_MISSING
+          - FEE_NOT_ACTIVE
+          - FEE_NOT_ALLOWED
+          - INCONSISTENT_FIRST_REPAYMENT_DATE_WITH_PRODUCT_OFFSET
+          - MISSING_ORIGINAL_TRANSACTION_ID
+          - REPAYMENT_WAS_FULLY_PAID
+          - REPAYMENT_HAS_INTEREST_APPLIED
+          - DUE_DATE_BEFORE_ACCOUNTING_CLOSURE
+          - DUE_DATE_BEFORE_LOGGED_TRANSACTION
+          - INVALID_PARENT_ACCOUNT_KEY
+          - AUTOMATICALLY_ADDED_INSTALLEMENTS_ARE_NOT_EDITABLE
+          - PURE_GRACE_INSTALLMENT_ARE_NOT_EDITABLE
+          - CUSTOM_PAYMENT_NOT_ALLOWED_BY_PRODUCT
+          - SAME_CUSTOM_PAYMENT_AMOUNT_TYPE_USED_MULTIPLE_TIMES
+          - CUSTOM_PAYMENT_AMOUNT_DIFFERENT_THAN_TOTAL_PAYMENT_AMOUNT
+          - ARREARS_TOLERANCE_PERIOD_OUTSIDE_CONSTRAINTS
+          - NEGATIVE_ARREARS_TOLERANCE_PERIOD
+          - REQUIRED_ARREARS_TOLERANCE_PERIOD_MISSING
+          - DUE_DATE_BEFORE_FEE_AMORTIZATION
+          - MAX_CLIENT_LIMIT_REACHED
+          - PENALTY_METHOD_NOT_ALLOWED_BY_PRODUCT
+          - CANNOT_REVERSE_TECHNICAL_OVERDRAFT
+          - INSUFFICIENT_BALANCE
+          - INVALID_PRODUCT_TYPE
+          - DUPLICATE_DISBURSEMENT_FEE
+          - UNKNOWN_GROUP_ERROR
+          - MISSING_CLIENT_ID
+          - INVALID_CLIENT_ID
+          - INVALID_CLIENT_KEY
+          - INVALID_PICTURE_KEY
+          - INVALID_SIGNATURE_KEY
+          - INVALID_CLIENT_STATE
+          - INVALID_CLIENT_ROLE_KEY
+          - INCONSISTENT_CLIENT_ROLE_WITH_CLIENT_TYPE
+          - INVALID_DEPENDENT_CUSTOM_FIELD_VALUE
+          - INVALID_BIRTH_DATE
+          - DUPLICATE_CLIENT
+          - INVALID_CLIENT_STATE_TYPE
+          - INVALID_CLIENT_STATE_TRANSITION
+          - CLIENT_IS_MEMBER_OF_A_GROUP
+          - CLIENT_IS_GUARANTOR
+          - CLIENT_HAS_ACCOUNTS
+          - CLIENT_ID_ALREADY_IN_USE
+          - GROUP_ID_ALREADY_IN_USE
+          - GROUP_HAS_ACCOUNTS
+          - MISSING_CLIENT_BASIC_DETAILS
+          - UNKNOWN_CLIENT_ERROR
+          - INVALID_SAVINGS_ACCOUNT_ID
+          - BALANCE_BELOW_ZERO
+          - MISSING_SAVINGS_ID
+          - BACKDATE_BEFORE_ACTIVATION
+          - BACKDATE_BEFORE_OTHER_OPERATION
+          - BACKDATE_SET_IN_THE_FUTURE
+          - INVALID_DEPOSIT_AMOUNT
+          - INVALID_DEPOSIT_ACCOUNT_STATE
+          - LOCKED_SAVINGS_AMOUNT
+          - SAVINGS_PRODUCT_MISMATCH
+          - SAVINGS_ACCOUNT_INVALID
+          - ACCOUNT_ID_ALREADY_IN_USE
+          - PRODUCT_DOESNT_ALLOW_WITHHOLDING_TAXES
+          - INVALID_WITHHOLDING_TAX_SOURCE_TYPE
+          - INVALID_INTEREST_CHARGE_FREQUENCY
+          - INVALID_INTEREST_CHARGE_FREQUENCY_COUNT
+          - INVALID_SAVINGS_ACCOUNT_STATE_TRANSITION
+          - MAXIMUM_WITHDRAWAL_AMOUNT_EXCEEDED
+          - MAXIMUM_OVERDRAFT_LIMIT_EXCEEDED
+          - OVERDRAFT_NOT_ALLOWED
+          - MISSING_INTEREST_RATE_FROM_SAVINGS_PRODUCT
+          - POSITIVE_SECURED_AMOUNT
+          - MINIMUM_OPENING_BALANCE_ACHIEVED
+          - ACCOUNT_HAS_TRANSACTIONS
+          - INVALID_OVERDRAFT_INTEREST_CHARGE_FREQUENCY
+          - INVALID_OVERDRAFT_INTEREST_CHARGE_FREQUENCY_COUNT
+          - RECOMMENDED_DEPOSIT_AMOUNT_INVALID
+          - MISSING_TYPE_PARAMETER
+          - INVALID_DEPOSIT_ACCOUNT_ID
+          - PRODUCT_SPECIFIES_OVERDRAFT_ALLOWED
+          - PRODUCT_SPECIFIES_OVERDRAFT_NOT_ALLOWED
+          - CURRENT_ACCOUNT_PRODUCT_DISABLED
+          - FIXED_DEPOSIT_PRODUCT_DISABLED
+          - COLLATERAL_FEATURE_DISABLED
+          - CREDIT_OFFICER_DISABLED
+          - DATA_EXPORT_DISABLED
+          - MAX_WITHDRAWAL_CANNOT_BE_NEGATIVE
+          - MAX_WITHDRAWAL_CANNOT_BE_ZERO
+          - WITHHOLDING_TAXES_DISABLED
+          - FUNDING_SOURCE_DISABLED
+          - RESET_DATA_DISABLED
+          - SOLIDARITY_GROUP_DISABLED
+          - SAVINGS_PLAN_DISABLED
+          - SAVINGS_ACCOUNT_DISABLED
+          - REVOLVING_CREDIT_DISABLED
+          - INDICATORS_DISABLED
+          - FIXED_TERM_LOAN_DISABLED
+          - FLAT_INTEREST_DISABLED
+          - EFFECTIVE_INTEREST_RATE_DISABLED
+          - RISK_REPORTING_DISABLED
+          - WITHDRAWAL_PAST_OVERDRAFT_CONSTRAINTS
+          - INTEREST_FREE_LOAN_DISABLED
+          - UNKNOWN_SAVINGS_ACCOUNT_ERROR
+          - TRANSFER_CANT_BE_MADE
+          - CANNOT_MAKE_TRANSFER_TO_SOURCE_ACCOUNT
+          - INVALID_TARGET_ACCOUNTING_STATE
+          - TRANSFER_AMOUNT_IS_NOT_POSITIVE
+          - INVALID_PRODUCT_ID
+          - TRANSFER_AS_POSTDATED_PAYMENT
+          - UNDEFINED_EXCHANGE_RATE_FOR_CURRENCY
+          - INVALID_PRODUCT_KEY
+          - CANNOT_MAKE_TRANSFER_TO_FUNDED_ACCOUNTS_WITH_ACCOUNTING_ENABLED
+          - LINKED_ACCOUNT_DELETION_ERROR
+          - ACCOUNT_HAS_REMAINING_BALANCE
+          - CANNOT_DISBURSE_LOCKED_ACCOUNTS
+          - DISBURSEMENT_DATE_AFTER_LAST_REPAYMENT_DUE_DATE
+          - INTEREST_RATE_NOT_AVAILABLE_FOR_INDEXED_RATES
+          - INTEREST_SPREAD_NOT_AVAILABLE_FOR_FIXED_RATES
+          - TRANCHES_EXPECTED_DISBURSMENT_DATES_NOT_ORDERED
+          - TRANCHES_NOT_ALLOWED
+          - TRANCHES_NOT_DEFINED
+          - MORE_TRANCHES_THAN_ALLOWED
+          - TOTAL_TRANCHES_AMOUNT_MORE_THAN_LOAN_AMOUNT
+          - TOTAL_AMOUNT_NOT_EQUAL_WITH_LOAN_AMOUNT
+          - TRANCHE_AMOUNT_SHOULD_BE_STRICT_POSITIVE
+          - INVALID_TRANCHE_KEY
+          - CANNOT_MODIFY_DISBURSED_TRANCHE
+          - DISBURSEMENT_DATE_BEFORE_NOT_REVERSED_TRANSACTION
+          - CANNOT_MODIFY_TRANCHES_ON_RESCHEDULED_REFINANCED_ACCOUNTS
+          - ALL_TRANCHES_ALREADY_DISBURSED
+          - TRANCHES_CANNOT_BE_EDITED
+          - INTEREST_RATE_SHOULD_BE_ZERO_OR_EMPTY
+          - INTEREST_SPREAD_SHOULD_BE_ZERO_OR_EMPTY
+          - INCONSISTENT_DATE_WITH_NEXT_TRANCHE
+          - INTEREST_RATE_CANNOT_BE_EDITED_FOR_TIERED_INTEREST_RATES
+          - INTEREST_SPREAD_CANNOT_BE_EDITED_FOR_TIERED_INTEREST_RATES
+          - INVALID_INTEREST_RATE_TIERS
+          - INVALID_OVERDRAFT_INTEREST_RATE_TIERS
+          - PAY_OFF_INVALID_INTEREST_PAID
+          - PAY_OFF_INVALID_FEES_PAID
+          - PAY_OFF_INVALID_PENALTY_PAID
+          - INTEREST_TYPE_NOT_ALLOWED
+          - INVALID_GL_ACCOUNT_ID
+          - INVALID_GL_ACCOUNT_TYPE
+          - JOURNAL_ENTRY_BEFORE_CLOSURE
+          - DEBITS_DO_NOT_MATCH_CREDITS
+          - JOURNAL_ENTRY_DATE_NOT_DEFINED
+          - GL_ACCOUNT_IS_HEADER
+          - GL_ACCOUNT_DOES_NOT_SUPPORT_MANUALLY_ENTRIES
+          - NO_INTER_BRANCH_GL_ACCOUNT
+          - INVALID_JOURNAL_TRANSACTION_ID
+          - DUPLICATE_JOURNAL_TRANSACTION_ID
+          - INVALID_ACCOUNTING_DATE_ORDER
+          - INVALID_ACCOUNTING_DATE_RANGE
+          - JOURNAL_ENTRY_DATE_IN_THE_FUTURE
+          - JOURNAL_ENTRY_DATE_IN_THE_PAST_BEFORE_THE_ALLOWED_LIMIT
+          - INVALID_BOOKING_DATE
+          - BOOKING_DATE_BEFORE_VALUE_DATE
+          - INVALID_CURRENCY_CODE
+          - CURRENCY_NOT_MATCHING
+          - ACCOUNT_CURRENCY_NOT_MATCH
+          - MISSING_CURRENCY
+          - INVALID_EXCHANGE_RATE_VALUE
+          - INCONSISTENT_START_DATE_WITH_TRANSACTIONS
+          - BUY_RATE_GREATER_THAN_SELL_RATE
+          - RATE_NOT_SET
+          - RATE_TO_SAME_CURRENCY
+          - DATE_BEFORE_LAST_RATE_DATE
+          - START_DATE_IN_FUTURE
+          - DATE_ON_LAST_RATE_DATE
+          - INVALID_USER_NAME
+          - INVALID_USER_ID
+          - INVALID_CREDIT_OFFICER_KEY
+          - INCONSISTENT_CREDIT_OFFICER_WITH_BRANCH
+          - MISSING_CREDIT_OFFICER_KEY
+          - MISSING_BRANCH_KEY
+          - MISSING_CENTRE_KEY
+          - INVALID_USER_ROLE_KEY
+          - USER_IS_LOCKED
+          - INVALID_PASSWORD
+          - EMAIL_ADDRESS_ALREADY_REGISTERED_WITH_ANOTHER_USER
+          - EMAIL_ADDRESS_FORMAT_IS_INVALID
+          - USERNAME_ALREADY_EXISTS
+          - MAX_USER_LIMIT_REACHED
+          - CANNOT_MANAGE_USER_BRANCH
+          - NOT_ENOUGH_PRIVILDGES_FOR_CHANGING_USER_SETTINGS
+          - ONLY_ONE_ROLE_ALLOWED
+          - INVALID_TRANSACTION_LIMIT_TYPE
+          - NOT_ENOUGH_PRIVILEDGES_TO_CREATE_ADMIN_USER
+          - CANNOT_HAVE_NEGATIVE_TRANSACTION_LIMITS
+          - INVALID_VALUE_FOR_MANAGED_BRANCHES
+          - CANNOT_HAVE_ADMIN_WITHOUT_FULL_BRANCHES_ACCESS
+          - CANNOT_HAVE_OFFICER_ADMIN_WITHOUT_MANAGE_OTHER_ENTITIES_ACCESS
+          - INCONSISTENT_CAN_MANAGE_BRANCHES_WITH_CAN_MANAGE_ENTITIES
+          - MISSING_EMAIL_ADDRESS
+          - MISSING_MOBILE_PHONE
+          - INVALID_BRANCH_ID
+          - INVALID_BRANCH_KEY
+          - INVALID_MANAGED_BRANCH_ID
+          - BRANCH_IS_NOT_ACTIVE
+          - INVALID_CENTRE_KEY
+          - INVALID_CENTRE_ID
+          - INCONSISTENT_CENTRE_WITH_BRANCH
+          - CENTRE_IS_NOT_ACTIVE
+          - INCONSISTENT_VALUE_WITH_CUSTOM_FIELD_TYPE
+          - REQUIRED_CUSTOM_FIELD_MISSING
+          - INVALID_CUSTOM_FIELD_ID
+          - MAX_CUSTOM_FIELD_VALUE_LENGTH_EXCEEDED
+          - INVALID_CUSTOM_FIELD_ENTITY_KEY
+          - VIEW_TYPE_NOT_MATCHING_RESOURCE
+          - VIEW_NOT_ACCESSIBLE_FOR_USER
+          - CUSTOM_FIELD_DEACTIVATED
+          - CUSTOM_FIELD_REQUIRED
+          - CUSTOM_FIELD_NOT_AVAILABLE_FOR_ENTITY
+          - INVALID_CUSTOM_FIELD_LINKED_ENTITY_KEY
+          - DEPENDENT_CUSTOM_FIELD_VALUE_REQUIRED
+          - INCONSISTENT_VALUE_WITH_SET_TYPE
+          - GROUPED_INDEXES_NOT_CONSECUTIVE
+          - TO_MANY_VALUES_FOR_SAME_GROUPED_CUSTOM_FIELD
+          - INVALID_CUSTOM_FIELD_GROUP_INDEX
+          - INCONSISTENT_CUSTOM_FIELD_VALUE_WITH_PATTERN
+          - DUPLICATE_CUSTOM_FIELD_VALUES
+          - CUSTOM_FIELD_SET_CHANGE_NOT_ALLOWED
+          - CUSTOM_FIELD_SET_NULL
+          - CUSTOM_FIELD_USAGE_CHANGE_NOT_ALLOWED
+          - DATATYPE_OR_TYPE_CHANGED
+          - CUSTOM_FIELD_NAME_NOT_UNIQUE
+          - ENCODED_KEY_MUST_BE_EMPTY_ON_CREATE
+          - CUSTOM_FIELDS_NEED_CHANNEL_PROVIDED
+          - DUPLICATE_UNIQUE_VALUE
+          - REFERRED_IN_CUSTOM_FIELD
+          - TRANSACTION_TYPE_NOT_ACCEPTING_CUSTOM_FIELDS
+          - INVALID_CUSTOM_FIELD_KEY
+          - BUILT_IN_CUSTOM_FIELD_CHANGE_NOT_ALLOWED
+          - INVALID_ID_DOCUMENT
+          - REQUIRED_ID_DOCUMENT_MISSING
+          - ADDING_OTHER_ID_DOCUMENTS_IS_DISABLED
+          - INVALID_ID_DOCUMENT_TEMPLATE_KEY
+          - INVALID_DOCUMENT_ID
+          - INVALID_FILE_EXTENSION
+          - FILE_EXTENSION_NOT_ALLOWED
+          - INCONSISTENT_EXTENSION_WITH_FILE_CONTENT
+          - MALWARE_CONTENT_DETECTED
+          - INVALID_FILENAME
+          - NO_PROFILE_PICTURE_SET
+          - NO_PROFILE_SIGNATURE_SET
+          - HAS_DOCUMENT_ATTACHED
+          - UNSUPPORTED_IMAGE_TYPE
+          - INVALID_TASK_ID
+          - INVALID_TASK_STATE_AND_COMPLETION_DATE
+          - INVALID_TASK_FIELD_CHANGE
+          - INVALID_TASK_STATUS
+          - INVALID_TASK_TITLE_LENGTH
+          - HAS_TASK_ATTACHED
+          - EDITING_VIEW_TYPE_NOT_ALLOWED
+          - INVALID_CUSTOM_FIELD_SET_ID
+          - TRANSACTION_LINKED_TO_A_REPAYMENT
+          - MISSING_FROM_DATE
+          - MISSING_TO_DATE
+          - MAXIMUM_ONE_FILTER_ALLOWED
+          - TILL_BALANCE_OUTSIDE_CONSTRAINTS
+          - TRANSACTION_IS_NOT_WITHIN_CHANNEL_CONSTRAINTS
+          - INVALID_ADDRESS
+          - CLIENT_ROLE_DOES_NOT_ALLOW_ADDRESS
+          - ADDRESS_CHANGE_NOT_ALLOWED
+          - INVALID_ADDRESS_LINE1
+          - INVALID_ADDRESS_LINE2
+          - INVALID_CITY
+          - INVALID_REGION
+          - INVALID_POSTCODE
+          - INVALID_COUNTRY
+          - DATA_IMPORT_IN_PROGRESS
+          - DATABASE_BACKUP_IN_PROGRESS
+          - DATABASE_BACKUP_NOT_FOUND
+          - CLIENT_IN_MIGRATION
+          - INVALID_NUMBER_OF_SHEETS
+          - UNDEFINED_SHEET
+          - WRONG_SHEET_POSITION
+          - INVALID_NUMBER_OF_COLUMNS_FOR_SHEET
+          - UNDEFINED_COLUMN
+          - WRONG_COLUMN_POSITION
+          - INVALID_ASSIGNMENT
+          - INVALID_INDEX_RATE_SOURCE_ID
+          - START_DATE_BEFORE_LAST_INDEX_REVIEWD_DATE
+          - INVALID_INDEX_RATE_START_DATE
+          - NO_INDEX_RATE_AVAILABLE
+          - NO_TAX_RATE_AVAILABLE
+          - INCONSISTENT_GROUP_MEMBER_PARENT_KEY
+          - INCONSISTENT_GROUP_MEMBER_ENCODED_KEY
+          - INCONSISTENT_GROUP_ROLE_PARENT_KEY
+          - INCONSISTENT_GROUP_ROLE_ENCODED_KEY
+          - PRODUCT_LINE_OF_CREDIT_AFFILIATION_CONSTRAINT_MISMATCH
+          - DISBURSEMENT_DATE_BEFORE_LINE_OF_CREDIT_START_DATE
+          - MATURITY_DATE_AFTER_LINE_OF_CREDIT_END_DATE
+          - LINE_OF_CREDIT_AMOUNT_EXCEEDED
+          - LINE_OF_CREDIT_REQUIRED_EXCEPTION
+          - OVERDRAFT_EXPIRY_DATE_AFTER_LINE_OF_CREDIT_END_DATE
+          - CANNOT_CREATE_ACCOUNT_WITH_LINE_OF_CREDIT
+          - LINE_OF_CREDIT_REQUIRES_OVERDRAFT_MAX_LIMIT
+          - LINE_OF_CREDIT_REQUIRES_OVERDRAFT_EXPIRY_DATE
+          - INVALID_LINE_OF_CREDIT_ID
+          - ACCOUNT_ALREADY_ON_LINE_OF_CREDIT
+          - INCONSISTENT_LINE_OF_CREDIT_CLIENT_WITH_ACCOUNT_OWNER
+          - ACCOUNT_IS_NOT_PART_OF_LINE_OF_CREDIT
+          - INVALID_LINE_OF_CREDIT_STATE
+          - HAS_LINES_OF_CREDIT
+          - LINE_OF_CREDIT_ID_ALREADY_IN_USE
+          - EXPIRE_DATE_BEFORE_START_DATE
+          - INVALID_CLIENT_ROLE_PERMISSION_FOR_OPENING_LINES_OF_CREDIT
+          - MISSING_LINE_OF_CREDIT_START_DATE
+          - MISSING_LINE_OF_CREDIT_EXPIRE_DATE
+          - MISSING_LINE_OF_CREDIT_AMOUNT
+          - LINE_OF_CREDIT_AMOUNT_NOT_STRICTLY_POSITIVE
+          - INVALID_ACCOUNT_HOLDER_ID
+          - MISSING_ACCOUNT_HOLDER_KEY
+          - MISSING_ACCOUNT_HOLDER_TYPE
+          - ACCOUNT_HOLDER_NOT_FOUND
+          - INVALID_ACCOUNT_HOLDER_STATE
+          - NO_ORGANIZATION_ICON
+          - NO_ORGANIZATION_LOGO
+          - MISSING_TEXT
+          - MAX_TEXT_LENGTH_EXCEEDED
+          - NUM_INSTALLMENTS_NOT_AVAILABLE_FOR_REVOLVING_CREDIT
+          - PRINCIPAL_PAYMENT_INCONSISTENT_WITH_PRODUCT
+          - SCHEDULE_PREVIEW_NOT_AVAILABLE_FOR_REVOLVING_CREDIT
+          - AMOUNT_MORE_THAN_CURRENT_AVAILABLE_AMOUNT
+          - INCONSISTENT_WITH_CENTRE_MEETING_DAY
+          - FIELD_IS_NOT_EDITABLE
+          - RESCHEDULED_REPAYMENT_BEFORE_DISBURSEMENT_DATE
+          - FIELD_NOT_ALLOWED
+          - OPERATION_NOT_ALLOWED_ON_FIELD
+          - INVALID_FILTER_VALUES
+          - INVALID_FILTER_SELECTION
+          - INVALID_FILTER_ELEMENT
+          - INVALID_FILTER_VALUE
+          - INVALID_FILTER_SECOND_VALUE
+          - TOO_MANY_FILTERS_PROVIDED
+          - INVALID_FILTER_DATA_ITEM_TYPE
+          - INSUFFICIENT_FUNDS_ACCOUNT_BALANCE
+          - INSUFFICIENT_FUNDS_TOTAL_AMOUNT
+          - FUNDS_NOT_ALLOWED
+          - FUNDING_AMOUNT_MUST_BE_STRICTLY_POSITIVE
+          - FUNDER_INTEREST_COMMISSION_CONSTRAINTS_VALIDATION
+          - MISSING_FUNDER_INTEREST_COMMISSION
+          - INVALID_FUND_ENCODED_KEY
+          - INVESTORS_TOTAL_AMOUNT_MORE_THAN_LOAN_AMOUNT
+          - INVALID_FUND_ID
+          - INACTIVE_FUND_ID
+          - INVALID_FUNDED_ACCOUNT_STATE
+          - FUND_SELL_WITH_NO_PURCHASES
+          - FUND_OVERSELL
+          - INVALID_SELLER_FUND_AMOUNT
+          - INVALID_SELLER_FUND_STATE
+          - INVALID_SELLER_FUNDING_ACCOUNT
+          - INVALID_INVESTMENT_PERCENTAGES_FOR_AMOUNTS
+          - FUND_SELF_SELL
+          - INVALID_BUYER_FUNDING_ACCOUNT
+          - DUPLICATE_BUYER_FUNDING_ACCOUNT
+          - INVALID_BUYER_FUND_AMOUNT
+          - INVALID_FUND_PURCHASE_PRICE
+          - INSUFFICIENT_BUYER_FUNDING_ACCOUNT_FUNDS
+          - LOAN_ACCOUNT_NOT_FUNDED_BY_SAVINGS_ACCOUNT
+          - INVALID_INTEREST_RATE_AGAINST_INTEREST_COMMISSION
+          - INVALID_SAVINGS_ACCOUNT_TYPE_FOR_FUNDING
+          - DUPLICATED_SAVINGS_ACCOUNT_FOR_FUNDING
+          - INVALID_FIXED_DAYS_OF_MONTH
+          - INVALID_SORTING_COLUMN
+          - COLUMN_NOT_SORTABLE
+          - INVALID_SORTING_ORDER
+          - ACCOUNT_TYPE_DOES_NOT_ALLOW_FIELD
+          - INVALID_GUARANTY_ENCODED_KEY
+          - INVALID_GUARANTY_TYPE
+          - INVALID_GUARANTOR_TYPE
+          - GUARANTY_KEY_TYPE_MISMATCH
+          - INVALID_TEMPLATE_ID
+          - INVALID_TEMPLATE_TYPE
+          - MISSING_FIXED_DAYS_OF_MONTH
+          - FIXED_DAYS_OF_MONTH_NOT_ALLOWED
+          - REPAYMENT_FREQUENCY_NOT_ALLOWED
+          - REPAYMENT_PERIOD_COUNT_NOT_ALLOWED
+          - APPLIED_INTEREST_BALANCE_CANNOT_BE_REALLOCATED
+          - INVALID_NEW_TOTAL_LOAN_AMOUNT
+          - NEGATIVE_WRITE_OFF_AMOUNT
+          - CAPITALIZED_AMOUNTS_NOT_ALLOWED_DUE_TO_DIFFERENT_ACCOUNTING
+          - TOP_UP_AMOUNT_IS_MANDATORY
+          - RESTRUCTURE_DETAILS_ARE_MANDATORY
+          - NEGATIVE_TOP_UP_AMOUNT
+          - WRITE_OFF_AMOUNT_MORE_THAN_BALANCE_AMOUNT
+          - CANNOT_REFINANCE_REVOLVING_CREDIT_LOAN
+          - POSITIVE_CAPITALIZED_AMOUNTS_FOR_LOAN_FUNDED_NOT_ALLOWED
+          - WRITE_OFF_AMOUNT_FOR_LOAN_FUNDED_DIFFERENT_BY_BALANCE_AMOUNT
+          - CURRENCY_NOT_AVAILABLE_FOR_PRODUCT
+          - CURRENCY_NOT_EDITABLE
+          - TELLER_CANNOT_POST_TRANSACTION_IN_MULTI_CURRENCY
+          - NOT_ENOUGH_PRINCIPAL_TO_CONTINUE_FEE_AMORTIZATION
+          - SETTINGS_ONLY_AVAILABLE_FOR_REVOLVING_CREDIT_ACCOUNTS
+          - INCONSISTENT_FLAT_AMOUNT_WITH_PRODUCT_CONSTRAINTS
+          - INCONSISTENT_PERCENTANGE_WITH_PRODUCT_CONSTRAINTS
+          - AMOUNT_REQUIRED_FOR_FLAT_PRINCIPAL_PAYMENT_METHOD
+          - PERCENTAGE_REQUIRED_FOR_PRINCIPAL_PAYMENT_PERCENTAGE_METHOD
+          - AMOUNT_ONLY_AVAILABLE_FOR_FLAT_PRINCIPAL_PAYMENT_METHOD
+          - PERCENTAGE_ONLY_AVAILABLE_FOR_OUTSTANDING_PRINCIPAL_PERCENTAGE_METHOD
+          - INVALID_PRINCIPAL_PAYMENT_FLAT_AMOUNT_WITH_DECIMALS
+          - INVALID_PRINCIPAL_PAYMENT_PERCENTAGE_VALUE
+          - CANT_EDIT_LOCKED_OPERATIONS_IN_LOCKED_CAPPING_STATE
+          - CANT_UNLOCK_WHEN_INCOME_BALANCE_IS_OVER_PRINCIPAL_CAPPING_CONSTRAINTS
+          - CANNOT_BULK_REVERSE_INTERNAL_TRANSFER_REPAYMENT
+          - CANNOT_BULK_REAPPLY_TRANSACTION_BECAUSE_LOCKED_TRANSACTIONS_LOGGED_AFTER_IT
+          - CANNOT_BULK_REAPPLY_POSTDATED_REPAYMENTS
+          - CANNOT_BULK_REVERSE_ACTIVATION_TRANSACTION
+          - CLOSURE_DATE_AFTER_MAX_ALLOWED_UNDO_CLOSURE_PERIOD
+          - CLOSURE_DATE_BEFORE_GL_ACCOUNT_CLOSURE
+          - MISSING_ORGANIZATION_INTEREST_COMMISSION
+          - INSUFFICIENT_TRANSACTION_AMOUNT
+          - CANNOT_REVERSE_INTEREST_ON_DISBURSEMENT
+          - TRANSACTION_TYPE_IS_IRREVERSIBLE
+          - INTEREST_APPLIED_WITH_NULL_AMOUNT
+          - CANNOT_REVERSE_OFFSET_DEPOSIT_TRANSACTION
+          - CANNOT_LOCK_CAPPING_ACCOUNT_INVALID_ACCOUNT_ID
+          - CANNOT_LOCK_CAPPING_ACCOUNT_INVALID_ACCOUNT_STATE_FOR_LOCK
+          - INCOME_BALANCE_CONSTRAINTS_EXCEEDED
+          - CANNOT_BULK_REVERSE_LOAN_FRACTION_SOLD
+          - LATE_FEE_TRANSACTIONS_LOGGED_AFTER_REPAYMENT_TO_REAPPLY_ON_FIXED_ACCOUNT
+          - FEE_CANNOT_BE_POSTED_ON_RECOMPUTED_SCHEDULE
+          - INVALID_ORGANIZATION_INTEREST_COMMISSION
+          - ACCOUNT_ALREADY_LOCKED
+          - CANNOT_BULK_ADJUST_ACTIVATION_TRANSACTION
+          - PAYMENT_DUE_FEE_APPLIED_ON_DUE_DATES_TRANSACTIONS_LOGGED_AFTER_REPAYMENT_TO_REAPPLY_ON_FIXED_ACCOUNT
+          - REALLOCATION_CAN_BE_DONE_ONLY_ON_FUTURE_REPAYMENTS
+          - REALLOCATION_NOT_ALLOWED_ON_GRACE_INSTALLMENTS
+          - INTEREST_RATE_CHANGED_TRANSACTION_NOT_ALLOWED
+          - INTEREST_RATE_CHANGED_TRANSACTION_NOT_ALLOWED_FOR_LOAN_PRODUCT_TYPE
+          - INSTALLMENT_WITH_INTEREST_APPLIED_CANNOT_BE_EDITED
+          - UNABLE_TO_DETERMINE_DELETED_REPAYMENTS
+          - PAID_OR_PURE_GRACE_INSTALLMENT_CANNOT_BE_DELETED
+          - NON_CUSTOM_MADE_INTALLMENT_CANNOT_BE_DELETED_FOR_REVOLVING_CREDIT_ACCOUNT
+          - INVALID_NUMBER_OF_INSTALLMENTS
+          - INVALID_PRINCIPAL_AMOUNT_WITH_DECIMALS
+          - INCONSISTENT_WITH_LINE_OF_CREDIT_VALID_UNTIL_DATE
+          - DUE_DATES_NOT_UNIQUE
+          - NON_ZERO_PRINCIPAL_REPAYMENT_CANNOT_BE_DELETED
+          - NON_DYNAMIC_ACCOUNT_REPAYMENT_DELETION_NOT_ALLOWED
+          - INVALID_LOAN_ACCOUNT_STATE_FOR_FUNDS_EDIT
+          - ENTRY_DATE_AFTER_MATURITY_DATE_WITH_LATE_FEES_AND_BULK_REVERSAL
+          - DIFFERENT_ACCOUNTING_STATE_BETWEEN_INVOLVED_PRODUCTS
+          - ACCOUNT_ALREADY_LINKED
+          - PRODUCT_DOES_NOT_ALLOW_LINKING
+          - UNLINKABLE_SAVINGS_PRODUCT
+          - INVALID_SAVINGS_ACCOUNT_HOLDER
+          - LINK_BETWEEN_ACCOUNTS_DOES_NOT_EXIST
+          - NON_NATIVE_GRACE_INSTALLMENT_CANNOT_BE_EDITED
+          - NON_NATIVE_GRACE_INSTALLMENT_CANNOT_BE_DELETED
+          - INSUFFICIENT_ACCOUNT_BALANCE
+          - INVALID_SAVINGS_ACCOUNT_TYPE
+          - MATURITY_PERIOD_ALREADY_STARTED
+          - LOAN_PRODUCT_PRINCIPAL_PAID_INSTALLMENT_STATUS_MISMATCH
+          - CANNOT_DELETE_LINK_FOR_ACTIVATED_OFFSET_LOAN
+          - INVALID_LANGUAGE
+          - INVALID_LINKED_SETTLEMENT_ACCOUNT_KEYS
+          - SAVINGS_ACCOUNT_ALREADY_LINKED
+          - INSTALLMENT_WITH_PENALTY_APPLIED_CANNOT_BE_EDITED
+          - INSTALLMENT_DUE_DATE_MOVED_BEFORE_LAST_PENALTY_APPLIED_DATE
+          - MATURITY_PERIOD_NOT_STARTED
+          - INVALID_AMOUNT_WITH_DECIMALS
+          - RESEND_FAILED_NOTIFICATION_FAILED
+          - INVALID_NOTIFICATION_MESSAGE_STATE
+          - DUPLICATED_NOTIFICATION_ENCODED_KEY
+          - MAXIMUM_NUMBER_OF_NOTIFICATIONS_TO_RESEND_EXCEEDED
+          - DUE_DATES_NOT_IN_ASCENDING_ORDER
+          - ACCOUNT_PRODUCT_BRANCH_AVAILABILITY_MISMATCH
+          - CLIENT_HAS_ACTIVE_ACCOUNTS_WITH_PRODUCT_BRANCH_AVAILABILITY_MISMATCH
+          - PRODUCT_HAS_ASSOCIATED_ACCOUNTS
+          - MAX_NUMBER_OF_FILTERS_REACHED
+          - MAX_NUMBER_OF_COLUMNS_REACHED
+          - USAGE_RIGHTS_ROLE_NOT_AVAILABLE
+          - CURRENCY_NOT_DEFINED
+          - BASE_CURRENCY_CANNOT_BE_REMOVED
+          - CURRENCY_IN_USE_CANNOT_BE_REMOVED
+          - CURRENCY_DOES_NOT_EXIST
+          - INVALID_COMMUNICATION_MESSAGE_ENCODED_KEY
+          - INVALID_EMAIL_SUBJECT
+          - CANNOT_ADJUST_OFFSET_DEPOSIT_TRANSACTION
+          - INVALID_CREDIT_ARRANGEMENT_ID
+          - INVALID_CREDIT_ARRANGEMENT_STATE
+          - CREDIT_ARRANGEMENT_ID_ALREADY_IN_USE
+          - INVALID_CLIENT_ROLE_PERMISSION_FOR_OPENING_CREDIT_ARRANGEMENTS
+          - CREDIT_ARRANGEMENT_AMOUNT_NOT_STRICTLY_POSITIVE
+          - PRODUCT_CREDIT_ARRANGEMENT_AFFILIATION_CONSTRAINT_MISMATCH
+          - ACCOUNT_ALREADY_ON_CREDIT_ARRANGEMENT
+          - INCONSISTENT_CREDIT_ARRANGEMENT_CLIENT_WITH_ACCOUNT_OWNER
+          - CREDIT_ARRANGEMENT_REQUIRES_OVERDRAFT_EXPIRE_DATE
+          - CREDIT_ARRANGEMENT_REQUIRES_OVERDRAFT_MAX_LIMIT
+          - CREDIT_ARRANGEMENT_AMOUNT_EXCEEDED
+          - MATURITY_DATE_AFTER_CREDIT_ARRANGEMENT_END_DATE
+          - OVERDRAFT_EXPIRY_DATE_AFTER_CREDIT_ARRANGEMENT_END_DATE
+          - DISBURSEMENT_DATE_BEFORE_CREDIT_ARRANGEMENT_START_DATE
+          - CREDIT_ARRANGEMENT_REQUIRED_EXCEPTION
+          - ACCOUNT_IS_NOT_PART_OF_CREDIT_ARRANGEMENT
+          - CREDIT_ARRANGEMENT_ILLEGAL_PARAMETER_MODIFICATION
+          - CREDIT_ARRANGEMENT_HAS_NON_CLOSED_ACCOUNTS
+          - BASE_CURRENCY_NOT_UNIQUE
+          - CURRENCY_SYMBOL_LENGTH_OUTSIDE_CONSTRAINTS
+          - INEXISTING_CURRENCY_SYMBOL
+          - INVALID_TO_INSTALLMENT_POSITION
+          - INVALID_PMT_VALUE
+          - PAYMENT_PLAN_NOT_AVAILABLE
+          - AT_LEAST_ONE_PERIODIC_PAYMENT_PLAN_MANDATORY
+          - SUM_OF_PERIODIC_PAYMENTS_LESS_OR_EQUAL_WITH_LOAN_AMOUNT
+          - PAYMENT_PLAN_ENTRIES_NOT_ORDERED
+          - INTEREST_RATE_COMPUTATION_ERROR
+          - INVALID_PERIODIC_PAYMENT_ENCODED_KEY
+          - DUPLICATED_PERIODIC_PAYMENT_ENCODED_KEY
+          - INVALID_INTEREST_CHARGE_FREQUENCY_METHOD_MUST_BE_NULL
+          - INVALID_DAYS_IN_YEARS_METHOD_MUST_BE_NULL
+          - PRODUCT_ID_ALREADY_IN_USE
+          - INVALID_ROUNDING_REPAYMENT_CURRENCY_FOR_PRODUCT
+          - SDK_CLIENT_COULD_NOT_BE_GENERATED
+          - SDK_CLIENT_LANGUAGES_COULD_NOT_BE_OBTAINED
+          - MAXIMUM_NUMBER_OF_COMMUNICATION_MESSAGES_TO_RESEND_EXCEEDED
+          - RESEND_FAILED_COMMUNICATON_FAILED
+          - DUPLICATE_ENCODED_KEY
+          - MESSAGE_STATE_MUST_BE_FAILED
+          - NO_MESSAGE_FOUND
+          - MESSAGE_NOT_FOUND
+          - MISSING_ENCODED_KEY
+          - URL_CONTAINS_QUOTES
+          - MISSING_RECIPIENT
+          - RECIPIENT_NOT_ALLOWED
+          - INVALID_CLIENT_RECIPIENT
+          - INVALID_CREDIT_OFFICER_RECIPIENT
+          - INVALID_GROUP_ROLE_RECIPIENT
+          - INVALID_CUSTOM_FIELD_RECIPIENT
+          - INVALID_EVENT
+          - INVALID_TARGET
+          - INVALID_PLACEHOLDER
+          - INVALID_FIELD_LENGTH
+          - INVALID_WEBHOOK_REQUEST_TYPE
+          - URL_CONTAINS_INVALID_PLACEHOLDERS
+          - CARD_REFERENCE_TOKEN_FORMAT_INVALID
+          - CARD_REFERENCE_TOKEN_ALREADY_IN_USE
+          - CARD_REFERENCE_HAS_ASSOCIATED_HOLDS_OR_TRANSACTIONS
+          - CARD_REFERENCE_NOT_FOUND
+          - DUPLICATE_AUTHORIZATION_HOLD
+          - DUPLICATE_CARD_TRANSACTION
+          - AVAILABLE_BALANCE_BELOW_ZERO
+          - AUTHORIZATION_HOLD_NOT_FOUND
+          - INVALID_AUTHORIZATION_HOLD_STATE
+          - CARD_TRANSACTION_CANNOT_BE_ADJUSTED
+          - TECHNICAL_OVERDRAFT_IS_NOT_ALLOWED_FOR_PRODUCT
+          - CARD_TRANSACTION_NOT_FOUND
+          - CARD_TRANSACTION_MAX_REVERSAL_AMOUNT_EXCEEDED
+          - CARDS_FEATURE_DISABLED
+          - PRODUCT_MUST_BE_ACTIVE
+          - TARGET_AMOUNT_IS_NEGATIVE
+          - MAX_WITHDRAWAL_AMOUNT_OUTSIDE_CONSTRAINTS
+          - ACCOUNT_HOLDER_KEY_INVALID
+          - ACCOUNT_HOLDER_TYPE_INVALID
+          - INVALID_WITHHOLDING_TAX_SOURCE_KEY
+          - INTEREST_RATE_OUTSIDE_CONSTRAINTS
+          - INVALID_INTEREST_PAYMENT_POINT
+          - INVALID_INTEREST_PAYMENT_DATES
+          - REQUIRED_OVERDRAFT_INTEREST_RATE
+          - REQUIRED_OVERDRAFT_EXPIRY_DATE
+          - REQUIRED_OVERDRAFT_LIMIT
+          - DEPOSIT_ACCOUNT_FIELD_NOT_EDITABLE
+          - DEPOSIT_PRODUCT_MISMATCH
+          - ACCOUNT_TYPE_DOES_NOT_ALLOW_RECOMMENDED_DEPOSIT_AMOUNT
+          - ACCOUNT_TYPE_DOES_NOT_ALLOW_MAX_WITHDRAWAL_AMOUNT
+          - ACCOUNT_TYPE_DOES_NOT_ALLOW_TARGET_AMOUNT
+          - REQUIRED_INTEREST_RATE
+          - INTEREST_RATE_SHOULD_BE_NULL
+          - OVERDRAFT_INTEREST_RATE_SHOULD_BE_NULL
+          - OVERDRAFT_INTEREST_SPREAD_SHOULD_BE_NULL
+          - INVALID_ACCOUNT_TYPE
+          - INVALID_ACCOUNT_KEY
+          - UNABLE_TO_RECALCULATE_SCHEDULE
+          - UNABLE_TO_APPRAISE_LOAN_ACCOUNT
+          - TRANSACTION_MADE_BY_A_DISBURSEMENT_FEE
+          - INVALID_TARGET_ACCOUNT_TYPE
+          - NEGATIVE_TARGET_ACCOUNT_BALANCE
+          - ZERO_DISBURSE_AMOUNT
+          - INVESTOR_FUNDED_LOAN_ACCOUNT
+          - INVALID_TARGET_ACCOUNT_HOLDER_KEY
+          - TRANSFER_NOTES_LENGTH_EXCEEDS_MAXIMUM_SIZE
+          - CANNOT_MAKE_TRANSFER_FOR_FOREIGN_CURRENCY_IF_ACCOUNTING_ENABLED
+          - INVALID_AMORTIZATION_PROFILE
+          - AMORTIZATION_PROFILE_NOT_ALLOWED
+          - INVALID_AMORTIZATION_FREQUENCY
+          - INVALID_AMORTIZATION_FREQUENCY_CUSTOM_INTERVAL_PERIOD_COUNT
+          - INVALID_AMORTIZATION_SETTINGS
+          - AMORTIZATION_FREQUENCY_CUSTOM_INTERVAL_TOTAL_STEPS_NOT_ALLOWED
+          - AMORTIZATION_FREQUENCY_CUSTOM_INTERVAL_PERIOD_UNIT_NOT_ALLOWED
+          - AMORTIZATION_FREQUENCY_CUSTOM_INTERVAL_PERIOD_COUNT_NOT_ALLOWED
+          - INVALID_AMORTIZATION_FREQUENCY_CUSTOM_INTERVAL_TOTAL_STEPS
+          - INVALID_AMORTIZATION_FREQUENCY_CUSTOM_INTERVAL_PERIOD_UNIT
+          - AMORTIZATION_SETTINGS_NOT_ALLOWED
+          - INVALID_INTEREST_RATE_TERMS
+          - TRANSACTION_DISBURSEMENT_DATE_DOES_NOT_MATCH_WITH_TRANCH_EXPECTED_DATE
+          - DUPLICATE_TRANSACTION_CHANNEL_NAME
+          - DUPLICATE_TRANSACTION_CHANNEL_ID
+          - TRANSACTION_CHANNEL_ID_CONTAINS_SPACES
+          - INVALID_TRANSACTION_CHANNEL_LOAN_CONSTRAINTS
+          - INVALID_TRANSACTION_CHANNEL_SAVINGS_CONSTRAINTS
+          - INVALID_TRANSACTION_CHANNEL_ACCOUNT_USAGE
+          - CANNOT_DELETE_DEFAULT_TRANSACTION_CHANNEL
+          - TRANSACTION_CHANNEL_IN_USE
+          - TRANSACTION_CHANNEL_CANNOT_BE_DEACTIVATED
+          - INCONSISTENT_TRANSACTION_USER_KEY_WITH_ACCOUNT_USER
+          - INCONSISTENCY_BETWEEN_CHANNEL_KEY_AND_ID
+          - INCONSISTENT_TRANSACTION_PRODUCT_KEY_WITH_ACCOUNT_PRODUCT
+          - DUPLICATE_ID
+          - DUPLICATE_NAME
+          - ID_CONTAINS_SPACES
+          - INVALID_EXTERNAL_ID
+          - EXTERNAL_ID_ALREADY_EXISTS
+          - INVALID_ASSIGNMENT_FROM_NO_MEETING_DAY
+          - HOLDER_HAS_ACCOUNTS_IN_DIFFERENT_BRANCH_WITH_CENTRE_OR_CREDITOFFICER_MISMATCH
+          - ACCOUNT_ALREADY_DISBURSED
+          - AMORTIZATION_FREQUENCY_INTERVAL_TYPE_NOT_ALLOWED
+          - AMORTIZATION_FREQUENCY_INTERVAL_COUNT_NOT_ALLOWED
+          - INVALID_AMORTIZATION_FREQUENCY_INTERVAL_TYPE
+          - INVALID_AMORTIZATION_FREQUENCY_PREDEFINED_INTERVALS_UNIT
+          - NON_POSITIVE_DEFAULT_INTEREST_RATE
+          - NON_POSITIVE_MIN_INTEREST_RATE
+          - NON_POSITIVE_MAX_INTEREST_RATE
+          - INVALID_INTEREST_RATE_MIN_MAX_DEFAULT_TUPLE
+          - DEFAULT_MIN_MAX_NOT_AVAILABLE
+          - INTEREST_RATE_TERMS_ARE_READONLY
+          - INTEREST_CALCULATION_BALANCE_METHOD_READONLY
+          - INTEREST_CALCULATION_BALANCE_METHOD_NOT_ALLOWED
+          - INTERNAL_TRANSFER_CANNOT_USE_CUSTOM_FIELDS
+          - INCONSISTENT_FEE_CALCULATION_METHOD_WITH_INCLUDE_FEE_IN_FLOOR_AMOUNT_OPTION_ENABLED
+          - INCONSISTENT_FEE_CALCULATION_METHOD_WITH_TOTAL_BALANCE_OPTION_ENABLED
+          - INCONSISTENT_LATE_REPAYMENT_FEE_TRIGGER_WITH_TOTAL_BALANCE_OPTION_ENABLED
+          - INACTIVE_ACCOUNT_BRANCH
+          - INCONSISTENT_ACCOUNT_BRANCH_ASSOCIATION_CENTRE_OR_CREDITOFFICER_MISMATCH
+          - INVALID_ACCOUNT_BRANCH_ASSIGNMENT_DUE_CENTRE_MEETING_DAY_MISMATCH
+          - CANNOT_CHANGE_LOAN_GROUP_BRANCH_FOR_A_SOLIDARITY_GROUP
+          - CANNOT_CHANGE_LOAN_ACCOUNT_BRANCH_WHEN_RESHEDULE_REFINANCE
+          - INVALID_FEE_APPLICATION
+          - INVALID_FEE_AMORTIZATION_UPON_RESCHEDULE_REFINANCE_OPTION
+          - FEE_AMORTIZATION_UPON_RESCHEDULE_REFINANCE_OPTION_IS_MANDATORY
+          - FEE_TRIGGER_NOT_ALLOWED
+          - NOT_ADJUSTED_TRANSACTION_LOGGED_AFTER_CURRENT_ONE
+          - CANNOT_ADJUST_INTEREST_ON_DISBURSEMENT
+          - TRANSACTION_TYPE_DOES_NOT_ALLOW_ADJUSTMENT
+          - TRANSACTION_ALREADY_ADJUSTED
+          - PAYMENT_DUE_FEES_ON_DUE_DATES_TRIGGER_NOT_ALLOWED
+          - DEPOSIT_INTEREST_FEATURE_DISABLED
+          - CANNOT_CREATE_NEW_USER_IN_FEDERATED_CONTEXT
+          - EMPTY_CUSTOM_FIELD_ID
+          - ACCOUNT_ALREADY_CLOSED
+          - INVALID_GUARANTEE_TYPE
+          - ORIGINAL_ACCOUNT_NOT_FOUND
+          - INVALID_ORIGINAL_ACCOUNT_STATE
+          - INCONSISTENT_AMORTIZATION_ACCOUNTING_SETUP
+          - PAYMENT_DUE_FEES_ON_DUE_DATES_NOT_ALLOWED_AT_RESCHEDULE_REFINANCE
+          - TAXES_ON_PRODUCT_NOT_ALLOWED
+          - CANNOT_APPLY_REPAYMENT_ON_ZERO_BALANCE_ACCOUNT
+          - LOCKED_BALANCE_NOT_ALLOWED
+          - INEXISTING_TOLERANCE_CALCULATION_METHOD
+          - ARREARS_TOLERANCE_DAY_OUTSIDE_CONSTRAINTS
+          - INCONSISTENT_ARREARS_TOLERANCE_VALUES_WITH_ARREARS_TOLERANCE_METHOD
+          - SAVINGS_PRODUCT_DOES_NOT_ALLOW_OFFSET_LINKING
+          - INVALID_SETTLEMENT_ACCOUNT_KEY
+          - INVALID_SETTLEMENT_ACCOUNT_STATE
+          - INVALID_DATA_MIGRATION_EVENT_KEY
+          - ANOTHER_TASK_IN_PROGRESS
+          - INVALID_DATA_IMPORT_TASK_KEY
+          - DEPOSIT_ACCOUNT_LINKED_TO_LOAN_ACCOUNTS_ON_DIFFERENT_BRANCHES
+          - SAVINGS_ACCOUNT_LINKED_TO_LOAN_ACCOUNTS_ON_DIFFERENT_BRANCHES
+          - INVALID_DEPOSIT_ACCOUNT_HOLDER
+          - UNLINKABLE_DEPOSIT_PRODUCT
+          - INEXISTING_DATE_CALCULATION_METHOD
+          - INEXISTING_NON_WORKING_DAYS_METHOD
+          - MESSAGE_SENDING_ERROR
+          - CONNECTION_CLOSING_ERROR
+          - CONSUMER_SERVICE_STARTING_ERROR
+          - CONSUMER_SERVICE_ALREADY_STARTED
+          - CONSUMER_UNSUBSCRIPTION_FAILED
+          - CONSUMER_SUBSCRIPTION_FAILED
+          - INVALID_SUPPORT_ROLE_ASSOCIATION
+          - INVALID_SUPPORT_ROLE_NAME
+          - INVALID_SUPPORT_ROLE_USER_RIGHTS
+          - INVALID_SUPPORT_ROLE_PERMISSIONS
+          - LOAN_ACCOUNT_FIELD_NOT_EDITABLE
+          - INCOMPATIBLE_ARREARS_TOLERANCE_METHOD_AND_PRODUCT_TYPE
+          - TRANSACTION_CHANNEL_NOT_ALLOWED_WHEN_DISBURSE_TO_DEPOSIT
+          - INVALID_TARGET_ACCOUNT_STATE_FOR_DEPOSIT
+          - FEE_AMOUNT_ALREADY_DEFINED_IN_PRODUCT
+          - MANDATORY_FEE_AMOUNT
+          - INVALID_SORTING_SELECTION
+          - BLACKLISTED_CLIENT_NOT_EDITABLE
+          - INVALID_STRING_VALUE
+          - NOTIFICATION_STATE_IS_REQUIRED
+          - NOTIFICATION_EVENT_MESSAGE_IS_REQUIRED
+          - INSTALLMENT_NUMBER_MANDATORY_FOR_FIXED_ACCOUNTS
+          - CLIENT_ID_ANONYMIZATION_ERROR
+          - INSTALLMENT_NUMBER_NOT_ALLOWED_FOR_DYNAMIC_ACCOUNTS
+          - INVALID_INSTALLMENT_NUMBER
+          - CANNOT_APPLY_FEE_ON_PAID_INSTALLMENT
+          - MANDATORY_ACCOUNT_HOLDER_TYPE
+          - CLIENT_DOES_NOT_HAVE_EXITED_STATE
+          - UNSUBSCRIBE_CLIENT_FROM_NOTIFICATIONS_ERROR
+          - CLIENT_PERSONAL_INFORMATION_ANONYMIZATION_ERROR
+          - CLIENT_LOAN_ACCOUNTS_ANONYMIZATION_ERROR
+          - CLIENT_SAVINGS_ACCOUNTS_ANONYMIZATION_ERROR
+          - CLIENT_LINES_OF_CREDIT_ANONYMIZATION_ERROR
+          - CLIENT_GUARANTEES_ANONYMIZATION_ERROR
+          - CLIENT_NOTIFICATION_MESSAGES_ANONYMIZATION_ERROR
+          - CLIENT_ASSOCIATED_TASKS_ANONYMIZATION_ERROR
+          - INVALID_API_KEY
+          - API_KEY_REFRESH_ERROR
+          - FILE_NOT_FOUND
+          - UPLOADED_FILE_NOT_FOUND
+          - MISSING_CLIENT_ROLE
+          - BACKGROUND_PROCESS_STATE_IS_REQUIRED
+          - BACKGROUND_PROCESS_STATE_CANNOT_BE_IN_PROGRESS
+          - NOT_ALLOWED_TO_CREATE_REOPEN_ACCOUNTS_WITH_RECALCULATE_SCHEDULE_KEEP_SAME_TOTAL_REPAYMENT_AMOUNT
+          - NOT_ALLOWED_TO_CREATE_REOPEN_ACCOUNTS_WITH_DEPRECATED_REDUCE_NUMBER_OF_INSTALLMENTS
+          - NOT_ALLOWED_TO_REOPEN_REVOLVING_ACCOUNTS_WITHOUT_KEEP_EMPTY_INSTALLMENTS_SCHEDULE
+          - FEATURE_NOT_ENABLED
+          - AUTOMATIC_END_OF_DAY_PROCESSING
+          - ACCOUNT_NOT_ACTIVE
+          - DUPLICATE_ENTRY_FOR_CUSTOM_FIELD_VALUE
+          - ACCOUNT_ACTIVATION_FAILED
+          - INSUFFICIENT_AVAILABLE_AMOUNT_FOR_AUTHORIZATION_HOLD_ON_LOANS
+          - INVALID_MCC_EXPIRATION_ENTRY
+          - MCC_ALREADY_EXISTS
+          - MCC_EXPIRATION_ENTRY_NOT_FOUND
+          - PRODUCT_DISBURSEMENT_FEES_PREVENT_CARD_ATTACHMENT
+          - INVALID_API_CONSUMER_USERNAME
+          - YAML_PROCESSING_FAILED
+          - CARD_TRANSACTION_REVERSAL_CANNOT_BE_ADJUSTED
+          - DUPLICATE_CUSTOM_FIELD_SELECTION_ID
+          - INVALID_DECIMAL_SEPARATOR
+          - INVALID_DATE_FORMAT
+          - HAS_INVALID_DATE_CHARACTER
+          - MISSING_REQUIRED_DATE_CHARACTER
+          - INVALID_DATE_TIME_FORMAT
+          - HAS_INVALID_DATE_TIME_CHARACTER
+          - MISSING_REQUIRED_DATE_TIME_CHARACTER
+          - ROLE_ID_ALREADY_IN_USE
+          - HYBRID_GROUP_NOT_AVAILABLE_FOR_DBEI_CAPITALIZED_INTEREST
+          - HYBRID_GROUP_NOT_AVAILABLE_WHEN_REDRAW_ENABLED
+          - PRODUCT_LINKING_NOT_AVAILABLE_WHEN_REDRAW_ENABLED
+          - FUNDING_SOURCES_NOT_AVAILABLE_WHEN_REDRAW_ENABLED
+          - TAXES_NOT_AVAILABLE_WHEN_REDRAW_ENABLED
+          - REDRAW_AND_OFFSET_SETTINGS_ENABLED_SIMULTANEOUSLY
+          - HYBRID_GROUP_NOT_AVAILABLE_FOR_OFFSET_LOAN
+          - INCONSISTENT_OFFSET_SETTINGS_WITH_PRODUCT_CONFIGURATION
+          - INCONSISTENT_OFFSET_SETTINGS_WITH_OFFSET_FEATURE
+          - PRODUCT_LINKING_IS_MANDATORY_WHEN_OFFSET_ENABLED
+          - LINKED_DEPOSIT_PRODUCT_DOES_NOT_ALLOW_OFFSET
+          - LINKED_DEPOSIT_PRODUCT_DOES_NOT_EXIST
+          - FUNDING_SOURCES_NOT_AVAILABLE_WHEN_OFFSET_ENABLED
+          - TAXES_NOT_AVAILABLE_WHEN_OFFSET_ENABLED
+          - ACCOUNT_HAS_POSITIVE_OR_ZERO_BALANCE
+          - ACCOUNT_DOES_NOT_ALLOW_OVERDRAFT
+          type: string
+      type: object
+    DisbursementDetails:
+      description: The the disbursement details it holds the information related to
+        the disbursement details as disbursement date, first repayment date, disbursement
+        fees.
+      example:
+        transactionDetails:
+          encodedKey: encodedKey
+          internalTransfer: true
+          transactionChannelKey: transactionChannelKey
+          transactionChannelId: transactionChannelId
+          targetDepositAccountKey: targetDepositAccountKey
+        expectedDisbursementDate: 2016-09-06T13:37:50+03:00
+        fees:
+        - amount: 0.8008281904610115
+          predefinedFeeEncodedKey: predefinedFeeEncodedKey
+          encodedKey: encodedKey
+        - amount: 0.8008281904610115
+          predefinedFeeEncodedKey: predefinedFeeEncodedKey
+          encodedKey: encodedKey
+        firstRepaymentDate: 2016-09-06T13:37:50+03:00
+        disbursementDate: 2016-09-06T13:37:50+03:00
+        encodedKey: encodedKey
+      properties:
+        transactionDetails:
+          $ref: '#/components/schemas/LoanTransactionDetails'
+        expectedDisbursementDate:
+          description: The date of the expected disbursement.Stored as Organization
+            Time.
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        fees:
+          description: List of fees that should be applied at the disbursement time.
+          items:
+            $ref: '#/components/schemas/CustomPredefinedFee'
+          type: array
+        firstRepaymentDate:
+          description: The date of the expected first repayment. Stored as Organization
+            Time.
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        disbursementDate:
+          description: The activation date, the date when the disbursement actually
+            took place.
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        encodedKey:
+          description: The encoded key of the disbursement details, auto generated,
+            unique
+          readOnly: true
+          type: string
+      type: object
+    Guarantor:
+      description: Guarantor, holds information about a client guaranty entry. It
+        can be defined based on another client which guarantees (including or not
+        a savings account whether it is a client of the organization using Mambu or
+        not) or based on a value the client holds (an asset)
+      example:
+        amount: 6.628464275087742
+        depositAccountKey: depositAccountKey
+        assetName: assetName
+        encodedKey: encodedKey
+        guarantorKey: guarantorKey
+        guarantorType: CLIENT
+      properties:
+        amount:
+          description: The amount used by the client for the guaranty
+          type: number
+        depositAccountKey:
+          description: The key of the deposit account used by the guarantor (populated
+            when the guaranty type is GUARANTOR). It can be null.
+          type: string
+        assetName:
+          description: The name of a value the client guarantees with (populated when
+            the guaranty type is ASSET)
+          type: string
+        encodedKey:
+          description: The encoded key of the security, auto generated, unique.
+          readOnly: true
+          type: string
+        guarantorKey:
+          description: The key of the client/group used as the guarantor.
+          type: string
+        guarantorType:
+          description: The type of the guarantor (client/group)
+          enum:
+          - CLIENT
+          - GROUP
+          type: string
+      required:
+      - amount
+      - guarantorKey
+      - guarantorType
+      type: object
+    PatchOperation:
+      description: A single change that needs to be made to a resource
+      example:
+        op: ADD
+        path: path
+        from: from
+        value: '{}'
+      properties:
+        op:
+          description: The change to perform
+          enum:
+          - ADD
+          - REPLACE
+          - REMOVE
+          - MOVE
+          type: string
+        path:
+          description: The field to perform the operation on
+          type: string
+        from:
+          description: The field from where a value should be moved, when using move
+          type: string
+        value:
+          description: The value of the field, can be null
+          properties: {}
+          type: object
+      required:
+      - op
+      - path
+      type: object
+    Asset:
+      description: Asset, holds information about a client asset entry.
+      example:
+        amount: 2.3021358869347655
+        depositAccountKey: depositAccountKey
+        assetName: assetName
+        encodedKey: encodedKey
+        guarantorKey: guarantorKey
+        guarantorType: CLIENT
+      properties:
+        amount:
+          description: The amount used by the client for the guaranty
+          type: number
+        depositAccountKey:
+          description: The key of the deposit account used by the guarantor (populated
+            when the guaranty type is GUARANTOR). It can be null.
+          type: string
+        assetName:
+          description: The name of a value the client guarantees with (populated when
+            the guaranty type is ASSET)
+          type: string
+        encodedKey:
+          description: The encoded key of the security, auto generated, unique.
+          readOnly: true
+          type: string
+        guarantorKey:
+          description: The key of the client/group used as the guarantor.
+          type: string
+        guarantorType:
+          description: The type of the guarantor (client/group)
+          enum:
+          - CLIENT
+          - GROUP
+          type: string
+      required:
+      - amount
+      - assetName
+      type: object
+    PatchOperationsList:
+      items:
+        $ref: '#/components/schemas/PatchOperation'
+      type: array
+    LoanAccountAction:
+      description: Allows specifying the action details for a loan account
+      example:
+        notes: notes
+        action: REQUEST_APPROVAL
+      properties:
+        action:
+          description: The action type to be applied
+          enum:
+          - REQUEST_APPROVAL
+          - SET_INCOMPLETE
+          - APPROVE
+          - UNDO_APPROVE
+          - REJECT
+          - WITHDRAW
+          - CLOSE
+          - UNDO_REJECT
+          - UNDO_WITHDRAW
+          - UNDO_CLOSE
+          type: string
+        notes:
+          description: The notes related to the action performed
+          type: string
+      required:
+      - action
+      type: object
+    LoanTransactionDetails:
+      description: Contains the details about the loan transaction including fields
+        like encoded key, transaction channel key and channel id.
+      example:
+        encodedKey: encodedKey
+        internalTransfer: true
+        transactionChannelKey: transactionChannelKey
+        transactionChannelId: transactionChannelId
+        targetDepositAccountKey: targetDepositAccountKey
+      properties:
+        encodedKey:
+          description: The encoded key of the entity, generated, globally unique
+          readOnly: true
+          type: string
+        internalTransfer:
+          description: Whether the transaction was transferred between loans or deposit
+            accounts
+          type: boolean
+        transactionChannelKey:
+          description: The encoded key of the transaction channel associated with
+            the transaction details.
+          type: string
+        transactionChannelId:
+          description: The id of the transaction channel associated with the transaction
+            details.
+          type: string
+        targetDepositAccountKey:
+          description: In case of a transaction to a deposit account this represent
+            the deposit account key to which the transaction was made.
+          type: string
+      type: object
+    Balances:
+      description: The loan account balance details.
+      example:
+        interestFromArrearsPaid: 3.5571952270680973
+        principalDue: 6.965117697638846
+        interestBalance: 1.284659006116532
+        holdBalance: 2.8841621266687802
+        principalPaid: 6.778324963048013
+        penaltyDue: 6.878052220127876
+        feesBalance: 5.944895607614016
+        penaltyBalance: 6.704019297950036
+        redrawBalance: 3.353193347011243
+        interestFromArrearsBalance: 3.0937452626664474
+        principalBalance: 7.143538047012306
+        interestDue: 0.8851374739011653
+        penaltyPaid: 7.058770351582356
+        feesPaid: 6.519180951018382
+        interestFromArrearsDue: 0.10263654006109402
+        feesDue: 4.652396432933246
+        interestPaid: 8.969578798196912
+      properties:
+        interestFromArrearsPaid:
+          description: The interest from arrears paid, indicates total interest from
+            arrears paid into the account.
+          readOnly: true
+          type: number
+        principalDue:
+          description: The principal due, indicates how much principal it's due at
+            this moment.
+          readOnly: true
+          type: number
+        interestBalance:
+          description: The interest balance. Represents the total interest owned by
+            the client, from now on (total interest accrued for account - interest
+            paid).
+          readOnly: true
+          type: number
+        holdBalance:
+          description: The sum of all the authorization hold amounts on this account.
+          readOnly: true
+          type: number
+        principalPaid:
+          description: The principal paid, holds the value of the total paid into
+            the account.
+          readOnly: true
+          type: number
+        penaltyDue:
+          description: The penalty due. Represents the total penalty amount due for
+            the account.
+          readOnly: true
+          type: number
+        feesBalance:
+          description: The fees balance. Represents the total fees expected to be
+            paid on this account at a given moment.
+          readOnly: true
+          type: number
+        penaltyBalance:
+          description: The penalty balance. Represents the total penalty expected
+            to be paid on this account at a given moment.
+          readOnly: true
+          type: number
+        redrawBalance:
+          description: The total redraw amount owned by the client, from now on.
+          type: number
+        interestFromArrearsBalance:
+          description: The interest from arrears balance. Indicates interest from
+            arrears owned by the client, from now on. (total interest from arrears
+            accrued for account - interest from arrears paid).
+          readOnly: true
+          type: number
+        principalBalance:
+          description: The total principal owned by the client, from now on (principal
+            disbursed - principal paid).
+          readOnly: true
+          type: number
+        interestDue:
+          description: The interest due. Indicates how much interest it's due for
+            the account at this moment.
+          readOnly: true
+          type: number
+        penaltyPaid:
+          description: The Penalty paid. Represents the total penalty amount paid
+            for the account.
+          readOnly: true
+          type: number
+        feesPaid:
+          description: The fees paid. Represents the total fees paid for the account.
+          readOnly: true
+          type: number
+        interestFromArrearsDue:
+          description: The interest from arrears due. Indicates how much interest
+            from arrears it's due for the account at this moment.
+          readOnly: true
+          type: number
+        feesDue:
+          description: The fees due. Representing the total fees due for the account.
+          readOnly: true
+          type: number
+        interestPaid:
+          description: The interest paid, indicates total interest paid into the account.
+          readOnly: true
+          type: number
+      type: object
+    ChangeInterestRateLoanAccountInput:
+      description: Represents the request payload for performing an interest rate
+        change action
+      example:
+        interestRate: 0.8008281904610115
+        notes: notes
+        valueDate: 2016-09-06T13:37:50+03:00
+      properties:
+        interestRate:
+          description: The new interest rate to be available on the account
+          type: number
+        valueDate:
+          description: The date when to change the interest rate (as Organization
+            Time)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        notes:
+          description: The notes for the change interest rate action performed on
+            the loan account
+          type: string
+      required:
+      - interestRate
+      - valueDate
+      type: object
+    TransactionDetails:
+      description: Contains the details about transaction including fields like transaction
+        channel key and channel id
+      example:
+        transactionChannelKey: transactionChannelKey
+        transactionChannelId: transactionChannelId
+      properties:
+        transactionChannelId:
+          description: The id of the transaction channel associated with the transaction
+            details.
+          type: string
+        transactionChannelKey:
+          description: The encoded key of the transaction channel associated with
+            the transaction details.
+          type: string
+      type: object
+    ErrorResponse:
+      properties:
+        errors:
+          items:
+            $ref: '#/components/schemas/RestError'
+          type: array
+      type: object
+    LoanActionDetails:
+      description: Allows specifying the action details for an action performed on
+        a loan account
+      example:
+        notes: notes
+      properties:
+        notes:
+          description: The notes for the action performed on the loan account
+          type: string
+      type: object
+    LoanTranche:
+      description: 'In some cases organizations may approve loans but not disburse
+        the full amount initially. They would like to spread the disbursement (and
+        risk) over time. Likewise for the client, they may not need the full loan
+        amount up front. They may want to have a loan to buy some equipment for their
+        business but will make one purchase today and another purchase in a few months.  In
+        these cases, they don''t need the full amount and wouldn''t want to pay interest
+        on cash they don''t need yet. A solution for this matter is the usage of disbursement
+        in tranches. This class holds the information required for one of this tranche. '
+      example:
+        amount: 3.616076749251911
+        disbursementDetails:
+          expectedDisbursementDate: 2016-09-06T13:37:50+03:00
+          disbursementTransactionKey: disbursementTransactionKey
+        encodedKey: encodedKey
+        trancheNumber: 2
+      properties:
+        encodedKey:
+          description: The encoded key of the transaction details , auto generated,
+            unique.
+          readOnly: true
+          type: string
+        amount:
+          description: The amount this tranche has available for disburse
+          type: number
+        disbursementDetails:
+          $ref: '#/components/schemas/TrancheDisbursementDetails'
+        trancheNumber:
+          description: Index indicating the tranche number
+          format: int32
+          type: integer
+      required:
+      - amount
+      type: object
+    PrepaymentSettings:
+      description: The prepayment settings, holds all prepayment properties.
+      example:
+        applyInterestOnPrepaymentMethod: AUTOMATIC
+        elementsRecalculationMethod: PRINCIPAL_EXPECTED_FIXED
+        principalPaidInstallmentStatus: PARTIALLY_PAID
+        prepaymentRecalculationMethod: NO_RECALCULATION
+      properties:
+        elementsRecalculationMethod:
+          description: The elements recalculation method, indicates how the declining
+            balance with equal installments repayments are recalculated.
+          enum:
+          - PRINCIPAL_EXPECTED_FIXED
+          - TOTAL_EXPECTED_FIXED
+          type: string
+        principalPaidInstallmentStatus:
+          description: Installment status for the case when principal is paid off
+            (copied from loan product).
+          enum:
+          - PARTIALLY_PAID
+          - PAID
+          - ORIGINAL_TOTAL_EXPECTED_PAID
+          type: string
+        prepaymentRecalculationMethod:
+          description: Prepayment recalculation method copied from the loan product
+            on which this account is based.
+          enum:
+          - NO_RECALCULATION
+          - RESCHEDULE_REMAINING_REPAYMENTS
+          - RECALCULATE_SCHEDULE_KEEP_SAME_NUMBER_OF_TERMS
+          - RECALCULATE_SCHEDULE_KEEP_SAME_PRINCIPAL_AMOUNT
+          - RECALCULATE_SCHEDULE_KEEP_SAME_TOTAL_REPAYMENT_AMOUNT
+          - REDUCE_AMOUNT_PER_INSTALLMENT
+          - REDUCE_NUMBER_OF_INSTALLMENTS
+          - REDUCE_NUMBER_OF_INSTALLMENTS_NEW
+          type: string
+        applyInterestOnPrepaymentMethod:
+          description: Apply interest on prepayment method copied from loan product
+            on which this account is based.
+          enum:
+          - AUTOMATIC
+          - MANUAL
+          type: string
+      type: object
+    TrancheDisbursementDetails:
+      description: The disbursement details regarding a loan tranche.
+      example:
+        expectedDisbursementDate: 2016-09-06T13:37:50+03:00
+        disbursementTransactionKey: disbursementTransactionKey
+      properties:
+        expectedDisbursementDate:
+          description: The date when this tranche is supposed to be disbursed (as
+            Organization Time)
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
+        disbursementTransactionKey:
+          description: The key of the disbursement transaction logged when this tranche
+            was disbursed. This field will be null until the tranche disbursement
+          type: string
+      type: object
+    Card:
+      description: A card which can be associated to an account (deposit / loan).
+        Cards consist only in card references (tokens). Card details are not stored
+        by Mambu.
+      properties:
+        referenceToken:
+          description: The reference token of the card
+          type: string
+      required:
+      - referenceToken
+      type: object
+    AuthorizationHold:
+      description: An authorization hold entry as a result of a hold action performed
+        by a card acceptor.
+      properties:
+        amount:
+          description: The amount of money to be held as a result of the authorization
+            hold request.
+          type: number
+        advice:
+          description: Whether the given request should be accepted without balance
+            validations.
+          type: boolean
+        cardAcceptor:
+          $ref: '#/components/schemas/CardAcceptor'
+        cardToken:
+          description: The reference token of the card.
+          readOnly: true
+          type: string
+        externalReferenceId:
+          description: The external reference ID to be used to reference the account
+            hold in subsequent requests.
+          type: string
+        originalAmount:
+          description: The original amount of money to be held as a result of the
+            authorization hold request.
+          type: number
+        exchangeRate:
+          description: The exchange rate for the original currency.
+          type: number
+        encodedKey:
+          description: The internal ID of the authorization hold, auto generated,
+            unique.
+          readOnly: true
+          type: string
+        userTransactionTime:
+          description: The formatted time at which the user made this authorization
+            hold.
+          type: string
+        originalCurrency:
+          description: The original currency in which the hold was created.
+          type: string
+        currencyCode:
+          description: The ISO currency code in which the hold was created. The amounts
+            are stored in the base currency, but the user could have enter it in a
+            foreign currency.
+          type: string
+        status:
+          description: The authorization hold status.
+          enum:
+          - PENDING
+          - REVERSED
+          - SETTLED
+          - EXPIRED
+          readOnly: true
+          type: string
+      required:
+      - advice
+      - amount
+      - externalReferenceId
+      type: object
+    PayOffAdjustableAmounts:
+      description: Adjustable amounts to be paid for Pay Off action
+      example:
+        penaltyPaid: 6.027456183070403
+        feesPaid: 0.8008281904610115
+        interestPaid: 1.4658129805029452
+      properties:
+        feesPaid:
+          description: The fee amount to be paid for Pay Off action
+          type: number
+        penaltyPaid:
+          description: The penalty amount to be paid for Pay Off action
+          type: number
+        interestPaid:
+          description: The interest amount to be paid for Pay Off action
+          type: number
+      type: object
+  securitySchemes:
+    basic:
+      description: ""
+      scheme: basic
+      type: http
+
