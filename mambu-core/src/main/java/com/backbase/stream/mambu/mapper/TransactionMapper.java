@@ -61,6 +61,7 @@ public class TransactionMapper {
 
 
         return Optional.of(new TransactionItemPost()
+            .billingStatus("BILLED")
             .externalId(depositTransaction.getId())
             .externalArrangementId(arrangementId)
             .typeGroup(transactionTypeGroup)
