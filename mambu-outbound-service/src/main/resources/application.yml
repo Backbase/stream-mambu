@@ -27,9 +27,25 @@ spring:
 logging:
   level:
     root: info
-
+    sun: off
+    javax: off
+    org.apache.activemq: off
+    jdk: off
 backbase:
   stream:
+    start:
+      title: "Stream Mambu"
+      subTitle: Stream <strong class="highlight">Mambu</strong>
+      header: Stream <strong class="highlight">Mambu</strong>
+      description: "Seamlessly integrate with Mambu with Stream Mambu. This service is provides an implementation for Account Integration Services, Transactions and Payments"
+      footer: "MAMBU"
+      defaultAction:
+        name: Swagger
+        href: swagger-ui.html
+      navbarLinks:
+        - name: Communtiy
+          href: https://community.backbase.com
+
     dbs:
       user-manager-base-url: http://user-manager:8080
       access-control-base-url: http://access-control:8080

@@ -23,6 +23,7 @@ import reactor.ipc.netty.http.client.HttpClientException;
 @Slf4j
 @RequiredArgsConstructor
 @EnableScheduling
+@ConditionalOnProperty(value = "backbase.stream.mambu.filler.enabled", havingValue = "true")
 public class MambuDatabaseFiller {
 
     private final MambuAccountRepository mambuAccountRepository;

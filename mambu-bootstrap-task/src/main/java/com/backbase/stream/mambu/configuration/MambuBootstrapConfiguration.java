@@ -193,7 +193,7 @@ public class MambuBootstrapConfiguration {
     private JobProfileUser setupJobProfileUser(User user) {
         JobProfileUser jobProfileUser = new JobProfileUser();
         jobProfileUser.setUser(user);
-        jobProfileUser.setReferenceJobRoleNames(mambuBootstrapTaskConfiguration.getReferenceJobRoleNames());
+        jobProfileUser.setReferenceJobRoleNames(mambuBootstrapTaskConfiguration.getDefaultReferenceJobRoleNames());
         return jobProfileUser;
     }
 

@@ -13,3 +13,37 @@ spec:
   ports:
     - port: 8080
       targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mambu-outbound
+  labels:
+    app: mambu-outbound
+    tier: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: mambu-outbound-service
+    tier: backend
+  ports:
+    - port: 8080
+      targetPort: http
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: account-integration-service
+  labels:
+    app: account-integration-service
+    tier: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: mambu-outbound-service
+    tier: backend
+  ports:
+    - port: 8080
+      targetPort: http
+

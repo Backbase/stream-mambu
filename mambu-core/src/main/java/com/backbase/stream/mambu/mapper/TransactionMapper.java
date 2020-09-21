@@ -72,6 +72,7 @@ public class TransactionMapper {
                 .currencyCode(depositTransaction.getCurrencyCode()))
             .description(description)
             .creditDebitIndicator(indicator));
+
     }
 
     public Optional<TransactionItem> mapPull(DepositTransaction depositTransaction, String arrangementId) {

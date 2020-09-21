@@ -108,9 +108,10 @@ backbase:
 bootstrap:
   ingest-mambu-clients: true
   parent-legal-entity-external-id: mambu-bank
-
   default-loan-currency: EUR
   mambu-branch-id: "dope"
+  default-reference-job-role-names:
+    - "Retail User - EU"
   legal-entity:
     name: "Backbase Root Bank"
     realmName: "backbase"
@@ -254,6 +255,7 @@ bootstrap:
       - name: "Mambu Bank"
         realmName: "backbase"
         externalId: "mambu-bank"
+
 
 logging:
   level:

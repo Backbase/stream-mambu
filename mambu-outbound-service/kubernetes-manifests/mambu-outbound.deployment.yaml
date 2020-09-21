@@ -76,5 +76,9 @@ spec:
                 configMapKeyRef:
                   key: R2DBC_USERNAME
                   name: mambu-mysql-config
+            - name: "backbase.stream.mambu.listener.enabled"
+              value: "true"
+            - name: "backbase.stream.mambu.filler.enabled"
+              value: "true"
             - name: JAVA_TOOL_OPTIONS
               value: "-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n,quiet=y -Deureka.client.enabled=true"

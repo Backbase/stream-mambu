@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Import;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
@@ -29,7 +30,7 @@ import reactor.core.publisher.Flux;
 @Slf4j
 @RequiredArgsConstructor
 @Import({TransactionServiceConfiguration.class, MambuConfiguration.class, DepositTransactionsService.class, CursorServiceConfiguration.class, AccessControlConfiguration.class})
-//@ConditionalOnProperty(value = "backbase.stream.mambu.listener.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "backbase.stream.mambu.listener.enabled", havingValue = "true")
 public class DbsEventListener {
 
     private final TransactionService transactionService;

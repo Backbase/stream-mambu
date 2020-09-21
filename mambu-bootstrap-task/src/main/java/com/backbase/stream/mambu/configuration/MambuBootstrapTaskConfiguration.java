@@ -29,11 +29,12 @@ public class MambuBootstrapTaskConfiguration {
     private String parentLegalEntityExternalId = "mambu-bank";
 
 
-    private List<String> referenceJobRoleNames = Collections.emptyList();
+    private List<String>  defaultReferenceJobRoleNames = Collections.emptyList();
 
 
     /**
      * Default Loan Currency
+     *
      */
     private String defaultLoanCurrency;
 
