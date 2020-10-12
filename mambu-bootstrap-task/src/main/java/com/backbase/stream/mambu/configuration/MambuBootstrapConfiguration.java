@@ -46,6 +46,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.util.StringUtils;
+import org.yaml.snakeyaml.Yaml;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -162,6 +163,10 @@ public class MambuBootstrapConfiguration {
 
     private ProductCatalog getProductCatalog() {
         Optional<ProductCatalog> productCatalog = productCatalogService.getProductCatalog().blockOptional();
+
+        Yaml yaml = new Yaml();
+        System.out.println(yaml.dump(productCatalog.get()));
+
         return productCatalog.orElseThrow(() -> new NullPointerException("Unable to get product catalog"));
     }
 
