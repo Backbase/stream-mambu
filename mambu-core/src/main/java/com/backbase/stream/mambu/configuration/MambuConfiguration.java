@@ -8,7 +8,7 @@ import com.backbase.mambu.deposit.transactions.api.DepositTransactionsApi;
 import com.backbase.mambu.loan.products.api.LoanProductsApi;
 import com.backbase.mambu.loans.api.LoanAccountsApi;
 import com.backbase.stream.mambu.mapper.ProductMapper;
-import com.backbase.stream.mambu.mapper.TransactionMapper;
+import com.backbase.stream.mambu.mapper.MambuTransactionMapper;
 import com.backbase.stream.mambu.service.DepositTransactionsService;
 import com.backbase.stream.webclient.DbsWebClientConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,8 +40,8 @@ public class MambuConfiguration {
     @Bean
     public DepositTransactionsService reactiveDepositTransactionsService(
         DepositTransactionsApi depositTransactionsApi,
-        TransactionMapper transactionMapper) {
-        return new DepositTransactionsService(depositTransactionsApi, transactionMapper);
+        MambuTransactionMapper mambuTransactionMapper) {
+        return new DepositTransactionsService(depositTransactionsApi, mambuTransactionMapper);
     }
 
     @Bean
@@ -100,8 +100,8 @@ public class MambuConfiguration {
 
 
     @Bean
-    public TransactionMapper transactionMapper(MambuConfigurationProperties mambuTransactionConfigurationProperties) {
-        return new TransactionMapper(mambuTransactionConfigurationProperties);
+    public MambuTransactionMapper mambuTransactionMapper(MambuConfigurationProperties mambuTransactionConfigurationProperties) {
+        return new MambuTransactionMapper(mambuTransactionConfigurationProperties);
     }
 
     @Bean

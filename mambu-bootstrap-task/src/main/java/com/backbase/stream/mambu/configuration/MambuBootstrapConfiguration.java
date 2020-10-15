@@ -43,6 +43,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.task.configuration.EnableTask;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.util.StringUtils;
@@ -53,7 +54,6 @@ import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
-@EnableTask
 @Configuration
 @Slf4j
 @EnableConfigurationProperties({MambuBootstrapTaskConfiguration.class})
@@ -64,6 +64,7 @@ import reactor.util.function.Tuples;
     TransactionServiceConfiguration.class
 })
 @RequiredArgsConstructor
+@ComponentScan("com.backbase.stream.mambu")
 public class MambuBootstrapConfiguration {
 
     private final LegalEntitySaga legalEntitySaga;
@@ -78,13 +79,9 @@ public class MambuBootstrapConfiguration {
     private final ReactiveProductCatalogService productCatalogService;
     private final DepositProductsApi depositProductsApi;
     private final LoanProductsApi loanProductsApi;
-    @Bean
-    public CommandLineRunner commandLineRunner() {
-        return this::run;
-    }
 
-    private void run(String... args) {
-        setupLegalEntityHieararchy();
+    public void execute() {
+//        setupLegalEntityHierarchy();
         Flux<LegalEntity> clients = setupLegalEntities();
         // Get Product Catalog and set it as context
         ProductCatalog productCatalog = getProductCatalog();
@@ -102,7 +99,6 @@ public class MambuBootstrapConfiguration {
         if (mambuBootstrapTaskConfiguration.isIngestMambuTransactions()) {
             ingestMambuTransactions(legalEntityAggregates);
         }
-        System.exit(0);
     }
 
     private void setupProductCatalog(ProductCatalog productCatalog) {
@@ -163,10 +159,6 @@ public class MambuBootstrapConfiguration {
 
     private ProductCatalog getProductCatalog() {
         Optional<ProductCatalog> productCatalog = productCatalogService.getProductCatalog().blockOptional();
-
-        Yaml yaml = new Yaml();
-        System.out.println(yaml.dump(productCatalog.get()));
-
         return productCatalog.orElseThrow(() -> new NullPointerException("Unable to get product catalog"));
     }
 
@@ -180,7 +172,8 @@ public class MambuBootstrapConfiguration {
                 LegalEntity legalEntity = setupLegalEntity(client, fullName, user, jobProfileUser);
                 log.info("Setup Legal Entity: {}", legalEntity.getName());
                 return legalEntity;
-            });
+            })
+            .filter(legalEntity -> legalEntity.getExternalId().equals("bart.veenstra"));
     }
 
     private LegalEntity setupLegalEntity(com.backbase.mambu.clients.model.Client client, String fullName, User user, JobProfileUser jobProfileUser) {
@@ -221,7 +214,7 @@ public class MambuBootstrapConfiguration {
         return user;
     }
 
-    private void setupLegalEntityHieararchy() {
+    private void setupLegalEntityHierarchy() {
         log.info("Setting up Root Legal Entity Hierarchy");
         LegalEntity legalEntity = mambuBootstrapTaskConfiguration.getLegalEntity();
         if (legalEntity == null) {

@@ -8,7 +8,7 @@ import com.backbase.mambu.deposit.transactions.model.DepositTransactionFilterCri
 import com.backbase.mambu.deposit.transactions.model.DepositTransactionSearchCriteria;
 import com.backbase.mambu.deposit.transactions.model.DepositTransactionSortingCriteria;
 import com.backbase.stream.cursor.model.IngestionCursor;
-import com.backbase.stream.mambu.mapper.TransactionMapper;
+import com.backbase.stream.mambu.mapper.MambuTransactionMapper;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class DepositTransactionsService {
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private final DepositTransactionsApi depositTransactionsApi;
-    private final TransactionMapper transactionMapper;
+    private final MambuTransactionMapper mambuTransactionMapper;
 
     public Flux<TransactionItemPost> retrieveTransactions(IngestionCursor ingestionCursor) {
         log.debug("ingestionCursor: {}", ingestionCursor);
@@ -47,12 +47,12 @@ public class DepositTransactionsService {
 
     public Flux<TransactionItemPost> getTransactionItemsForOutbound(String externalArrangementId, LocalDate dateFrom) {
         Flux<DepositTransaction> depositTransactionFlux = getDepositTransactions(externalArrangementId, dateFrom);
-        return depositTransactionFlux.flatMap(depositTransaction -> Mono.justOrEmpty(transactionMapper.map(depositTransaction, externalArrangementId)));
+        return depositTransactionFlux.flatMap(depositTransaction -> Mono.justOrEmpty(mambuTransactionMapper.map(depositTransaction, externalArrangementId)));
     }
 
     public Flux<TransactionItem> getTransactionItemsForPull(String externalArrangementId, LocalDate dateFrom) {
         Flux<DepositTransaction> depositTransactionFlux = getDepositTransactions(externalArrangementId, dateFrom);
-        return depositTransactionFlux.flatMap(depositTransaction -> Mono.justOrEmpty(transactionMapper.mapPull(depositTransaction, externalArrangementId)));
+        return depositTransactionFlux.flatMap(depositTransaction -> Mono.justOrEmpty(mambuTransactionMapper.mapPull(depositTransaction, externalArrangementId)));
     }
 
 

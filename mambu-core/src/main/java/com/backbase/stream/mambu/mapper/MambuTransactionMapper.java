@@ -14,11 +14,11 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class TransactionMapper {
+public class MambuTransactionMapper {
 
     private final MambuConfigurationProperties mambuConfigurationProperties;
 
-    public TransactionMapper(MambuConfigurationProperties mambuConfigurationProperties) {
+    public MambuTransactionMapper(MambuConfigurationProperties mambuConfigurationProperties) {
         this.mambuConfigurationProperties = mambuConfigurationProperties;
     }
 

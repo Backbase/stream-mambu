@@ -16,7 +16,7 @@ import com.backbase.stream.dbs.paymentorder.outbound.model.Paymentordercancelres
 import com.backbase.stream.dbs.paymentorder.outbound.model.PostalAddress;
 import com.backbase.stream.dbs.paymentorder.outbound.model.RemittanceInformation;
 import com.backbase.stream.dbs.paymentorder.outbound.model.TransferTransactionInformation;
-import com.backbase.stream.mambu.mapper.TransactionMapper;
+import com.backbase.stream.mambu.mapper.MambuTransactionMapper;
 import com.backbase.stream.mambu.outbound.repository.MambuAccountRepository;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import java.math.BigDecimal;
@@ -47,7 +47,7 @@ class PaymentOutboundController implements PaymentOrdersApi {
 
     private final TransactionService transactionService;
 
-    private final TransactionMapper transactionMapper;
+    private final MambuTransactionMapper mambuTransactionMapper;
 
     @Override
     public Mono<ResponseEntity<PaymentordercancelresponsePost>> postCancelByBankReferenceId(@Size(max = 64) String bankReferenceId, ServerWebExchange exchange) {
@@ -107,7 +107,7 @@ class PaymentOutboundController implements PaymentOrdersApi {
 
     private void enrichTransaction(PaymentorderPost paymentOrder, DepositTransaction depositTransaction) {
 
-        Optional<TransactionItemPost> transactionItemPost = transactionMapper.map(depositTransaction, paymentOrder.getOriginatorAccount().getExternalArrangementId());
+        Optional<TransactionItemPost> transactionItemPost = mambuTransactionMapper.map(depositTransaction, paymentOrder.getOriginatorAccount().getExternalArrangementId());
 
         transactionItemPost.ifPresent(transaction -> {
             TransferTransactionInformation transferTransactionInformation = paymentOrder.getTransferTransactionInformation();

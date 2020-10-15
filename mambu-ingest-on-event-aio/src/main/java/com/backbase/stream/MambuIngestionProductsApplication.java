@@ -8,6 +8,7 @@ import com.backbase.stream.cursor.model.LoginEvent;
 import com.backbase.stream.mambu.mapper.ProductMapper;
 import com.backbase.stream.mambu.service.DepositAccountsService;
 import com.backbase.stream.mambu.service.DepositTransactionsService;
+import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.ProductIngestionSaga;
 import com.backbase.stream.product.task.ProductGroupTask;
 import java.util.List;
@@ -38,7 +39,7 @@ public class MambuIngestionProductsApplication {
         private final AuditLoginEventListener auditLoginEventListener;
         private final DepositAccountsService reactiveDepositAccountsService;
         private final ProductMapper productMapper;
-        private final ProductIngestionSaga productIngestionSaga;
+        private final BatchProductIngestionSaga productIngestionSaga;
         private final DepositTransactionsService depositTransactionsService;
         private final TransactionService transactionService;
 
