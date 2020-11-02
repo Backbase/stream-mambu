@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-http-starter-parent</artifactId>
-        <version>2.10.0</version>
+        <version>2.11.0</version>
         <relativePath/>
     </parent>
 
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>cursor-publishers</artifactId>
-            <version>2.10.0</version>
+            <version>2.11.0</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-ui -->
@@ -63,7 +63,7 @@
 <!--        <dependency>-->
 <!--            <groupId>com.backbase.stream</groupId>-->
 <!--            <artifactId>stream-web-start-webflux</artifactId>-->
-<!--            <version>2.10.0</version>-->
+<!--            <version>2.11.0</version>-->
 <!--        </dependency>-->
 
         <dependency>
@@ -102,7 +102,7 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>transactions-core</artifactId>
-            <version>2.10.0</version>
+            <version>2.11.0</version>
         </dependency>
 
         <dependency>

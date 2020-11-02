@@ -1,6 +1,7 @@
 package com.backbase.stream.mambu.configuration;
 
 import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.productcatalog.model.ProductCatalog;
 import java.util.Collections;
 import java.util.List;
 import lombok.Data;
@@ -58,6 +59,8 @@ public class MambuBootstrapTaskConfiguration {
      * The Root Legal Entity including Subsidiaries
      */
     private LegalEntity legalEntity;
+
+    private ProductCatalog productCatalog;
 
 }
 

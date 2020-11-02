@@ -53,7 +53,7 @@
                     <plugin>
                         <groupId>com.backbase.oss</groupId>
                         <artifactId>boat-maven-plugin</artifactId>
-                        <version>0.1.9</version>
+                        <version>0.2.7</version>
                         <executions>
                             <execution>
                                 <id>mambu-deposit-transactions</id>
