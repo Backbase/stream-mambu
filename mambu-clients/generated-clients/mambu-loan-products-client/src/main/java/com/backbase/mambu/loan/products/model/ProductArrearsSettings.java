@@ -15,6 +15,7 @@ package com.backbase.mambu.loan.products.model;
 
 import java.util.Objects;
 import java.util.Arrays;
+import com.backbase.mambu.loan.products.model.DecimalInterval;
 import com.backbase.mambu.loan.products.model.IntegerIntervalConstraints;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.math.BigDecimal;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -30,7 +32,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @ApiModel(description = "The product arrears settings, shows whether the non working days are taken in consideration or not when applying penalties/late fees or when setting an account into arrears")
 @JsonPropertyOrder({
   ProductArrearsSettings.JSON_PROPERTY_MONTHLY_TOLERANCE_DAY,
+  ProductArrearsSettings.JSON_PROPERTY_TOLERANCE_FLOOR_AMOUNT,
   ProductArrearsSettings.JSON_PROPERTY_NON_WORKING_DAYS_METHOD,
+  ProductArrearsSettings.JSON_PROPERTY_TOLERANCE_PERCENTAGE_OF_OUTSTANDING_PRINCIPAL,
   ProductArrearsSettings.JSON_PROPERTY_TOLERANCE_PERIOD,
   ProductArrearsSettings.JSON_PROPERTY_ENCODED_KEY,
   ProductArrearsSettings.JSON_PROPERTY_TOLERANCE_CALCULATION_METHOD,
@@ -40,6 +44,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class ProductArrearsSettings {
   public static final String JSON_PROPERTY_MONTHLY_TOLERANCE_DAY = "monthlyToleranceDay";
   private Integer monthlyToleranceDay;
+
+  public static final String JSON_PROPERTY_TOLERANCE_FLOOR_AMOUNT = "toleranceFloorAmount";
+  private BigDecimal toleranceFloorAmount;
 
   /**
    * Shows whether the non working days are taken in consideration or not when applying penaltees/late fees or when setting an account into arrears
@@ -78,6 +85,9 @@ public class ProductArrearsSettings {
 
   public static final String JSON_PROPERTY_NON_WORKING_DAYS_METHOD = "nonWorkingDaysMethod";
   private NonWorkingDaysMethodEnum nonWorkingDaysMethod;
+
+  public static final String JSON_PROPERTY_TOLERANCE_PERCENTAGE_OF_OUTSTANDING_PRINCIPAL = "tolerancePercentageOfOutstandingPrincipal";
+  private DecimalInterval tolerancePercentageOfOutstandingPrincipal;
 
   public static final String JSON_PROPERTY_TOLERANCE_PERIOD = "tolerancePeriod";
   private IntegerIntervalConstraints tolerancePeriod;
@@ -129,7 +139,9 @@ public class ProductArrearsSettings {
   public enum DateCalculationMethodEnum {
     ACCOUNT_FIRST_WENT_TO_ARREARS("ACCOUNT_FIRST_WENT_TO_ARREARS"),
     
-    LAST_LATE_REPAYMENT("LAST_LATE_REPAYMENT");
+    LAST_LATE_REPAYMENT("LAST_LATE_REPAYMENT"),
+    
+    ACCOUNT_FIRST_BREACHED_MATERIALITY_THRESHOLD("ACCOUNT_FIRST_BREACHED_MATERIALITY_THRESHOLD");
 
     private String value;
 
@@ -187,6 +199,31 @@ public class ProductArrearsSettings {
   }
 
 
+  public ProductArrearsSettings toleranceFloorAmount(BigDecimal toleranceFloorAmount) {
+    
+    this.toleranceFloorAmount = toleranceFloorAmount;
+    return this;
+  }
+
+   /**
+   * The tolerance floor amount.
+   * @return toleranceFloorAmount
+  **/
+  @javax.annotation.Nullable
+  @ApiModelProperty(value = "The tolerance floor amount.")
+  @JsonProperty(JSON_PROPERTY_TOLERANCE_FLOOR_AMOUNT)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public BigDecimal getToleranceFloorAmount() {
+    return toleranceFloorAmount;
+  }
+
+
+  public void setToleranceFloorAmount(BigDecimal toleranceFloorAmount) {
+    this.toleranceFloorAmount = toleranceFloorAmount;
+  }
+
+
   public ProductArrearsSettings nonWorkingDaysMethod(NonWorkingDaysMethodEnum nonWorkingDaysMethod) {
     
     this.nonWorkingDaysMethod = nonWorkingDaysMethod;
@@ -209,6 +246,31 @@ public class ProductArrearsSettings {
 
   public void setNonWorkingDaysMethod(NonWorkingDaysMethodEnum nonWorkingDaysMethod) {
     this.nonWorkingDaysMethod = nonWorkingDaysMethod;
+  }
+
+
+  public ProductArrearsSettings tolerancePercentageOfOutstandingPrincipal(DecimalInterval tolerancePercentageOfOutstandingPrincipal) {
+    
+    this.tolerancePercentageOfOutstandingPrincipal = tolerancePercentageOfOutstandingPrincipal;
+    return this;
+  }
+
+   /**
+   * Get tolerancePercentageOfOutstandingPrincipal
+   * @return tolerancePercentageOfOutstandingPrincipal
+  **/
+  @javax.annotation.Nullable
+  @ApiModelProperty(value = "")
+  @JsonProperty(JSON_PROPERTY_TOLERANCE_PERCENTAGE_OF_OUTSTANDING_PRINCIPAL)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public DecimalInterval getTolerancePercentageOfOutstandingPrincipal() {
+    return tolerancePercentageOfOutstandingPrincipal;
+  }
+
+
+  public void setTolerancePercentageOfOutstandingPrincipal(DecimalInterval tolerancePercentageOfOutstandingPrincipal) {
+    this.tolerancePercentageOfOutstandingPrincipal = tolerancePercentageOfOutstandingPrincipal;
   }
 
 
@@ -313,7 +375,9 @@ public class ProductArrearsSettings {
     }
     ProductArrearsSettings productArrearsSettings = (ProductArrearsSettings) o;
     return Objects.equals(this.monthlyToleranceDay, productArrearsSettings.monthlyToleranceDay) &&
+        Objects.equals(this.toleranceFloorAmount, productArrearsSettings.toleranceFloorAmount) &&
         Objects.equals(this.nonWorkingDaysMethod, productArrearsSettings.nonWorkingDaysMethod) &&
+        Objects.equals(this.tolerancePercentageOfOutstandingPrincipal, productArrearsSettings.tolerancePercentageOfOutstandingPrincipal) &&
         Objects.equals(this.tolerancePeriod, productArrearsSettings.tolerancePeriod) &&
         Objects.equals(this.encodedKey, productArrearsSettings.encodedKey) &&
         Objects.equals(this.toleranceCalculationMethod, productArrearsSettings.toleranceCalculationMethod) &&
@@ -322,7 +386,7 @@ public class ProductArrearsSettings {
 
   @Override
   public int hashCode() {
-    return Objects.hash(monthlyToleranceDay, nonWorkingDaysMethod, tolerancePeriod, encodedKey, toleranceCalculationMethod, dateCalculationMethod);
+    return Objects.hash(monthlyToleranceDay, toleranceFloorAmount, nonWorkingDaysMethod, tolerancePercentageOfOutstandingPrincipal, tolerancePeriod, encodedKey, toleranceCalculationMethod, dateCalculationMethod);
   }
 
 
@@ -331,7 +395,9 @@ public class ProductArrearsSettings {
     StringBuilder sb = new StringBuilder();
     sb.append("class ProductArrearsSettings {\n");
     sb.append("    monthlyToleranceDay: ").append(toIndentedString(monthlyToleranceDay)).append("\n");
+    sb.append("    toleranceFloorAmount: ").append(toIndentedString(toleranceFloorAmount)).append("\n");
     sb.append("    nonWorkingDaysMethod: ").append(toIndentedString(nonWorkingDaysMethod)).append("\n");
+    sb.append("    tolerancePercentageOfOutstandingPrincipal: ").append(toIndentedString(tolerancePercentageOfOutstandingPrincipal)).append("\n");
     sb.append("    tolerancePeriod: ").append(toIndentedString(tolerancePeriod)).append("\n");
     sb.append("    encodedKey: ").append(toIndentedString(encodedKey)).append("\n");
     sb.append("    toleranceCalculationMethod: ").append(toIndentedString(toleranceCalculationMethod)).append("\n");

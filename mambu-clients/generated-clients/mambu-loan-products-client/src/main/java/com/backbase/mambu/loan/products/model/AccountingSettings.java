@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @ApiModel(description = "Accounting settings, defines the accounting settings for the product.")
 @JsonPropertyOrder({
   AccountingSettings.JSON_PROPERTY_ACCOUNTING_METHOD,
+  AccountingSettings.JSON_PROPERTY_INTEREST_ACCRUAL_CALCULATION,
   AccountingSettings.JSON_PROPERTY_ACCOUNTING_RULES,
   AccountingSettings.JSON_PROPERTY_INTEREST_ACCRUED_ACCOUNTING_METHOD
 })
@@ -76,6 +77,46 @@ public class AccountingSettings {
 
   public static final String JSON_PROPERTY_ACCOUNTING_METHOD = "accountingMethod";
   private AccountingMethodEnum accountingMethod;
+
+  /**
+   * The accounting interest calculation option selected for the product.
+   */
+  public enum InterestAccrualCalculationEnum {
+    NONE("NONE"),
+    
+    AGGREGATED_AMOUNT("AGGREGATED_AMOUNT"),
+    
+    BREAKDOWN_PER_ACCOUNT("BREAKDOWN_PER_ACCOUNT");
+
+    private String value;
+
+    InterestAccrualCalculationEnum(String value) {
+      this.value = value;
+    }
+
+    @JsonValue
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static InterestAccrualCalculationEnum fromValue(String value) {
+      for (InterestAccrualCalculationEnum b : InterestAccrualCalculationEnum.values()) {
+        if (b.value.equals(value)) {
+          return b;
+        }
+      }
+      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+    }
+  }
+
+  public static final String JSON_PROPERTY_INTEREST_ACCRUAL_CALCULATION = "interestAccrualCalculation";
+  private InterestAccrualCalculationEnum interestAccrualCalculation;
 
   public static final String JSON_PROPERTY_ACCOUNTING_RULES = "accountingRules";
   private List<GLAccountingRule> accountingRules = null;
@@ -142,6 +183,31 @@ public class AccountingSettings {
 
   public void setAccountingMethod(AccountingMethodEnum accountingMethod) {
     this.accountingMethod = accountingMethod;
+  }
+
+
+  public AccountingSettings interestAccrualCalculation(InterestAccrualCalculationEnum interestAccrualCalculation) {
+    
+    this.interestAccrualCalculation = interestAccrualCalculation;
+    return this;
+  }
+
+   /**
+   * The accounting interest calculation option selected for the product.
+   * @return interestAccrualCalculation
+  **/
+  @javax.annotation.Nullable
+  @ApiModelProperty(value = "The accounting interest calculation option selected for the product.")
+  @JsonProperty(JSON_PROPERTY_INTEREST_ACCRUAL_CALCULATION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public InterestAccrualCalculationEnum getInterestAccrualCalculation() {
+    return interestAccrualCalculation;
+  }
+
+
+  public void setInterestAccrualCalculation(InterestAccrualCalculationEnum interestAccrualCalculation) {
+    this.interestAccrualCalculation = interestAccrualCalculation;
   }
 
 
@@ -213,13 +279,14 @@ public class AccountingSettings {
     }
     AccountingSettings accountingSettings = (AccountingSettings) o;
     return Objects.equals(this.accountingMethod, accountingSettings.accountingMethod) &&
+        Objects.equals(this.interestAccrualCalculation, accountingSettings.interestAccrualCalculation) &&
         Objects.equals(this.accountingRules, accountingSettings.accountingRules) &&
         Objects.equals(this.interestAccruedAccountingMethod, accountingSettings.interestAccruedAccountingMethod);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(accountingMethod, accountingRules, interestAccruedAccountingMethod);
+    return Objects.hash(accountingMethod, interestAccrualCalculation, accountingRules, interestAccruedAccountingMethod);
   }
 
 
@@ -228,6 +295,7 @@ public class AccountingSettings {
     StringBuilder sb = new StringBuilder();
     sb.append("class AccountingSettings {\n");
     sb.append("    accountingMethod: ").append(toIndentedString(accountingMethod)).append("\n");
+    sb.append("    interestAccrualCalculation: ").append(toIndentedString(interestAccrualCalculation)).append("\n");
     sb.append("    accountingRules: ").append(toIndentedString(accountingRules)).append("\n");
     sb.append("    interestAccruedAccountingMethod: ").append(toIndentedString(interestAccruedAccountingMethod)).append("\n");
     sb.append("}");

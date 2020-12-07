@@ -223,6 +223,92 @@ paths:
       x-contentType: application/json
       x-accepts: application/vnd.mambu.v2+json
   /loanproducts:
+    get:
+      operationId: getAll
+      parameters:
+      - description: Pagination, index to start searching at when retrieving elements,
+          used in combination with limit to paginate results
+        in: query
+        name: offset
+        schema:
+          format: int32
+          type: integer
+      - description: Pagination, the number of elements to retrieve, used in combination
+          with offset to paginate results
+        in: query
+        name: limit
+        schema:
+          format: int32
+          type: integer
+      - description: Flag specifying whether the pagination  details should be provided
+          in response headers. Please note that by default it is disabled (OFF), in
+          order to improve the performance of the APIs
+        in: query
+        name: paginationDetails
+        schema:
+          default: "OFF"
+          enum:
+          - "ON"
+          - "OFF"
+          type: string
+      - description: 'The criteria based on which the records will be sorted. Expected
+          format is <field:order>, eg sortBy = field1:ASC,field2:DESC.<br/>Only the
+          following fields can be used: id, productName, creationDate, lastModifiedDate<br/>Default
+          sorting is done by creationDate:DESC'
+        in: query
+        name: sortBy
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/LoanProduct'
+                type: array
+          description: Loan products retrieved
+          headers:
+            Items-Offset:
+              description: Pagination details, the index of the first returned item
+              schema:
+                format: int32
+                type: integer
+            Items-Limit:
+              description: Pagination details, the requested page size
+              schema:
+                format: int32
+                type: integer
+            Items-Total:
+              description: Pagination details, the total available items
+              schema:
+                format: int32
+                type: integer
+        "400":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A Validation error occurred
+        "401":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: UNAUTHORIZED
+        "403":
+          content:
+            application/vnd.mambu.v2+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Forbidden
+      security:
+      - basic: []
+      summary: Allows retrieval of all loan products in paginated or non-paginated
+        manner
+      tags:
+      - LoanProducts
+      x-accepts: application/vnd.mambu.v2+json
     post:
       operationId: create
       parameters:
@@ -328,7 +414,7 @@ components:
         by the loan accounts based on this product
       example:
         loanPenaltyCalculationMethod: NONE
-        loanPenaltyGracePeriod: 8
+        loanPenaltyGracePeriod: 9
         penaltyRate:
           minValue: 2.3021358869347655
           maxValue: 7.061401241503109
@@ -362,30 +448,32 @@ components:
         interestType: SIMPLE_INTEREST
         indexRateSettings:
           interestRate:
-            minValue: 1.4894159098541704
-            maxValue: 6.84685269835264
-            defaultValue: 7.457744773683766
+            minValue: 1.2315135367772556
+            maxValue: 1.0246457001441578
+            defaultValue: 1.4894159098541704
           interestRateReviewUnit: DAYS
+          allowNegativeInterestRate: true
           interestRateSource: FIXED_INTEREST_RATE
           interestChargeFrequency: ANNUALIZED
           accrueInterestAfterMaturity: true
           interestRateTerms: FIXED
-          interestChargeFrequencyCount: 1
-          interestRateReviewCount: 4
+          interestChargeFrequencyCount: 4
+          interestRateReviewCount: 5
           indexSourceKey: indexSourceKey
-          interestRateCeilingValue: 5.025004791520295
+          interestRateCeilingValue: 9.965781217890562
           interestRateTiers:
-          - interestRate: 9.369310271410669
-            endingBalance: 9.965781217890562
+          - interestRate: 6.683562403749608
+            endingBalance: 9.369310271410669
             encodedKey: encodedKey
-          - interestRate: 9.369310271410669
-            endingBalance: 9.965781217890562
+          - interestRate: 6.683562403749608
+            endingBalance: 9.369310271410669
             encodedKey: encodedKey
           encodedKey: encodedKey
-          interestRateFloorValue: 6.683562403749608
+          interestRateFloorValue: 8.762042012749001
         interestBalanceCalculationMethod: ONLY_PRINCIPAL
         daysInYear: ACTUAL_365_FIXED
         accrueLateInterest: true
+        compoundingFrequency: DAILY
       properties:
         interestCalculationMethod:
           description: The interest calculation method. Holds the type of interest
@@ -415,6 +503,7 @@ components:
           enum:
           - SIMPLE_INTEREST
           - CAPITALIZED_INTEREST
+          - COMPOUNDING_INTEREST
           type: string
         indexRateSettings:
           $ref: '#/components/schemas/InterestProductSettings'
@@ -438,6 +527,12 @@ components:
         accrueLateInterest:
           description: Whether late interest should be accrued, applied and paid
           type: boolean
+        compoundingFrequency:
+          description: The frequency on which the accrued interest will be added to
+            the principal for interest calculation. It is used only for InterestType.COMPOUNDING_INTEREST
+          enum:
+          - DAILY
+          type: string
       required:
       - daysInYear
       - interestCalculationMethod
@@ -479,13 +574,7 @@ components:
       description: The redraw settings for the product.
       example:
         allowRedraw: true
-        encodedKey: encodedKey
       properties:
-        encodedKey:
-          description: The encoded key of the product redraw settings, auto generated,
-            unique
-          readOnly: true
-          type: string
         allowRedraw:
           description: Indicates whether the product support redraw (prepayments which
             are stored at loan account level as a Redrawable balance)
@@ -499,10 +588,15 @@ components:
         setting an account into arrears
       example:
         monthlyToleranceDay: 4
+        toleranceFloorAmount: 7.386281948385884
         nonWorkingDaysMethod: INCLUDED
+        tolerancePercentageOfOutstandingPrincipal:
+          minValue: 1.2315135367772556
+          maxValue: 1.0246457001441578
+          defaultValue: 1.4894159098541704
         tolerancePeriod:
-          minValue: 7
-          defaultValue: 1
+          minValue: 6
+          defaultValue: 7
           maxValue: 1
           encodedKey: encodedKey
         encodedKey: encodedKey
@@ -513,6 +607,9 @@ components:
           description: Defines the tolerance monthly date
           format: int32
           type: integer
+        toleranceFloorAmount:
+          description: The tolerance floor amount.
+          type: number
         nonWorkingDaysMethod:
           description: Shows whether the non working days are taken in consideration
             or not when applying penaltees/late fees or when setting an account into
@@ -521,6 +618,8 @@ components:
           - INCLUDED
           - EXCLUDED
           type: string
+        tolerancePercentageOfOutstandingPrincipal:
+          $ref: '#/components/schemas/DecimalInterval'
         tolerancePeriod:
           $ref: '#/components/schemas/IntegerIntervalConstraints'
         encodedKey:
@@ -539,6 +638,7 @@ components:
           enum:
           - ACCOUNT_FIRST_WENT_TO_ARREARS
           - LAST_LATE_REPAYMENT
+          - ACCOUNT_FIRST_BREACHED_MATERIALITY_THRESHOLD
           type: string
       type: object
     AccountingSettings:
@@ -555,6 +655,7 @@ components:
           financialResource: PORTFOLIO_CONTROL
         interestAccruedAccountingMethod: NONE
         accountingMethod: NONE
+        interestAccrualCalculation: NONE
       properties:
         accountingMethod:
           description: A list of accounting rules for the product.
@@ -562,6 +663,14 @@ components:
           - NONE
           - CASH
           - ACCRUAL
+          type: string
+        interestAccrualCalculation:
+          description: The accounting interest calculation option selected for the
+            product.
+          enum:
+          - NONE
+          - AGGREGATED_AMOUNT
+          - BREAKDOWN_PER_ACCOUNT
           type: string
         accountingRules:
           description: A list of accounting rules for the product.
@@ -651,7 +760,7 @@ components:
     SecuritySettings:
       description: The settings and constraints for securities.
       example:
-        requiredGuaranties: 1.284659006116532
+        requiredGuaranties: 2.8841621266687802
         isCollateralEnabled: true
         isGuarantorsEnabled: true
       properties:
@@ -726,14 +835,18 @@ components:
           taxCalculationMethod: INCLUSIVE
         redrawSettings:
           allowRedraw: true
-          encodedKey: encodedKey
         type: FIXED_TERM_LOAN
         arrearsSettings:
           monthlyToleranceDay: 4
+          toleranceFloorAmount: 7.386281948385884
           nonWorkingDaysMethod: INCLUDED
+          tolerancePercentageOfOutstandingPrincipal:
+            minValue: 1.2315135367772556
+            maxValue: 1.0246457001441578
+            defaultValue: 1.4894159098541704
           tolerancePeriod:
-            minValue: 7
-            defaultValue: 1
+            minValue: 6
+            defaultValue: 7
             maxValue: 1
             encodedKey: encodedKey
           encodedKey: encodedKey
@@ -750,36 +863,38 @@ components:
           interestType: SIMPLE_INTEREST
           indexRateSettings:
             interestRate:
-              minValue: 1.4894159098541704
-              maxValue: 6.84685269835264
-              defaultValue: 7.457744773683766
+              minValue: 1.2315135367772556
+              maxValue: 1.0246457001441578
+              defaultValue: 1.4894159098541704
             interestRateReviewUnit: DAYS
+            allowNegativeInterestRate: true
             interestRateSource: FIXED_INTEREST_RATE
             interestChargeFrequency: ANNUALIZED
             accrueInterestAfterMaturity: true
             interestRateTerms: FIXED
-            interestChargeFrequencyCount: 1
-            interestRateReviewCount: 4
+            interestChargeFrequencyCount: 4
+            interestRateReviewCount: 5
             indexSourceKey: indexSourceKey
-            interestRateCeilingValue: 5.025004791520295
+            interestRateCeilingValue: 9.965781217890562
             interestRateTiers:
-            - interestRate: 9.369310271410669
-              endingBalance: 9.965781217890562
+            - interestRate: 6.683562403749608
+              endingBalance: 9.369310271410669
               encodedKey: encodedKey
-            - interestRate: 9.369310271410669
-              endingBalance: 9.965781217890562
+            - interestRate: 6.683562403749608
+              endingBalance: 9.369310271410669
               encodedKey: encodedKey
             encodedKey: encodedKey
-            interestRateFloorValue: 6.683562403749608
+            interestRateFloorValue: 8.762042012749001
           interestBalanceCalculationMethod: ONLY_PRINCIPAL
           daysInYear: ACTUAL_365_FIXED
           accrueLateInterest: true
+          compoundingFrequency: DAILY
         encodedKey: encodedKey
         id: id
         state: ACTIVE
         penaltySettings:
           loanPenaltyCalculationMethod: NONE
-          loanPenaltyGracePeriod: 8
+          loanPenaltyGracePeriod: 9
           penaltyRate:
             minValue: 2.3021358869347655
             maxValue: 7.061401241503109
@@ -788,7 +903,11 @@ components:
         lastModifiedDate: 2016-09-06T13:37:50+03:00
         feesSettings:
           fees:
-          - amount: 9.018348186070783
+          - amount: 6.438423552598547
+            lastModifiedDate: 2016-09-06T13:37:50+03:00
+            amountCalculationMethod: FLAT
+            trigger: MANUAL
+            creationDate: 2016-09-06T13:37:50+03:00
             accountingRules:
             - glAccountKey: glAccountKey
               encodedKey: encodedKey
@@ -798,25 +917,26 @@ components:
               encodedKey: encodedKey
               transactionChannelKey: transactionChannelKey
               financialResource: PORTFOLIO_CONTROL
-            amountCalculationMethod: FLAT
             name: name
             feeApplication: REQUIRED
             amortizationSettings:
               feeAmortizationUponRescheduleRefinanceOption: END_AMORTIZATION_ON_THE_ORIGINAL_ACCOUNT
               intervalType: PREDEFINED_INTERVALS
-              periodCount: 6
-              intervalCount: 3
+              periodCount: 3
+              intervalCount: 6
               encodedKey: encodedKey
               amortizationProfile: NONE
               periodUnit: DAYS
               frequency: ACCOUNT_INSTALLMENTS_DUE_DATES
             encodedKey: encodedKey
-            trigger: MANUAL
             state: ACTIVE
-            creationDate: 2016-09-06T13:37:50+03:00
             applyDateMethod: MONTHLY_FROM_ACTIVATION
-            percentageAmount: 6.965117697638846
-          - amount: 9.018348186070783
+            percentageAmount: 1.284659006116532
+          - amount: 6.438423552598547
+            lastModifiedDate: 2016-09-06T13:37:50+03:00
+            amountCalculationMethod: FLAT
+            trigger: MANUAL
+            creationDate: 2016-09-06T13:37:50+03:00
             accountingRules:
             - glAccountKey: glAccountKey
               encodedKey: encodedKey
@@ -826,24 +946,21 @@ components:
               encodedKey: encodedKey
               transactionChannelKey: transactionChannelKey
               financialResource: PORTFOLIO_CONTROL
-            amountCalculationMethod: FLAT
             name: name
             feeApplication: REQUIRED
             amortizationSettings:
               feeAmortizationUponRescheduleRefinanceOption: END_AMORTIZATION_ON_THE_ORIGINAL_ACCOUNT
               intervalType: PREDEFINED_INTERVALS
-              periodCount: 6
-              intervalCount: 3
+              periodCount: 3
+              intervalCount: 6
               encodedKey: encodedKey
               amortizationProfile: NONE
               periodUnit: DAYS
               frequency: ACCOUNT_INSTALLMENTS_DUE_DATES
             encodedKey: encodedKey
-            trigger: MANUAL
             state: ACTIVE
-            creationDate: 2016-09-06T13:37:50+03:00
             applyDateMethod: MONTHLY_FROM_ACTIVATION
-            percentageAmount: 6.965117697638846
+            percentageAmount: 1.284659006116532
           allowArbitraryFees: true
         accountLinkSettings:
           linkableDepositProductKey: linkableDepositProductKey
@@ -853,24 +970,33 @@ components:
           settlementMethod: FULL_DUE_AMOUNTS
           enabled: true
         securitySettings:
-          requiredGuaranties: 1.284659006116532
+          requiredGuaranties: 2.8841621266687802
           isCollateralEnabled: true
           isGuarantorsEnabled: true
+        templates:
+        - lastModifiedDate: 2016-09-06T13:37:50+03:00
+          name: name
+          encodedKey: encodedKey
+          creationDate: 2016-09-06T13:37:50+03:00
+          type: ACCOUNT
+        - lastModifiedDate: 2016-09-06T13:37:50+03:00
+          name: name
+          encodedKey: encodedKey
+          creationDate: 2016-09-06T13:37:50+03:00
+          type: ACCOUNT
         gracePeriodSettings:
           gracePeriod:
-            minValue: 7
-            defaultValue: 1
+            minValue: 6
+            defaultValue: 7
             maxValue: 1
             encodedKey: encodedKey
           gracePeriodType: NONE
         offsetSettings:
-          offsetPercentage: 2.8841621266687802
+          allowOffset: true
         creationDate: 2016-09-06T13:37:50+03:00
         creditArrangementSettings:
           creditArrangementRequirement: OPTIONAL
         allowCustomRepaymentAllocation: true
-        productOffsetSettings:
-          isOffsetEnabled: true
         scheduleSettings:
           repaymentScheduleMethod: NONE
           repaymentPeriodUnit: DAYS
@@ -885,13 +1011,13 @@ components:
           - ADJUST_PAYMENT_DATES
           scheduleDueDatesMethod: INTERVAL
           numInstallments:
-            minValue: 7
-            defaultValue: 1
+            minValue: 6
+            defaultValue: 7
             maxValue: 1
             encodedKey: encodedKey
           firstRepaymentDueDateOffset:
-            minValue: 7
-            defaultValue: 1
+            minValue: 6
+            defaultValue: 7
             maxValue: 1
             encodedKey: encodedKey
           roundingSettings:
@@ -910,6 +1036,7 @@ components:
             financialResource: PORTFOLIO_CONTROL
           interestAccruedAccountingMethod: NONE
           accountingMethod: NONE
+          interestAccrualCalculation: NONE
         name: name
         loanAmountSettings:
           trancheSettings:
@@ -919,6 +1046,7 @@ components:
             maxValue: 1.4658129805029452
             defaultValue: 5.962133916683182
             encodedKey: encodedKey
+        category: PERSONAL_LENDING
         internalControls:
           lockSettings:
             cappingPercentage: 3.353193347011243
@@ -961,7 +1089,6 @@ components:
           - INTEREST_FREE_LOAN
           - TRANCHED_LOAN
           - REVOLVING_CREDIT
-          - OFFSET_LOAN
           type: string
         arrearsSettings:
           $ref: '#/components/schemas/ProductArrearsSettings'
@@ -996,6 +1123,11 @@ components:
           $ref: '#/components/schemas/AccountLinkSettings'
         securitySettings:
           $ref: '#/components/schemas/SecuritySettings'
+        templates:
+          description: Template documents of the product.
+          items:
+            $ref: '#/components/schemas/DocumentTemplate'
+          type: array
         gracePeriodSettings:
           $ref: '#/components/schemas/GracePeriodSettings'
         offsetSettings:
@@ -1011,8 +1143,6 @@ components:
           description: Whether a payment could be customly allocated on the account,
             ignoring the default repayment allocation order
           type: boolean
-        productOffsetSettings:
-          $ref: '#/components/schemas/ProductOffsetSettings'
         scheduleSettings:
           $ref: '#/components/schemas/LoanProductScheduleSettings'
         accountingSettings:
@@ -1022,6 +1152,16 @@ components:
           type: string
         loanAmountSettings:
           $ref: '#/components/schemas/LoanAmountSettings'
+        category:
+          description: Indicates the category the loan product belongs to.
+          enum:
+          - PERSONAL_LENDING
+          - PURCHASE_FINANCING
+          - RETAIL_MORTGAGES
+          - SME_LENDING
+          - COMMERCIAL
+          - UNCATEGORIZED
+          type: string
         internalControls:
           $ref: '#/components/schemas/InternalControls'
         fundingSettings:
@@ -1063,6 +1203,7 @@ components:
           - TAXES_PAYABLE
           - FEE_INCOME
           - PENALTY_INCOME
+          - NEGATIVE_INTEREST_PAYABLE
           - INTEREST_RECEIVABLE
           - FEE_RECEIVABLE
           - PENALTY_RECEIVABLE
@@ -1089,8 +1230,8 @@ components:
       example:
         feeAmortizationUponRescheduleRefinanceOption: END_AMORTIZATION_ON_THE_ORIGINAL_ACCOUNT
         intervalType: PREDEFINED_INTERVALS
-        periodCount: 6
-        intervalCount: 3
+        periodCount: 3
+        intervalCount: 6
         encodedKey: encodedKey
         amortizationProfile: NONE
         periodUnit: DAYS
@@ -1151,7 +1292,11 @@ components:
       description: The response representation of the PredefinedFee. Represents a
         fee with a defined name and a fixed value.
       example:
-        amount: 9.018348186070783
+        amount: 6.438423552598547
+        lastModifiedDate: 2016-09-06T13:37:50+03:00
+        amountCalculationMethod: FLAT
+        trigger: MANUAL
+        creationDate: 2016-09-06T13:37:50+03:00
         accountingRules:
         - glAccountKey: glAccountKey
           encodedKey: encodedKey
@@ -1161,28 +1306,30 @@ components:
           encodedKey: encodedKey
           transactionChannelKey: transactionChannelKey
           financialResource: PORTFOLIO_CONTROL
-        amountCalculationMethod: FLAT
         name: name
         feeApplication: REQUIRED
         amortizationSettings:
           feeAmortizationUponRescheduleRefinanceOption: END_AMORTIZATION_ON_THE_ORIGINAL_ACCOUNT
           intervalType: PREDEFINED_INTERVALS
-          periodCount: 6
-          intervalCount: 3
+          periodCount: 3
+          intervalCount: 6
           encodedKey: encodedKey
           amortizationProfile: NONE
           periodUnit: DAYS
           frequency: ACCOUNT_INSTALLMENTS_DUE_DATES
         encodedKey: encodedKey
-        trigger: MANUAL
         state: ACTIVE
-        creationDate: 2016-09-06T13:37:50+03:00
         applyDateMethod: MONTHLY_FROM_ACTIVATION
-        percentageAmount: 6.965117697638846
+        percentageAmount: 1.284659006116532
       properties:
         amount:
           description: The amount of the fee
           type: number
+        lastModifiedDate:
+          description: Shows the last modified date of the fee
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          type: string
         amountCalculationMethod:
           description: The amount from which the fee is calculated using percentageAmount
           enum:
@@ -1281,8 +1428,8 @@ components:
         for the loan product.
       example:
         gracePeriod:
-          minValue: 7
-          defaultValue: 1
+          minValue: 6
+          defaultValue: 7
           maxValue: 1
           encodedKey: encodedKey
         gracePeriodType: NONE
@@ -1342,9 +1489,9 @@ components:
           - READ_ONLY_MODE
           - UNSUPPORTED_PAGINATION
           - BLOCKING_OPERATION_IN_PROGRESS
+          - QUERY_TIMEOUT_EXCEPTION
           - NON_REVERSIBLE_WRITE_OFF
           - NON_WEEKLY_LOAN_REPAYMENTS
-          - INCONSISTENT_LINKED_ACCOUNT
           - INVALID_LOAN_ACCOUNT_ID
           - INVALID_AMOUNT
           - INVALID_DATE
@@ -1523,6 +1670,7 @@ components:
           - INSUFFICIENT_BALANCE
           - INVALID_PRODUCT_TYPE
           - DUPLICATE_DISBURSEMENT_FEE
+          - NO_DUE_AMOUNT_TO_BE_PAID
           - UNKNOWN_GROUP_ERROR
           - MISSING_CLIENT_ID
           - INVALID_CLIENT_ID
@@ -1544,6 +1692,7 @@ components:
           - GROUP_ID_ALREADY_IN_USE
           - GROUP_HAS_ACCOUNTS
           - MISSING_CLIENT_BASIC_DETAILS
+          - EMAIL_ADDRESS_SIZE_INVALID
           - UNKNOWN_CLIENT_ERROR
           - INVALID_SAVINGS_ACCOUNT_ID
           - BALANCE_BELOW_ZERO
@@ -1597,6 +1746,7 @@ components:
           - RISK_REPORTING_DISABLED
           - WITHDRAWAL_PAST_OVERDRAFT_CONSTRAINTS
           - INTEREST_FREE_LOAN_DISABLED
+          - INVALID_REVOLVING_SETTINGS
           - UNKNOWN_SAVINGS_ACCOUNT_ERROR
           - TRANSFER_CANT_BE_MADE
           - CANNOT_MAKE_TRANSFER_TO_SOURCE_ACCOUNT
@@ -1653,6 +1803,15 @@ components:
           - JOURNAL_ENTRY_DATE_IN_THE_PAST_BEFORE_THE_ALLOWED_LIMIT
           - INVALID_BOOKING_DATE
           - BOOKING_DATE_BEFORE_VALUE_DATE
+          - FROM_CURRENCY_NOT_DEFINED
+          - FROM_CURRENCY_IS_NOT_BASE_CURRENCY
+          - FROM_CURRENCY_DOES_NOT_EXIST
+          - CURRENCY_SHOULD_BE_DIFFERENT_THEN_ORGANISATION_BASE_CURRENCY
+          - START_DATE_SHOULD_BE_AFTER_LAST_ACCOUNTING_RATE
+          - RATE_SHOULD_BE_POSITIVE
+          - FUTURE_START_DATE_NOT_ALLOWED
+          - ACCOUNTING_IN_MULTICURRENCY_SHOULD_BE_ENABLED
+          - GL_JOURNAL_ENTRIES_USING_PREV_ACCOUNTING_RATE_SHOULD_NOT_EXISTS
           - INVALID_CURRENCY_CODE
           - CURRENCY_NOT_MATCHING
           - ACCOUNT_CURRENCY_NOT_MATCH
@@ -1665,6 +1824,10 @@ components:
           - DATE_BEFORE_LAST_RATE_DATE
           - START_DATE_IN_FUTURE
           - DATE_ON_LAST_RATE_DATE
+          - DELETE_BASE_CURRENCY
+          - CURRENCY_ASSOCIATED_WITH_TRANSACTION
+          - CURRENCY_USED_IN_PRODUCT_OR_GL_ACCOUNT
+          - UNDEFINED_ACCOUNTING_RATE_FOR_CURRENCY
           - INVALID_USER_NAME
           - INVALID_USER_ID
           - INVALID_CREDIT_OFFICER_KEY
@@ -1733,6 +1896,7 @@ components:
           - REQUIRED_ID_DOCUMENT_MISSING
           - ADDING_OTHER_ID_DOCUMENTS_IS_DISABLED
           - INVALID_ID_DOCUMENT_TEMPLATE_KEY
+          - DOCUMENT_CANNOT_BE_DELETED
           - INVALID_DOCUMENT_ID
           - INVALID_FILE_EXTENSION
           - FILE_EXTENSION_NOT_ALLOWED
@@ -1782,6 +1946,8 @@ components:
           - INVALID_INDEX_RATE_START_DATE
           - NO_INDEX_RATE_AVAILABLE
           - NO_TAX_RATE_AVAILABLE
+          - INVALID_INDEX_RATE_SOURCE
+          - INDEX_RATE_SOURCE_IN_USE
           - INCONSISTENT_GROUP_MEMBER_PARENT_KEY
           - INCONSISTENT_GROUP_MEMBER_ENCODED_KEY
           - INCONSISTENT_GROUP_ROLE_PARENT_KEY
@@ -1890,6 +2056,7 @@ components:
           - CURRENCY_NOT_EDITABLE
           - TELLER_CANNOT_POST_TRANSACTION_IN_MULTI_CURRENCY
           - NOT_ENOUGH_PRINCIPAL_TO_CONTINUE_FEE_AMORTIZATION
+          - TELLER_CANNOT_POST_TRANSACTION_WITHOUT_OPENED_TILL
           - SETTINGS_ONLY_AVAILABLE_FOR_REVOLVING_CREDIT_ACCOUNTS
           - INCONSISTENT_FLAT_AMOUNT_WITH_PRODUCT_CONSTRAINTS
           - INCONSISTENT_PERCENTANGE_WITH_PRODUCT_CONSTRAINTS
@@ -1925,12 +2092,13 @@ components:
           - PAYMENT_DUE_FEE_APPLIED_ON_DUE_DATES_TRANSACTIONS_LOGGED_AFTER_REPAYMENT_TO_REAPPLY_ON_FIXED_ACCOUNT
           - REALLOCATION_CAN_BE_DONE_ONLY_ON_FUTURE_REPAYMENTS
           - REALLOCATION_NOT_ALLOWED_ON_GRACE_INSTALLMENTS
+          - INVALID_PRINCIPAL_PAYMENT_METHOD
           - INTEREST_RATE_CHANGED_TRANSACTION_NOT_ALLOWED
           - INTEREST_RATE_CHANGED_TRANSACTION_NOT_ALLOWED_FOR_LOAN_PRODUCT_TYPE
           - INSTALLMENT_WITH_INTEREST_APPLIED_CANNOT_BE_EDITED
           - UNABLE_TO_DETERMINE_DELETED_REPAYMENTS
           - PAID_OR_PURE_GRACE_INSTALLMENT_CANNOT_BE_DELETED
-          - NON_CUSTOM_MADE_INTALLMENT_CANNOT_BE_DELETED_FOR_REVOLVING_CREDIT_ACCOUNT
+          - UNABLE_TO_DELETE_NON_CUSTOM_ADDED_REPAYMENT_FOR_REVOLVING_ACCOUNT
           - INVALID_NUMBER_OF_INSTALLMENTS
           - INVALID_PRINCIPAL_AMOUNT_WITH_DECIMALS
           - INCONSISTENT_WITH_LINE_OF_CREDIT_VALID_UNTIL_DATE
@@ -1959,6 +2127,11 @@ components:
           - INSTALLMENT_DUE_DATE_MOVED_BEFORE_LAST_PENALTY_APPLIED_DATE
           - MATURITY_PERIOD_NOT_STARTED
           - INVALID_AMOUNT_WITH_DECIMALS
+          - PAYMENT_HOLIDAY_INVALID_INSTALLMENT_STATE
+          - PAYMENT_HOLIDAYS_ARE_NOT_ALLOWED_FOR_INSTALLMENTS_THAT_ALREADY_HAVE_PAYMENT_HOLIDAYS
+          - PAYMENT_HOLIDAYS_ARE_NOT_ALLOWED_FOR_INSTALLMENTS_THAT_HAVE_INTEREST_APPLIED
+          - PAYMENT_HOLIDAYS_ARE_NOT_ALLOWED_FOR_INSTALLMENTS_THAT_HAVE_FEE_APPLIED
+          - PAYMENT_HOLIDAYS_ARE_NOT_ALLOWED_FOR_INSTALLMENTS_THAT_HAVE_PENALTY_APPLIED
           - RESEND_FAILED_NOTIFICATION_FAILED
           - INVALID_NOTIFICATION_MESSAGE_STATE
           - DUPLICATED_NOTIFICATION_ENCODED_KEY
@@ -2009,6 +2182,14 @@ components:
           - DUPLICATED_PERIODIC_PAYMENT_ENCODED_KEY
           - INVALID_INTEREST_CHARGE_FREQUENCY_METHOD_MUST_BE_NULL
           - INVALID_DAYS_IN_YEARS_METHOD_MUST_BE_NULL
+          - PAYMENT_HOLIDAYS_ADJUSTMENT_IS_NOT_ALLOWED_FOR_ACCOUNTS_WITH_PAYMENT_DUE_FEE_APPLIED_ON_DUE_DATES
+          - ACCOUNT_HAS_NO_PAYMENT_HOLIDAYS_ACCRUED_INTEREST
+          - ACCOUNT_HAS_LESS_PAYMENT_HOLIDAY_ACCRUED_INTEREST_THAN_THE_PROVIDED_AMOUNT_TO_APPLY
+          - PAYMENT_HOLIDAYS_ADJUSTMENT_IS_NOT_ALLOWED_FOR_INSTALLMENTS_WITHOUT_PAYMENT_HOLIDAYS
+          - PAYMENT_HOLIDAYS_ADJUSTMENT_IS_NOT_ALLOWED_FOR_INSTALLMENTS_THAT_HAVE_REPAYMENTS_POSTED
+          - PAYMENT_HOLIDAYS_ADJUSTMENT_IS_NOT_ALLOWED_FOR_INSTALLMENTS_THAT_HAVE_INTEREST_APPLIED
+          - PAYMENT_HOLIDAYS_ADJUSTMENT_IS_NOT_ALLOWED_FOR_INSTALLMENTS_THAT_HAVE_FEE_APPLIED
+          - PAYMENT_HOLIDAYS_ADJUSTMENT_IS_NOT_ALLOWED_FOR_INSTALLMENTS_THAT_HAVE_PENALTY_APPLIED
           - PRODUCT_ID_ALREADY_IN_USE
           - INVALID_ROUNDING_REPAYMENT_CURRENCY_FOR_PRODUCT
           - SDK_CLIENT_COULD_NOT_BE_GENERATED
@@ -2033,6 +2214,7 @@ components:
           - INVALID_FIELD_LENGTH
           - INVALID_WEBHOOK_REQUEST_TYPE
           - URL_CONTAINS_INVALID_PLACEHOLDERS
+          - INVALID_CUSTOM_REQUEST_HEADERS
           - CARD_REFERENCE_TOKEN_FORMAT_INVALID
           - CARD_REFERENCE_TOKEN_ALREADY_IN_USE
           - CARD_REFERENCE_HAS_ASSOCIATED_HOLDS_OR_TRANSACTIONS
@@ -2113,6 +2295,7 @@ components:
           - INVALID_ASSIGNMENT_FROM_NO_MEETING_DAY
           - HOLDER_HAS_ACCOUNTS_IN_DIFFERENT_BRANCH_WITH_CENTRE_OR_CREDITOFFICER_MISMATCH
           - ACCOUNT_ALREADY_DISBURSED
+          - ACCOUNT_APPROVED_AMOUNT_HAS_BEEN_EXCEEDED
           - AMORTIZATION_FREQUENCY_INTERVAL_TYPE_NOT_ALLOWED
           - AMORTIZATION_FREQUENCY_INTERVAL_COUNT_NOT_ALLOWED
           - INVALID_AMORTIZATION_FREQUENCY_INTERVAL_TYPE
@@ -2153,6 +2336,8 @@ components:
           - INCONSISTENT_AMORTIZATION_ACCOUNTING_SETUP
           - PAYMENT_DUE_FEES_ON_DUE_DATES_NOT_ALLOWED_AT_RESCHEDULE_REFINANCE
           - TAXES_ON_PRODUCT_NOT_ALLOWED
+          - TAX_CALCULATION_METHOD_NOT_ALLOWED
+          - TAXES_NOT_EDITABLE
           - CANNOT_APPLY_REPAYMENT_ON_ZERO_BALANCE_ACCOUNT
           - LOCKED_BALANCE_NOT_ALLOWED
           - INEXISTING_TOLERANCE_CALCULATION_METHOD
@@ -2230,14 +2415,45 @@ components:
           - YAML_PROCESSING_FAILED
           - CARD_TRANSACTION_REVERSAL_CANNOT_BE_ADJUSTED
           - DUPLICATE_CUSTOM_FIELD_SELECTION_ID
+          - INVALID_CREDIT_DEBIT_INDICATOR_FOR_OPERATION
+          - BLANK_INSTITUTION_NAME
+          - INSTITUTION_NAME_LENGTH
+          - BLANK_DECIMAL_SEPARATOR
           - INVALID_DECIMAL_SEPARATOR
+          - BLANK_DATE
           - INVALID_DATE_FORMAT
           - HAS_INVALID_DATE_CHARACTER
           - MISSING_REQUIRED_DATE_CHARACTER
+          - BLANK_DATE_TIME
           - INVALID_DATE_TIME_FORMAT
           - HAS_INVALID_DATE_TIME_CHARACTER
           - MISSING_REQUIRED_DATE_TIME_CHARACTER
           - ROLE_ID_ALREADY_IN_USE
+          - INVALID_CHARACTERS_IN_ROLE_ID
+          - ROLE_NAME_ALREADY_IN_USE
+          - REMOVED_ADMIN_FOR_CURRENT_USER
+          - ADDED_ADMIN_FOR_CURRENT_USER
+          - REMOVED_MAMBU_ACCESS_RIGHT_FOR_CURRENT_USER
+          - MISSING_REQUIRED_BRANCH
+          - A_TELLER_CAN_SEE_ONLY_ONE_BRANCH
+          - CANNOT_REMOVE_TELLER_PROPERTY
+          - CANNOT_CHANGE_BRANCH_ASSIGNMENT
+          - CANNOT_DELETE_TELLER
+          - A_TELLER_CANNOT_BE_ADMINISTRATOR
+          - CREDIT_OFFICER_PROPERTY_REMOVED
+          - CREDIT_OFFICER_PROPERTY_REMOVED_FROM_ROLE
+          - USER_BRANCH_CHANGE
+          - USER_DEACTIVATED
+          - USER_DELETED
+          - SUPPORT_ROLE_CANNOT_BE_ASSIGNED_TO_AN_ADMINISTRATOR
+          - SUPPORT_ROLE_CANNOT_BE_ASSIGNED_TO_A_TELLER
+          - SUPPORT_ROLE_CANNOT_BE_ASSIGNED_TO_A_REGULAR_USER
+          - SUPPORT_ROLE_NAME_CANNOT_BE_CHANGED
+          - SUPPORT_ROLE_USER_RIGHTS_CANNOT_BE_CHANGED
+          - SUPPORT_ROLE_PERMISSIONS_MUST_BE_VIEW_ONLY
+          - INVALID_ROLE_NAME
+          - ROLES_CONFIGURATION_EMPTY
+          - INVALID_ROLE_ID
           - HYBRID_GROUP_NOT_AVAILABLE_FOR_DBEI_CAPITALIZED_INTEREST
           - HYBRID_GROUP_NOT_AVAILABLE_WHEN_REDRAW_ENABLED
           - PRODUCT_LINKING_NOT_AVAILABLE_WHEN_REDRAW_ENABLED
@@ -2254,6 +2470,154 @@ components:
           - TAXES_NOT_AVAILABLE_WHEN_OFFSET_ENABLED
           - ACCOUNT_HAS_POSITIVE_OR_ZERO_BALANCE
           - ACCOUNT_DOES_NOT_ALLOW_OVERDRAFT
+          - INVALID_NOTES_LENGTH
+          - FEE_AMORTIZATION_PROFILE_CANNOT_BE_CHANGED
+          - FEE_AMORTIZATION_FREQUENCY_CANNOT_BE_CHANGED
+          - FEE_AMORTIZATION_PROFILE_IS_NOT_PROVIDED
+          - WITHDRAWAL_AMOUNT_GREATER_THAN_DUE_AMOUNT
+          - WITHDRAWAL_COVERING_LATE_REPAYMENTS_NOT_ALLOWED_WITHOUT_REDRAW_REPAYMENT
+          - INTEREST_RATE_CHANGED_TRANSACTION_NOT_ALLOWED_FOR_DEPOSIT_PRODUCT_SETTINGS
+          - INTEREST_RATE_CHANGED_NOT_ALLOWED_INTEREST_APPLIANCE_TRANSACTIONS_AFTER_VALUE_DATE
+          - BLOCKED_BALANCE_SHOULD_BE_ZERO_OR_NULL
+          - FORWARD_AVAILABLE_BALANCE_SHOULD_BE_ZERO_OR_NULL
+          - CUSTOM_FIELD_DEFAULT_SET_CANNOT_BE_MORE_THAN_ONE
+          - CUSTOM_FIELD_DEFAULT_SET_ID_CANNOT_BE_CHANGED
+          - CUSTOM_FIELD_DEFAULT_SET_NAME_CANNOT_BE_CHANGED
+          - CUSTOM_FIELD_DEFAULT_DESCRIPTION_CANNOT_BE_CHANGED
+          - CUSTOM_FIELD_DEFAULT_SET_TYPE_CANNOT_BE_CHANGED
+          - CUSTOM_FIELD_SET_BLANK_ID
+          - CUSTOM_FIELD_SET_INVALID_ID_LENGTH
+          - CUSTOM_FIELD_SET_INVALID_ID_FORMAT
+          - CUSTOM_FIELD_SET_MISSING_ID_PREFIX
+          - CUSTOM_FIELD_SET_DUPLICATE_ID
+          - CUSTOM_FIELD_SET_ID_RESERVED_KEYWORD
+          - CUSTOM_FIELD_SET_BLANK_NAME
+          - CUSTOM_FIELD_SET_NAME_LENGTH
+          - CUSTOM_FIELD_SET_DUPLICATE_NAME
+          - CUSTOM_FIELD_SET_TYPE_REQUIRED
+          - CUSTOM_FIELD_SET_TYPE_CANNOT_BE_CHANGED
+          - CUSTOM_FIELD_SET_AVAILABLE_FOR_REQUIRED
+          - CUSTOM_FIELD_SET_AVAILABLE_FOR_CANNOT_BE_CHANGED
+          - CUSTOM_FIELD_BLANK_ID
+          - CUSTOM_FIELD_INVALID_ID_LENGTH
+          - CUSTOM_FIELD_INVALID_ID_FORMAT
+          - CUSTOM_FIELD_DUPLICATE_ID
+          - CUSTOM_FIELD_RESERVED_ID
+          - CUSTOM_FIELD_BLANK_NAME
+          - CUSTOM_FIELD_NAME_LENGTH
+          - CUSTOM_FIELD_DUPLICATE_NAME
+          - CUSTOM_FIELD_DEPENDENT_INVALID_TYPE_FOR_FIELD_WITH_DEPENDENT_FIELD
+          - CUSTOM_FIELD_DEPENDENT_FIELD_DOES_NOT_EXIST_IN_SET
+          - CUSTOM_FIELD_DEPENDENT_INVALID_TYPE_FOR_THE_DEPENDENT_FIELD
+          - CUSTOM_FIELD_SELECTIONS_OPTION_CANNOT_BE_DELETED
+          - CUSTOM_FIELD_SELECTIONS_FOR_SELECTION_ID_PRESENT_BUT_NO_DEPENDENT_FIELD
+          - CUSTOM_FIELD_SELECTIONS_DEPENDENT_FIELD_PRESENT_BUT_FOR_SELECTION_IS_MISSING
+          - CUSTOM_FIELD_SELECTIONS_FOR_SELECTION_ID_COULD_NOT_BE_FOUND_IN_THE_DEPENDENT_FIELD
+          - CUSTOM_FIELD_SELECTIONS_DUPLICATED_SELECTION_IDS
+          - CUSTOM_FIELD_SELECTIONS_SELECTION_ID_SHOULD_NOT_BE_EMPTY
+          - CUSTOM_FIELD_SELECTIONS_SELECTION_ID_CONTAINS_INVALID_CHARACTERS
+          - CUSTOM_FIELD_SELECTIONS_INVALID_SCORE_NUMBER
+          - CUSTOM_FIELD_SELECTIONS_DEPENDENT_FIELD_OPTIONS_NOT_COVERED
+          - CUSTOM_FIELD_SELECTIONS_DUPLICATE_OPTION_VALUES
+          - CUSTOM_FIELD_SELECTIONS_VALUE_CANNOT_BE_EMPTY
+          - CUSTOM_FIELD_SELECTIONS_CIRCULAR_DEPENDENCY
+          - CUSTOM_FIELD_SELECTION_OPTIONS_ARE_REQUIRED
+          - CUSTOM_FIELD_ACCESS_RIGHTS_INVALID_ROLE_ID
+          - CUSTOM_FIELD_SUPPORT_ROLE_INVALID_RIGHTS
+          - CUSTOM_FIELD_BLANK_ROLE_ID
+          - CUSTOM_FIELD_USAGE_BLANK_ID
+          - CUSTOM_FIELD_USAGE_ID_NOT_FOUND
+          - CUSTOM_FIELD_INVALID_USAGE_FOR_RECORD_TYPE
+          - CUSTOM_FIELD_INVALID_USAGE_FOR_FIELD
+          - CUSTOM_FIELD_USAGE_FOR_RECORD_TYPE_NOT_ALLOWED
+          - CUSTOM_FIELD_USAGE_FOR_RECORD_TYPE_REQUIRED
+          - CUSTOM_FIELD_SELECTION_USAGE_NOT_ALLOWED
+          - CUSTOM_FIELD_SELECTION_REQUIRED_NOT_ALLOWED
+          - CUSTOM_FIELD_SELECTION_DEFAULT_NOT_ALLOWED
+          - CUSTOM_FIELD_BLANK_TYPE
+          - CUSTOM_FIELD_TYPE_CHANGED
+          - CUSTOM_FIELD_VALIDATION_RULES_NOT_ALLOWED
+          - CUSTOM_FIELD_VALIDATION_RULES_DUPLICATE_VALUES
+          - CUSTOM_FIELD_STATE_REQUIRED
+          - CUSTOM_FIELD_DISPLAY_SETTINGS_REQUIRED
+          - CUSTOM_FIELD_DESCRIPTION_LENGTH_EXCEEDED
+          - CUSTOM_FIELD_SIZE_REQUIRED
+          - CUSTOM_FIELD_SET_BUILT_IN_USAGE
+          - CUSTOM_FIELD_DUPLICATE_USAGE_ID
+          - CUSTOM_FIELD_DUPLICATE_ROLE_ID
+          - CUSTOM_FIELD_ACCESS_RIGHTS_REQUIRED
+          - CUSTOM_FIELD_ACCESS_RIGHTS_ROLES_REQUIRED
+          - CUSTOM_FIELD_ACCESS_RIGHTS_ALL_USERS_REQUIRED
+          - CUSTOM_FIELD_ACCESS_RIGHTS_ALL_USERS_FALSE_WHEN_ROLES_SPECIFIED
+          - CUSTOM_FIELD_SELECTION_OPTIONS_NULL
+          - CUSTOM_FIELD_AVAILABLE_OPTIONS_NULL
+          - CUSTOM_FIELD_NULL_USAGE
+          - CUSTOM_FIELD_SET_NULL_FIELD
+          - CUSTOM_FIELDS_CONFIGURATION_EMPTY
+          - CUSTOM_FIELD_SET_NULL_ENTRY
+          - CONFIGURATION_AS_CODE_UPDATE_IN_PROGRESS
+          - CONFIGURATION_AS_CODE_FEATURE_DISABLED
+          - PREPAYMENT_RECALCULATION_METHOD_ON_REPAYMENT_NOT_ALLOWED_FOR_LOAN_ACCOUNT
+          - PREPAYMENT_RECALCULATION_METHOD_ON_REPAYMENT_NOT_SUPPORTED
+          - CONFLICT_BETWEEN_EDIT_SCHEDULE_OPERATIONS_AND_ATTEMPTED_PREPAYMENT_RECALCULATION_METHOD
+          - CONFLICT_BETWEEN_PREPAYMENT_RECALCULATION_METHOD_FROM_TRANSACTIONS_AND_NEW_SCHEDULE_EDIT
+          - EDITING_INSTALLMENTS_DUE_BEFORE_LAST_PAID_INSTALLMENT_IS_NOT_ALLOWED
+          - INVALID_INSTALLMENT_KEY
+          - INVALID_REPAYMENT_AMOUNT_FOR_SPECIFIC_INSTALLMENT
+          - SPECIFIC_INSTALLMENT_REPAYMENTS_NOT_ALLOWED_IF_GENERIC_REPAYMENTS_EXIST
+          - GENERIC_REPAYMENTS_NOT_ALLOWED_IF_SPECIFIC_INSTALLMENT_REPAYMENTS_EXIST
+          - INSTALLMENT_ALREADY_PAID
+          - PREPAYMENT_RECALCULATION_METHOD_NOT_SUPPORTED
+          - ONLY_IOI_METHOD_SUPPORTED
+          - ACCRUE_LATE_INTEREST_NOT_SUPPORTED
+          - ONLY_PARTIALLY_PAID_STATUS_SUPPORTED
+          - ONLY_NO_PENALTY_PRODUCTS_SUPPORTED
+          - ACCOUNT_IS_LOCKED
+          - ONLY_STANDARD_PAYMENTS_SUPPORTED
+          - ARBITRARY_FEES_NOT_SUPPORTED
+          - TAXES_ON_INTEREST_NOT_SUPPORTED
+          - REPAYMENT_DUE_DATE_DUPLICATED
+          - TAXES_ON_FEE_NOT_SUPPORTED
+          - CHANGING_NO_OF_POSITIVE_PRINCIPAL_INSTALLMENTS_NOT_ALLOWED
+          - NOT_ALLOWED_FOR_CURRENT_ACCOUNT_TYPE
+          - NOT_ALLOWED_BEFORE_ACTIVATION_DATE
+          - NOT_ALLOWED_BEFORE_OR_DURING_PAID_INSTALLMENT
+          - GET_NOTIFICATION_MESSAGE_UPDATE_FAILURE
+          - INVALID_CUSTOM_FILTER_CONSTRAINT_OPERATOR
+          - EMPTY_CUSTOM_FILTER_CONSTRAINT_VALUE
+          - INVALID_CUSTOM_FILTER_CONSTRAINT_VALUE
+          - INVALID_CUSTOM_FILTER_CONSTRAINT_OPERATOR_USAGE
+          - EMPTY_TRANSACTION_CHANNEL_NAME
+          - EMPTY_TRANSACTION_CHANNEL_ID
+          - INVALID_CUSTOM_FILTER_CONSTRAINT_TYPE
+          - INVALID_CUSTOM_FILTER_USAGE
+          - INVALID_CUSTOM_FILTER_CRITERIA
+          - INTEREST_ACCRUAL_BREAKDOWN_INTERNAL_ERROR
+          - INTEREST_ACCRUAL_BREAKDOWN_BAD_REQUEST
+          - DUPLICATE_BLOCK_ID
+          - INVALID_BLOCK_FUND_STATE
+          - BLOCK_FUND_DOES_NOT_EXIST
+          - S3_REGION_NOT_FOUND
+          - INVALID_TRANSACTION_CHANNEL_ID
+          - INVALID_ACCOUNTING_METHOD
+          - MISSING_RULE
+          - NOT_REQUIRED_RULE
+          - HEADER_ACCOUNT_NOT_ALLOWED
+          - INVALID_GLACCOUNT_TYPE
+          - RULE_WITHOUT_GLACCOUNT
+          - INVALID_INTEREST_ACCRUED_METHOD
+          - GLACCOUNTS_ARE_NOT_IN_ORGANIZATION_OR_PRODUCT_CURRENCY
+          - INCONSISTENT_GLACCOUNTS_CURRENCY_SETUP
+          - INCONSISTENT_FEE_GLACCOUNTS_CURRENCY_SETUP
+          - INVALID_GL_ACCOUNT_CURRENCY
+          - CANNOT_EDIT_GL_ACCOUNT_CURRENCY_AS_ACCOUNT_IS_IN_USE
+          - FOREIGN_CURRENCY_IS_NOT_ALLOWED
+          - INEXISTING_GLACCOUNT
+          - CHANGE_ARREARS_SETTINGS_NOT_ALLOWED_FOR_PRODUCT_TOLERANCE_CALCULATION_METHOD
+          - INVALID_BULK_PROCESS_KEY
+          - BULK_API_REQUEST_SIZE_LIMIT_REACHED
+          - POSITIVE_AMOUNT_REQUIRED
+          - INVALID_YAML_SYNTAX
           type: string
       type: object
     PatchOperation:
@@ -2285,6 +2649,42 @@ components:
       required:
       - op
       - path
+      type: object
+    DocumentTemplate:
+      description: Template documents of the product.
+      example:
+        lastModifiedDate: 2016-09-06T13:37:50+03:00
+        name: name
+        encodedKey: encodedKey
+        creationDate: 2016-09-06T13:37:50+03:00
+        type: ACCOUNT
+      properties:
+        name:
+          description: The name the document
+          type: string
+        encodedKey:
+          description: The document encodedKey
+          readOnly: true
+          type: string
+        creationDate:
+          description: The creation date of the document
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          readOnly: true
+          type: string
+        type:
+          description: The type of the template
+          enum:
+          - ACCOUNT
+          - TRANSACTION
+          - ACCOUNT_WITH_TRANSACTIONS
+          type: string
+        lastModifiedDate:
+          description: The last modified date of the document
+          example: 2016-09-06T13:37:50+03:00
+          format: date-time
+          readOnly: true
+          type: string
       type: object
     TrancheSettings:
       description: The tranche settings, indicates the settings regarding tranches
@@ -2334,8 +2734,8 @@ components:
     IntegerIntervalConstraints:
       description: Decimal integer, like min/max/default.
       example:
-        minValue: 7
-        defaultValue: 1
+        minValue: 6
+        defaultValue: 7
         maxValue: 1
         encodedKey: encodedKey
       properties:
@@ -2382,8 +2782,8 @@ components:
       description: Used or TIERED interest rates, holds the values to define how the
         interest is computed
       example:
-        interestRate: 9.369310271410669
-        endingBalance: 9.965781217890562
+        interestRate: 6.683562403749608
+        endingBalance: 9.369310271410669
         encodedKey: encodedKey
       properties:
         endingBalance:
@@ -2407,27 +2807,28 @@ components:
         will be used on the loan account created based on this product.
       example:
         interestRate:
-          minValue: 1.4894159098541704
-          maxValue: 6.84685269835264
-          defaultValue: 7.457744773683766
+          minValue: 1.2315135367772556
+          maxValue: 1.0246457001441578
+          defaultValue: 1.4894159098541704
         interestRateReviewUnit: DAYS
+        allowNegativeInterestRate: true
         interestRateSource: FIXED_INTEREST_RATE
         interestChargeFrequency: ANNUALIZED
         accrueInterestAfterMaturity: true
         interestRateTerms: FIXED
-        interestChargeFrequencyCount: 1
-        interestRateReviewCount: 4
+        interestChargeFrequencyCount: 4
+        interestRateReviewCount: 5
         indexSourceKey: indexSourceKey
-        interestRateCeilingValue: 5.025004791520295
+        interestRateCeilingValue: 9.965781217890562
         interestRateTiers:
-        - interestRate: 9.369310271410669
-          endingBalance: 9.965781217890562
+        - interestRate: 6.683562403749608
+          endingBalance: 9.369310271410669
           encodedKey: encodedKey
-        - interestRate: 9.369310271410669
-          endingBalance: 9.965781217890562
+        - interestRate: 6.683562403749608
+          endingBalance: 9.369310271410669
           encodedKey: encodedKey
         encodedKey: encodedKey
-        interestRateFloorValue: 6.683562403749608
+        interestRateFloorValue: 8.762042012749001
       properties:
         interestRate:
           $ref: '#/components/schemas/DecimalInterval'
@@ -2438,6 +2839,10 @@ components:
           - WEEKS
           - MONTHS
           type: string
+        allowNegativeInterestRate:
+          description: Indicator whether the loan product allows negative values for
+            interest rate or interest spread
+          type: boolean
         interestRateSource:
           description: 'Interest calculation method: fixed or (interest spread + active
             organization index interest rate)'
@@ -2466,6 +2871,7 @@ components:
           - FIXED
           - TIERED
           - TIERED_PERIOD
+          - TIERED_BAND
           type: string
         interestChargeFrequencyCount:
           description: the count of units to apply over the interval
@@ -2538,6 +2944,8 @@ components:
           - FLAT
           - OUTSTANDING_PRINCIPAL_PERCENTAGE
           - TOTAL_BALANCE_PERCENTAGE
+          - TOTAL_BALANCE_FLAT
+          - TOTAL_PRINCIPAL_PERCENTAGE
           type: string
         principalFloorValue:
           description: The minimum principal due amount a repayment made with this
@@ -2549,6 +2957,8 @@ components:
           - FLAT
           - OUTSTANDING_PRINCIPAL_PERCENTAGE
           - TOTAL_BALANCE_PERCENTAGE
+          - TOTAL_BALANCE_FLAT
+          - TOTAL_PRINCIPAL_PERCENTAGE
           type: string
         percentage:
           $ref: '#/components/schemas/DecimalConstraints'
@@ -2572,9 +2982,9 @@ components:
     DecimalInterval:
       description: Decimal constraints, like min/max/default.
       example:
-        minValue: 1.4894159098541704
-        maxValue: 6.84685269835264
-        defaultValue: 7.457744773683766
+        minValue: 1.2315135367772556
+        maxValue: 1.0246457001441578
+        defaultValue: 1.4894159098541704
       properties:
         minValue:
           description: The minimum value.
@@ -2622,13 +3032,13 @@ components:
         - ADJUST_PAYMENT_DATES
         scheduleDueDatesMethod: INTERVAL
         numInstallments:
-          minValue: 7
-          defaultValue: 1
+          minValue: 6
+          defaultValue: 7
           maxValue: 1
           encodedKey: encodedKey
         firstRepaymentDueDateOffset:
-          minValue: 7
-          defaultValue: 1
+          minValue: 6
+          defaultValue: 7
           maxValue: 1
           encodedKey: encodedKey
         roundingSettings:
@@ -2691,6 +3101,7 @@ components:
             - ADJUST_FEE_PAYMENT_SCHEDULE
             - ADJUST_PENALTY_PAYMENT_SCHEDULE
             - ADJUST_NUMBER_OF_INSTALLMENTS
+            - ADJUST_PAYMENT_HOLIDAYS
             type: string
           type: array
         scheduleDueDatesMethod:
@@ -2777,17 +3188,6 @@ components:
             $ref: '#/components/schemas/RestError'
           type: array
       type: object
-    ProductOffsetSettings:
-      description: The offset settings for a product.
-      example:
-        isOffsetEnabled: true
-      properties:
-        isOffsetEnabled:
-          description: Indicates whether the product supports offset
-          type: boolean
-      required:
-      - isOffsetEnabled
-      type: object
     ProductPrepaymentSettings:
       description: Defines the prepayment settings for the product
       example:
@@ -2854,7 +3254,11 @@ components:
       description: Defines fees settings for the product.
       example:
         fees:
-        - amount: 9.018348186070783
+        - amount: 6.438423552598547
+          lastModifiedDate: 2016-09-06T13:37:50+03:00
+          amountCalculationMethod: FLAT
+          trigger: MANUAL
+          creationDate: 2016-09-06T13:37:50+03:00
           accountingRules:
           - glAccountKey: glAccountKey
             encodedKey: encodedKey
@@ -2864,25 +3268,26 @@ components:
             encodedKey: encodedKey
             transactionChannelKey: transactionChannelKey
             financialResource: PORTFOLIO_CONTROL
-          amountCalculationMethod: FLAT
           name: name
           feeApplication: REQUIRED
           amortizationSettings:
             feeAmortizationUponRescheduleRefinanceOption: END_AMORTIZATION_ON_THE_ORIGINAL_ACCOUNT
             intervalType: PREDEFINED_INTERVALS
-            periodCount: 6
-            intervalCount: 3
+            periodCount: 3
+            intervalCount: 6
             encodedKey: encodedKey
             amortizationProfile: NONE
             periodUnit: DAYS
             frequency: ACCOUNT_INSTALLMENTS_DUE_DATES
           encodedKey: encodedKey
-          trigger: MANUAL
           state: ACTIVE
-          creationDate: 2016-09-06T13:37:50+03:00
           applyDateMethod: MONTHLY_FROM_ACTIVATION
-          percentageAmount: 6.965117697638846
-        - amount: 9.018348186070783
+          percentageAmount: 1.284659006116532
+        - amount: 6.438423552598547
+          lastModifiedDate: 2016-09-06T13:37:50+03:00
+          amountCalculationMethod: FLAT
+          trigger: MANUAL
+          creationDate: 2016-09-06T13:37:50+03:00
           accountingRules:
           - glAccountKey: glAccountKey
             encodedKey: encodedKey
@@ -2892,24 +3297,21 @@ components:
             encodedKey: encodedKey
             transactionChannelKey: transactionChannelKey
             financialResource: PORTFOLIO_CONTROL
-          amountCalculationMethod: FLAT
           name: name
           feeApplication: REQUIRED
           amortizationSettings:
             feeAmortizationUponRescheduleRefinanceOption: END_AMORTIZATION_ON_THE_ORIGINAL_ACCOUNT
             intervalType: PREDEFINED_INTERVALS
-            periodCount: 6
-            intervalCount: 3
+            periodCount: 3
+            intervalCount: 6
             encodedKey: encodedKey
             amortizationProfile: NONE
             periodUnit: DAYS
             frequency: ACCOUNT_INSTALLMENTS_DUE_DATES
           encodedKey: encodedKey
-          trigger: MANUAL
           state: ACTIVE
-          creationDate: 2016-09-06T13:37:50+03:00
           applyDateMethod: MONTHLY_FROM_ACTIVATION
-          percentageAmount: 6.965117697638846
+          percentageAmount: 1.284659006116532
         allowArbitraryFees: true
       properties:
         fees:
@@ -2926,11 +3328,11 @@ components:
     OffsetSettings:
       description: The offset settings, holds information about offset.
       example:
-        offsetPercentage: 2.8841621266687802
+        allowOffset: true
       properties:
-        offsetPercentage:
-          description: The offset percentage
-          type: number
+        allowOffset:
+          description: Indicates whether the product supports offset
+          type: boolean
       type: object
     NewAccountSettings:
       description: The new account settings, defines the settings and constraints

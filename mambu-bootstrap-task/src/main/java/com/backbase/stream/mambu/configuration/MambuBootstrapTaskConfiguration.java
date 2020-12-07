@@ -33,11 +33,18 @@ public class MambuBootstrapTaskConfiguration {
     private List<String>  defaultReferenceJobRoleNames = Collections.emptyList();
 
 
+    private List<String> customerNameFilters;
+
     /**
      * Default Loan Currency
      *
      */
     private String defaultLoanCurrency;
+
+
+    private boolean setupLegalEntityHierachy = false;
+
+    private boolean setupProductCatalog = false;
 
     /**
      * Ingest Product Catalog

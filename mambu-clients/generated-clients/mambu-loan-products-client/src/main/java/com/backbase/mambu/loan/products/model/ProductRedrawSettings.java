@@ -28,32 +28,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @ApiModel(description = "The redraw settings for the product.")
 @JsonPropertyOrder({
-  ProductRedrawSettings.JSON_PROPERTY_ENCODED_KEY,
   ProductRedrawSettings.JSON_PROPERTY_ALLOW_REDRAW
 })
 
 public class ProductRedrawSettings {
-  public static final String JSON_PROPERTY_ENCODED_KEY = "encodedKey";
-  private String encodedKey;
-
   public static final String JSON_PROPERTY_ALLOW_REDRAW = "allowRedraw";
   private Boolean allowRedraw;
-
-
-   /**
-   * The encoded key of the product redraw settings, auto generated, unique
-   * @return encodedKey
-  **/
-  @javax.annotation.Nullable
-  @ApiModelProperty(value = "The encoded key of the product redraw settings, auto generated, unique")
-  @JsonProperty(JSON_PROPERTY_ENCODED_KEY)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public String getEncodedKey() {
-    return encodedKey;
-  }
-
-
 
 
   public ProductRedrawSettings allowRedraw(Boolean allowRedraw) {
@@ -89,13 +69,12 @@ public class ProductRedrawSettings {
       return false;
     }
     ProductRedrawSettings productRedrawSettings = (ProductRedrawSettings) o;
-    return Objects.equals(this.encodedKey, productRedrawSettings.encodedKey) &&
-        Objects.equals(this.allowRedraw, productRedrawSettings.allowRedraw);
+    return Objects.equals(this.allowRedraw, productRedrawSettings.allowRedraw);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(encodedKey, allowRedraw);
+    return Objects.hash(allowRedraw);
   }
 
 
@@ -103,7 +82,6 @@ public class ProductRedrawSettings {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ProductRedrawSettings {\n");
-    sb.append("    encodedKey: ").append(toIndentedString(encodedKey)).append("\n");
     sb.append("    allowRedraw: ").append(toIndentedString(allowRedraw)).append("\n");
     sb.append("}");
     return sb.toString();

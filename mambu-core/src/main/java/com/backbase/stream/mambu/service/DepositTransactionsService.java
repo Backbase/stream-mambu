@@ -64,9 +64,13 @@ public class DepositTransactionsService {
         DepositTransactionSearchCriteria searchCriteria = createSearchCriteria(externalArrangementId, dateFrom);
         log.debug("searchCriteria: {}", searchCriteria);
 
-        return depositTransactionsApi.search(searchCriteria, null, null, null, null)
+        Flux<DepositTransaction> depositTransactionFlux = depositTransactionsApi.search(searchCriteria, null, null, null, null)
             .doOnError(WebClientResponseException.class, e -> log.error("Failed to get Mambu transactions for: {}. Response[{}]: {}", externalArrangementId, e.getRawStatusCode(), e.getResponseBodyAsString()))
             .onErrorResume(WebClientResponseException.class, e -> Mono.empty());
+
+
+
+        return depositTransactionFlux;
     }
 
     private DepositTransactionSearchCriteria createSearchCriteria(String externalArrangementId,

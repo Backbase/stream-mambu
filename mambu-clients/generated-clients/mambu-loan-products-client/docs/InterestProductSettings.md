@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **interestRate** | [**DecimalInterval**](DecimalInterval.md) |  |  [optional]
 **interestRateReviewUnit** | [**InterestRateReviewUnitEnum**](#InterestRateReviewUnitEnum) | Interest rate review frequency measurement unit |  [optional]
+**allowNegativeInterestRate** | **Boolean** | Indicator whether the loan product allows negative values for interest rate or interest spread |  [optional]
 **interestRateSource** | [**InterestRateSourceEnum**](#InterestRateSourceEnum) | Interest calculation method: fixed or (interest spread + active organization index interest rate) |  [optional]
 **interestChargeFrequency** | [**InterestChargeFrequencyEnum**](#InterestChargeFrequencyEnum) | The interval used for determining how often is interest charged |  [optional]
 **accrueInterestAfterMaturity** | **Boolean** | If the product supports this option, specify if the interest should be accrued after the account maturity date |  [optional]
@@ -62,6 +63,7 @@ Name | Value
 FIXED | &quot;FIXED&quot;
 TIERED | &quot;TIERED&quot;
 TIERED_PERIOD | &quot;TIERED_PERIOD&quot;
+TIERED_BAND | &quot;TIERED_BAND&quot;
 
 
 

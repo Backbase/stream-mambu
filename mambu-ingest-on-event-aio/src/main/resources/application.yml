@@ -110,22 +110,11 @@ backbase:
         delay-between-tasks: 1000
 
 bootstrap:
-  setup-product-catalog: false
-  setup-legal-entity-hierarchy: false
-  ingest-mambu-clients: true
+  ingest-mambu-clients: false
   ingest-mambu-transactions: false
   parent-legal-entity-external-id: mambu-bank
   default-loan-currency: EUR
-#  mambu-branch-id: "dope"
-  customerNameFilters:
-    - "(_)"
-    - "(user)"
-    - "(manager)"
-    - "(mambu)"
-    - "(\\()"
-    - "(\\))"
-    - "(u[\\d])"
-    - "\\d"
+  mambu-branch-id: "dope"
   default-reference-job-role-names:
     - "Retail User - EU"
     - "Retail User - USA"

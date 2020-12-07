@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -29,36 +28,36 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @ApiModel(description = "The offset settings, holds information about offset.")
 @JsonPropertyOrder({
-  OffsetSettings.JSON_PROPERTY_OFFSET_PERCENTAGE
+  OffsetSettings.JSON_PROPERTY_ALLOW_OFFSET
 })
 
 public class OffsetSettings {
-  public static final String JSON_PROPERTY_OFFSET_PERCENTAGE = "offsetPercentage";
-  private BigDecimal offsetPercentage;
+  public static final String JSON_PROPERTY_ALLOW_OFFSET = "allowOffset";
+  private Boolean allowOffset;
 
 
-  public OffsetSettings offsetPercentage(BigDecimal offsetPercentage) {
+  public OffsetSettings allowOffset(Boolean allowOffset) {
     
-    this.offsetPercentage = offsetPercentage;
+    this.allowOffset = allowOffset;
     return this;
   }
 
    /**
-   * The offset percentage
-   * @return offsetPercentage
+   * Indicates whether the product supports offset
+   * @return allowOffset
   **/
   @javax.annotation.Nullable
-  @ApiModelProperty(value = "The offset percentage")
-  @JsonProperty(JSON_PROPERTY_OFFSET_PERCENTAGE)
+  @ApiModelProperty(value = "Indicates whether the product supports offset")
+  @JsonProperty(JSON_PROPERTY_ALLOW_OFFSET)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public BigDecimal getOffsetPercentage() {
-    return offsetPercentage;
+  public Boolean getAllowOffset() {
+    return allowOffset;
   }
 
 
-  public void setOffsetPercentage(BigDecimal offsetPercentage) {
-    this.offsetPercentage = offsetPercentage;
+  public void setAllowOffset(Boolean allowOffset) {
+    this.allowOffset = allowOffset;
   }
 
 
@@ -71,12 +70,12 @@ public class OffsetSettings {
       return false;
     }
     OffsetSettings offsetSettings = (OffsetSettings) o;
-    return Objects.equals(this.offsetPercentage, offsetSettings.offsetPercentage);
+    return Objects.equals(this.allowOffset, offsetSettings.allowOffset);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(offsetPercentage);
+    return Objects.hash(allowOffset);
   }
 
 
@@ -84,7 +83,7 @@ public class OffsetSettings {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class OffsetSettings {\n");
-    sb.append("    offsetPercentage: ").append(toIndentedString(offsetPercentage)).append("\n");
+    sb.append("    allowOffset: ").append(toIndentedString(allowOffset)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -16,7 +16,7 @@
     <name>Stream :: Mambu Bootstrap Task</name>
 
     <properties>
-        <stream-services.version>2.11.0</stream-services.version>
+        <stream-services.version>2.15.0</stream-services.version>
     </properties>
 
     <dependencies>
@@ -29,9 +29,20 @@
         </dependency>
 
         <dependency>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr</artifactId>
+            <version>0.9.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>legal-entity-core</artifactId>
             <version>${stream-services.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-tools</artifactId>
         </dependency>
 
         <dependency>

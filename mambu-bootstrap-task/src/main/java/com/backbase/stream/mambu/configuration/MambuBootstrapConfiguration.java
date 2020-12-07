@@ -1,6 +1,7 @@
 package com.backbase.stream.mambu.configuration;
 
 import com.backbase.dbs.transaction.presentation.service.model.TransactionIds;
+import com.backbase.mambu.clients.model.Client;
 import com.backbase.mambu.deposit.products.api.DepositProductsApi;
 import com.backbase.mambu.loan.products.api.LoanProductsApi;
 import com.backbase.stream.LegalEntitySaga;
@@ -32,14 +33,22 @@ import com.backbase.stream.productcatalog.model.ProductType;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -77,18 +86,21 @@ public class MambuBootstrapConfiguration {
     private final ReactiveProductCatalogService productCatalogService;
     private final DepositProductsApi depositProductsApi;
     private final LoanProductsApi loanProductsApi;
-    private Scheduler single = Schedulers.single();
+    private final Scheduler single = Schedulers.single();
+    private List<Pattern> nameFilterPatterns;
 
     public void execute() {
-
-        productCatalogService.setupProductCatalog(mambuBootstrapTaskConfiguration.getProductCatalog()).block();
-
-        setupLegalEntityHierarchy();
-        Flux<LegalEntity> clients = setupLegalEntities();
+        if (mambuBootstrapTaskConfiguration.isSetupProductCatalog()) {
+            productCatalogService.setupProductCatalog(mambuBootstrapTaskConfiguration.getProductCatalog()).block();
+        }
+        if (mambuBootstrapTaskConfiguration.isSetupLegalEntityHierachy()) {
+            setupLegalEntityHierarchy();
+        }
+        Flux<LegalEntity> clients = createMambuLegalEntities();
         // Get Product Catalog and set it as context
         ProductCatalog productCatalog = getProductCatalog();
         // Get All Mambu Customers
-        List<LegalEntity> legalEntityAggregates = getMambuCustomers(clients, productCatalog);
+        List<LegalEntity> legalEntityAggregates = setupProductCatalogForMambuCustomers(clients, productCatalog);
 
         if (mambuBootstrapTaskConfiguration.isIngestProductCatalog()) {
             setupProductCatalog(productCatalog);
@@ -112,7 +124,7 @@ public class MambuBootstrapConfiguration {
             .block();
     }
 
-    private List<LegalEntity> getMambuCustomers(Flux<LegalEntity> clients, ProductCatalog productCatalog) {
+    private List<LegalEntity> setupProductCatalogForMambuCustomers(Flux<LegalEntity> clients, ProductCatalog productCatalog) {
         return clients
             .flatMap(legalEntity -> setupMambuProducts(legalEntity, productCatalog))
             .collectList()
@@ -164,20 +176,66 @@ public class MambuBootstrapConfiguration {
         return productCatalog.orElseThrow(() -> new NullPointerException("Unable to get product catalog"));
     }
 
-    private Flux<LegalEntity> setupLegalEntities() {
+    private Flux<LegalEntity> createMambuLegalEntities() {
         return clientsService.getAllClients(mambuBootstrapTaskConfiguration.getMambuBranchId(), mambuBootstrapTaskConfiguration.getMambuCentreId())
+            .filter(this::filterClient)
             .map(client -> {
                 String fullName = client.getFirstName() + " " + client.getLastName();
-
                 User user = setupUser(client, fullName);
                 JobProfileUser jobProfileUser = setupJobProfileUser(user);
-                LegalEntity legalEntity = setupLegalEntity(client, fullName, user, jobProfileUser);
-                log.info("Setup Legal Entity: {}", legalEntity.getName());
-                return legalEntity;
-            });
+                return createMambuLegalEntity(client, fullName, user, jobProfileUser);
+            })
+            .collectList()
+            .map(legalEntities -> {
+                Comparator<LegalEntity> comparing = Comparator.comparing(LegalEntity::getName);
+                Set<LegalEntity> uniqueLegalEntities = distinct(legalEntities, Comparator.comparing(LegalEntity::getName));
+                log.info("Unique name legal entities: {} from: {}", uniqueLegalEntities.size(), legalEntities.size());
+                uniqueLegalEntities = distinct(uniqueLegalEntities, (l1, l2) -> {
+                    String emailL1 = l1.getUsers().stream().findFirst().get().getUser().getEmailAddress().getAddress();
+                    String emaill2 = l2.getUsers().stream().findFirst().get().getUser().getEmailAddress().getAddress();
+                    return emailL1.compareTo(emaill2);
+                });
+                log.info("Unique email legal entities: {} from: {}", uniqueLegalEntities.size(), legalEntities.size());
+                return uniqueLegalEntities;
+            })
+            .flatMapIterable(Function.identity());
     }
 
-    private LegalEntity setupLegalEntity(com.backbase.mambu.clients.model.Client client, String fullName, User user, JobProfileUser jobProfileUser) {
+    public Set<LegalEntity> distinct(Collection<LegalEntity> input, Comparator<LegalEntity> comparator) {
+        TreeSet<LegalEntity> result = new TreeSet<>(comparator);
+        result.addAll(input);
+        return result;
+    }
+
+    public List<Pattern> getNameFilterPatterns() {
+        if (this.nameFilterPatterns == null) {
+            this.nameFilterPatterns = this.mambuBootstrapTaskConfiguration.getCustomerNameFilters().stream()
+                .map(Pattern::compile)
+                .collect(Collectors.toList());
+        }
+        return nameFilterPatterns;
+    }
+
+    private boolean filterClient(Client client) {
+        String name = getClientFullName(client);
+        boolean accepted = getNameFilterPatterns().stream()
+            .map(pattern -> pattern.matcher(name))
+            .noneMatch(Matcher::find);
+        log.info("Client: {} matched name filter patterns: {}", name, accepted);
+        return accepted;
+    }
+
+    @NotNull
+    private String getClientFullName(Client client) {
+        String name = client.getFirstName();
+        if (client.getMiddleName() != null) {
+            name += " " + client.getMiddleName();
+        }
+        name += " " + client.getLastName();
+        return name;
+    }
+
+    private LegalEntity createMambuLegalEntity(com.backbase.mambu.clients.model.Client client, String fullName, User user, JobProfileUser jobProfileUser) {
         LegalEntity legalEntity = new LegalEntity();
         legalEntity.setParentExternalId(mambuBootstrapTaskConfiguration.getParentLegalEntityExternalId());
         legalEntity.setName(fullName);
@@ -315,9 +373,9 @@ public class MambuBootstrapConfiguration {
                 if (!productType.isPresent()) {
                     return Mono.just(loan).zipWith(createProductTypeFromMambuLoanProduct(loan.getProductTypeExternalId(), productCatalog),
                         (arr, productType1) -> {
-                        arr.setProductTypeExternalId(productType1.getExternalId());
-                        return arr;
-                    });
+                            arr.setProductTypeExternalId(productType1.getExternalId());
+                            return arr;
+                        });
                 } else {
                     return Mono.just(loan);
                 }

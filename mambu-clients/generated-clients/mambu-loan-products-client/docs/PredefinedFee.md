@@ -8,6 +8,7 @@ The response representation of the PredefinedFee. Represents a fee with a define
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **amount** | [**BigDecimal**](BigDecimal.md) | The amount of the fee |  [optional]
+**lastModifiedDate** | [**OffsetDateTime**](OffsetDateTime.md) | Shows the last modified date of the fee |  [optional]
 **amountCalculationMethod** | [**AmountCalculationMethodEnum**](#AmountCalculationMethodEnum) | The amount from which the fee is calculated using percentageAmount |  [optional]
 **trigger** | [**TriggerEnum**](#TriggerEnum) | Shows the event that will trigger a fee | 
 **creationDate** | [**OffsetDateTime**](OffsetDateTime.md) | Shows the creation date of the fee |  [optional]

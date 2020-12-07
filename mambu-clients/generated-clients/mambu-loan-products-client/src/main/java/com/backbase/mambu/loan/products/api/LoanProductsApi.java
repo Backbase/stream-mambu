@@ -130,6 +130,47 @@ public class LoanProductsApi {
         return apiClient.invokeAPI("/loanproducts/{loanProductId}", HttpMethod.DELETE, pathParams, queryParams, postBody, headerParams, cookieParams, formParams, localVarAccept, localVarContentType, localVarAuthNames, localVarReturnType);
     }
     /**
+     * Allows retrieval of all loan products in paginated or non-paginated manner
+     * 
+     * <p><b>200</b> - Loan products retrieved
+     * <p><b>400</b> - A Validation error occurred
+     * <p><b>401</b> - UNAUTHORIZED
+     * <p><b>403</b> - Forbidden
+     * @param offset Pagination, index to start searching at when retrieving elements, used in combination with limit to paginate results
+     * @param limit Pagination, the number of elements to retrieve, used in combination with offset to paginate results
+     * @param paginationDetails Flag specifying whether the pagination  details should be provided in response headers. Please note that by default it is disabled (OFF), in order to improve the performance of the APIs
+     * @param sortBy The criteria based on which the records will be sorted. Expected format is &lt;field:order&gt;, eg sortBy &#x3D; field1:ASC,field2:DESC.&lt;br/&gt;Only the following fields can be used: id, productName, creationDate, lastModifiedDate&lt;br/&gt;Default sorting is done by creationDate:DESC
+     * @return List&lt;LoanProduct&gt;
+     * @throws RestClientException if an error occurs while attempting to invoke the API
+     */
+    public Flux<LoanProduct> getAll(Integer offset, Integer limit, String paginationDetails, String sortBy) throws RestClientException {
+        Object postBody = null;
+        // create path and map variables
+        final Map<String, Object> pathParams = new HashMap<String, Object>();
+
+        final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
+        final HttpHeaders headerParams = new HttpHeaders();
+        final MultiValueMap<String, String> cookieParams = new LinkedMultiValueMap<String, String>();
+        final MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<String, Object>();
+
+        queryParams.putAll(apiClient.parameterToMultiValueMap(null, "offset", offset));
+        queryParams.putAll(apiClient.parameterToMultiValueMap(null, "limit", limit));
+        queryParams.putAll(apiClient.parameterToMultiValueMap(null, "paginationDetails", paginationDetails));
+        queryParams.putAll(apiClient.parameterToMultiValueMap(null, "sortBy", sortBy));
+
+        final String[] localVarAccepts = { 
+            "application/vnd.mambu.v2+json"
+        };
+        final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        final String[] localVarContentTypes = { };
+        final MediaType localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+
+        String[] localVarAuthNames = new String[] { "basic" };
+
+        ParameterizedTypeReference<LoanProduct> localVarReturnType = new ParameterizedTypeReference<LoanProduct>() {};
+        return apiClient.invokeFluxAPI("/loanproducts", HttpMethod.GET, pathParams, queryParams, postBody, headerParams, cookieParams, formParams, localVarAccept, localVarContentType, localVarAuthNames, localVarReturnType);
+    }
+    /**
      * Allows retrieval of a single loan product via id or encoded key
      * 
      * <p><b>200</b> - Loan product retrieved
