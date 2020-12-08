@@ -113,6 +113,23 @@ public class MambuBootstrapConfiguration {
         if (mambuBootstrapTaskConfiguration.isIngestMambuTransactions()) {
             ingestMambuTransactions(legalEntityAggregates);
         }
+
+        if(mambuBootstrapTaskConfiguration.isIngestMambuClientsAsBeneficiaries()) {
+            ingestMambuCLientsAsBeneficiaries(legalEntityAggregates);
+        }
+
+
+    }
+
+    private void ingestMambuCLientsAsBeneficiaries(List<LegalEntity> legalEntityAggregates) {
+
+        legalEntityAggregates.forEach(legalEntity ->  {
+
+            List<LegalEntity> otherClients = legalEntityAggregates.stream().filter(le -> !le.equals(legalEntity)).collect(Collectors.toList());
+
+
+        });
+
     }
 
     private void setupProductCatalog(ProductCatalog productCatalog) {

@@ -13,8 +13,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
@@ -57,20 +59,35 @@ public class DepositTransactionsService {
 
 
     public Flux<DepositTransaction> getDepositTransactions(String externalArrangementId, LocalDate dateFrom) {
-        if(externalArrangementId == null) {
+        if (externalArrangementId == null) {
             log.error("Invalid external arrangement id");
         }
-
         DepositTransactionSearchCriteria searchCriteria = createSearchCriteria(externalArrangementId, dateFrom);
         log.debug("searchCriteria: {}", searchCriteria);
 
-        Flux<DepositTransaction> depositTransactionFlux = depositTransactionsApi.search(searchCriteria, null, null, null, null)
+        int limit = 100;
+        final int[] offset = {0};
+        return Mono.from(getTransactions(externalArrangementId, searchCriteria, limit, offset[0]))
+            .expand(transactions -> {
+                if (transactions.isEmpty()) {
+                    log.info("We reached the end. return emtpy mono");
+                    return Mono.empty();
+                } else {
+                    offset[0] = offset[0] + limit;
+                    return getTransactions(externalArrangementId, searchCriteria, limit, offset[0]);
+                }
+            })
+            .flatMapIterable(Function.identity());
+
+    }
+
+    @NotNull
+    private Mono<List<DepositTransaction>> getTransactions(String externalArrangementId, DepositTransactionSearchCriteria searchCriteria, int limit, int offset) {
+        log.info("Getting {} transactions for arrangement: {} from: {}", limit, externalArrangementId, offset);
+        return depositTransactionsApi.search(searchCriteria, offset, limit, null, null)
             .doOnError(WebClientResponseException.class, e -> log.error("Failed to get Mambu transactions for: {}. Response[{}]: {}", externalArrangementId, e.getRawStatusCode(), e.getResponseBodyAsString()))
-            .onErrorResume(WebClientResponseException.class, e -> Mono.empty());
-
-
-
-        return depositTransactionFlux;
+            .onErrorResume(WebClientResponseException.class, e -> Mono.empty())
+            .collectList();
     }
 
     private DepositTransactionSearchCriteria createSearchCriteria(String externalArrangementId,

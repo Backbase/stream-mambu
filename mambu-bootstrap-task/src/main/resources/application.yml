@@ -113,7 +113,7 @@ bootstrap:
   setup-product-catalog: false
   setup-legal-entity-hierarchy: false
   ingest-mambu-clients: true
-  ingest-mambu-transactions: false
+  ingest-mambu-transactions: true
   parent-legal-entity-external-id: mambu-bank
   default-loan-currency: EUR
 #  mambu-branch-id: "dope"

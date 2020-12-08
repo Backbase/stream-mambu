@@ -62,6 +62,9 @@ public class MambuBootstrapTaskConfiguration {
     private boolean ingestMambuTransactions = false;
 
 
+    private boolean ingestMambuClientsAsBeneficiaries = false;
+
+
     /**
      * The Root Legal Entity including Subsidiaries
      */
