@@ -35,6 +35,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
   InterestProductSettings.JSON_PROPERTY_INTEREST_RATE,
   InterestProductSettings.JSON_PROPERTY_INTEREST_RATE_REVIEW_UNIT,
+  InterestProductSettings.JSON_PROPERTY_ALLOW_NEGATIVE_INTEREST_RATE,
   InterestProductSettings.JSON_PROPERTY_INTEREST_RATE_SOURCE,
   InterestProductSettings.JSON_PROPERTY_INTEREST_CHARGE_FREQUENCY,
   InterestProductSettings.JSON_PROPERTY_ACCRUE_INTEREST_AFTER_MATURITY,
@@ -91,6 +92,9 @@ public class InterestProductSettings {
 
   public static final String JSON_PROPERTY_INTEREST_RATE_REVIEW_UNIT = "interestRateReviewUnit";
   private InterestRateReviewUnitEnum interestRateReviewUnit;
+
+  public static final String JSON_PROPERTY_ALLOW_NEGATIVE_INTEREST_RATE = "allowNegativeInterestRate";
+  private Boolean allowNegativeInterestRate;
 
   /**
    * Interest calculation method: fixed or (interest spread + active organization index interest rate)
@@ -187,7 +191,9 @@ public class InterestProductSettings {
     
     TIERED("TIERED"),
     
-    TIERED_PERIOD("TIERED_PERIOD");
+    TIERED_PERIOD("TIERED_PERIOD"),
+    
+    TIERED_BAND("TIERED_BAND");
 
     private String value;
 
@@ -288,6 +294,31 @@ public class InterestProductSettings {
 
   public void setInterestRateReviewUnit(InterestRateReviewUnitEnum interestRateReviewUnit) {
     this.interestRateReviewUnit = interestRateReviewUnit;
+  }
+
+
+  public InterestProductSettings allowNegativeInterestRate(Boolean allowNegativeInterestRate) {
+    
+    this.allowNegativeInterestRate = allowNegativeInterestRate;
+    return this;
+  }
+
+   /**
+   * Indicator whether the loan product allows negative values for interest rate or interest spread
+   * @return allowNegativeInterestRate
+  **/
+  @javax.annotation.Nullable
+  @ApiModelProperty(value = "Indicator whether the loan product allows negative values for interest rate or interest spread")
+  @JsonProperty(JSON_PROPERTY_ALLOW_NEGATIVE_INTEREST_RATE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public Boolean getAllowNegativeInterestRate() {
+    return allowNegativeInterestRate;
+  }
+
+
+  public void setAllowNegativeInterestRate(Boolean allowNegativeInterestRate) {
+    this.allowNegativeInterestRate = allowNegativeInterestRate;
   }
 
 
@@ -576,6 +607,7 @@ public class InterestProductSettings {
     InterestProductSettings interestProductSettings = (InterestProductSettings) o;
     return Objects.equals(this.interestRate, interestProductSettings.interestRate) &&
         Objects.equals(this.interestRateReviewUnit, interestProductSettings.interestRateReviewUnit) &&
+        Objects.equals(this.allowNegativeInterestRate, interestProductSettings.allowNegativeInterestRate) &&
         Objects.equals(this.interestRateSource, interestProductSettings.interestRateSource) &&
         Objects.equals(this.interestChargeFrequency, interestProductSettings.interestChargeFrequency) &&
         Objects.equals(this.accrueInterestAfterMaturity, interestProductSettings.accrueInterestAfterMaturity) &&
@@ -591,7 +623,7 @@ public class InterestProductSettings {
 
   @Override
   public int hashCode() {
-    return Objects.hash(interestRate, interestRateReviewUnit, interestRateSource, interestChargeFrequency, accrueInterestAfterMaturity, interestRateTerms, interestChargeFrequencyCount, interestRateReviewCount, indexSourceKey, interestRateCeilingValue, interestRateTiers, encodedKey, interestRateFloorValue);
+    return Objects.hash(interestRate, interestRateReviewUnit, allowNegativeInterestRate, interestRateSource, interestChargeFrequency, accrueInterestAfterMaturity, interestRateTerms, interestChargeFrequencyCount, interestRateReviewCount, indexSourceKey, interestRateCeilingValue, interestRateTiers, encodedKey, interestRateFloorValue);
   }
 
 
@@ -601,6 +633,7 @@ public class InterestProductSettings {
     sb.append("class InterestProductSettings {\n");
     sb.append("    interestRate: ").append(toIndentedString(interestRate)).append("\n");
     sb.append("    interestRateReviewUnit: ").append(toIndentedString(interestRateReviewUnit)).append("\n");
+    sb.append("    allowNegativeInterestRate: ").append(toIndentedString(allowNegativeInterestRate)).append("\n");
     sb.append("    interestRateSource: ").append(toIndentedString(interestRateSource)).append("\n");
     sb.append("    interestChargeFrequency: ").append(toIndentedString(interestChargeFrequency)).append("\n");
     sb.append("    accrueInterestAfterMaturity: ").append(toIndentedString(accrueInterestAfterMaturity)).append("\n");

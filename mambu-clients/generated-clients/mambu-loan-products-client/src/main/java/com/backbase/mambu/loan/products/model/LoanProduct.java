@@ -18,6 +18,7 @@ import java.util.Arrays;
 import com.backbase.mambu.loan.products.model.AccountLinkSettings;
 import com.backbase.mambu.loan.products.model.AccountingSettings;
 import com.backbase.mambu.loan.products.model.CreditArrangementSettings;
+import com.backbase.mambu.loan.products.model.DocumentTemplate;
 import com.backbase.mambu.loan.products.model.FeesSettings;
 import com.backbase.mambu.loan.products.model.FundingSettings;
 import com.backbase.mambu.loan.products.model.GracePeriodSettings;
@@ -30,7 +31,6 @@ import com.backbase.mambu.loan.products.model.PaymentSettings;
 import com.backbase.mambu.loan.products.model.ProductArrearsSettings;
 import com.backbase.mambu.loan.products.model.ProductAvailabilitySettings;
 import com.backbase.mambu.loan.products.model.ProductInterestSettings;
-import com.backbase.mambu.loan.products.model.ProductOffsetSettings;
 import com.backbase.mambu.loan.products.model.ProductPenaltySettings;
 import com.backbase.mambu.loan.products.model.ProductRedrawSettings;
 import com.backbase.mambu.loan.products.model.SecuritySettings;
@@ -42,6 +42,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -66,16 +68,17 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   LoanProduct.JSON_PROPERTY_FEES_SETTINGS,
   LoanProduct.JSON_PROPERTY_ACCOUNT_LINK_SETTINGS,
   LoanProduct.JSON_PROPERTY_SECURITY_SETTINGS,
+  LoanProduct.JSON_PROPERTY_TEMPLATES,
   LoanProduct.JSON_PROPERTY_GRACE_PERIOD_SETTINGS,
   LoanProduct.JSON_PROPERTY_OFFSET_SETTINGS,
   LoanProduct.JSON_PROPERTY_CREATION_DATE,
   LoanProduct.JSON_PROPERTY_CREDIT_ARRANGEMENT_SETTINGS,
   LoanProduct.JSON_PROPERTY_ALLOW_CUSTOM_REPAYMENT_ALLOCATION,
-  LoanProduct.JSON_PROPERTY_PRODUCT_OFFSET_SETTINGS,
   LoanProduct.JSON_PROPERTY_SCHEDULE_SETTINGS,
   LoanProduct.JSON_PROPERTY_ACCOUNTING_SETTINGS,
   LoanProduct.JSON_PROPERTY_NAME,
   LoanProduct.JSON_PROPERTY_LOAN_AMOUNT_SETTINGS,
+  LoanProduct.JSON_PROPERTY_CATEGORY,
   LoanProduct.JSON_PROPERTY_INTERNAL_CONTROLS,
   LoanProduct.JSON_PROPERTY_FUNDING_SETTINGS
 })
@@ -108,9 +111,7 @@ public class LoanProduct {
     
     TRANCHED_LOAN("TRANCHED_LOAN"),
     
-    REVOLVING_CREDIT("REVOLVING_CREDIT"),
-    
-    OFFSET_LOAN("OFFSET_LOAN");
+    REVOLVING_CREDIT("REVOLVING_CREDIT");
 
     private String value;
 
@@ -210,6 +211,9 @@ public class LoanProduct {
   public static final String JSON_PROPERTY_SECURITY_SETTINGS = "securitySettings";
   private SecuritySettings securitySettings;
 
+  public static final String JSON_PROPERTY_TEMPLATES = "templates";
+  private List<DocumentTemplate> templates = null;
+
   public static final String JSON_PROPERTY_GRACE_PERIOD_SETTINGS = "gracePeriodSettings";
   private GracePeriodSettings gracePeriodSettings;
 
@@ -225,9 +229,6 @@ public class LoanProduct {
   public static final String JSON_PROPERTY_ALLOW_CUSTOM_REPAYMENT_ALLOCATION = "allowCustomRepaymentAllocation";
   private Boolean allowCustomRepaymentAllocation;
 
-  public static final String JSON_PROPERTY_PRODUCT_OFFSET_SETTINGS = "productOffsetSettings";
-  private ProductOffsetSettings productOffsetSettings;
-
   public static final String JSON_PROPERTY_SCHEDULE_SETTINGS = "scheduleSettings";
   private LoanProductScheduleSettings scheduleSettings;
 
@@ -239,6 +240,52 @@ public class LoanProduct {
 
   public static final String JSON_PROPERTY_LOAN_AMOUNT_SETTINGS = "loanAmountSettings";
   private LoanAmountSettings loanAmountSettings;
+
+  /**
+   * Indicates the category the loan product belongs to.
+   */
+  public enum CategoryEnum {
+    PERSONAL_LENDING("PERSONAL_LENDING"),
+    
+    PURCHASE_FINANCING("PURCHASE_FINANCING"),
+    
+    RETAIL_MORTGAGES("RETAIL_MORTGAGES"),
+    
+    SME_LENDING("SME_LENDING"),
+    
+    COMMERCIAL("COMMERCIAL"),
+    
+    UNCATEGORIZED("UNCATEGORIZED");
+
+    private String value;
+
+    CategoryEnum(String value) {
+      this.value = value;
+    }
+
+    @JsonValue
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static CategoryEnum fromValue(String value) {
+      for (CategoryEnum b : CategoryEnum.values()) {
+        if (b.value.equals(value)) {
+          return b;
+        }
+      }
+      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+    }
+  }
+
+  public static final String JSON_PROPERTY_CATEGORY = "category";
+  private CategoryEnum category;
 
   public static final String JSON_PROPERTY_INTERNAL_CONTROLS = "internalControls";
   private InternalControls internalControls;
@@ -661,6 +708,39 @@ public class LoanProduct {
   }
 
 
+  public LoanProduct templates(List<DocumentTemplate> templates) {
+    
+    this.templates = templates;
+    return this;
+  }
+
+  public LoanProduct addTemplatesItem(DocumentTemplate templatesItem) {
+    if (this.templates == null) {
+      this.templates = new ArrayList<>();
+    }
+    this.templates.add(templatesItem);
+    return this;
+  }
+
+   /**
+   * Template documents of the product.
+   * @return templates
+  **/
+  @javax.annotation.Nullable
+  @ApiModelProperty(value = "Template documents of the product.")
+  @JsonProperty(JSON_PROPERTY_TEMPLATES)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public List<DocumentTemplate> getTemplates() {
+    return templates;
+  }
+
+
+  public void setTemplates(List<DocumentTemplate> templates) {
+    this.templates = templates;
+  }
+
+
   public LoanProduct gracePeriodSettings(GracePeriodSettings gracePeriodSettings) {
     
     this.gracePeriodSettings = gracePeriodSettings;
@@ -785,31 +865,6 @@ public class LoanProduct {
   }
 
 
-  public LoanProduct productOffsetSettings(ProductOffsetSettings productOffsetSettings) {
-    
-    this.productOffsetSettings = productOffsetSettings;
-    return this;
-  }
-
-   /**
-   * Get productOffsetSettings
-   * @return productOffsetSettings
-  **/
-  @javax.annotation.Nullable
-  @ApiModelProperty(value = "")
-  @JsonProperty(JSON_PROPERTY_PRODUCT_OFFSET_SETTINGS)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public ProductOffsetSettings getProductOffsetSettings() {
-    return productOffsetSettings;
-  }
-
-
-  public void setProductOffsetSettings(ProductOffsetSettings productOffsetSettings) {
-    this.productOffsetSettings = productOffsetSettings;
-  }
-
-
   public LoanProduct scheduleSettings(LoanProductScheduleSettings scheduleSettings) {
     
     this.scheduleSettings = scheduleSettings;
@@ -909,6 +964,31 @@ public class LoanProduct {
   }
 
 
+  public LoanProduct category(CategoryEnum category) {
+    
+    this.category = category;
+    return this;
+  }
+
+   /**
+   * Indicates the category the loan product belongs to.
+   * @return category
+  **/
+  @javax.annotation.Nullable
+  @ApiModelProperty(value = "Indicates the category the loan product belongs to.")
+  @JsonProperty(JSON_PROPERTY_CATEGORY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public CategoryEnum getCategory() {
+    return category;
+  }
+
+
+  public void setCategory(CategoryEnum category) {
+    this.category = category;
+  }
+
+
   public LoanProduct internalControls(InternalControls internalControls) {
     
     this.internalControls = internalControls;
@@ -985,23 +1065,24 @@ public class LoanProduct {
         Objects.equals(this.feesSettings, loanProduct.feesSettings) &&
         Objects.equals(this.accountLinkSettings, loanProduct.accountLinkSettings) &&
         Objects.equals(this.securitySettings, loanProduct.securitySettings) &&
+        Objects.equals(this.templates, loanProduct.templates) &&
         Objects.equals(this.gracePeriodSettings, loanProduct.gracePeriodSettings) &&
         Objects.equals(this.offsetSettings, loanProduct.offsetSettings) &&
         Objects.equals(this.creationDate, loanProduct.creationDate) &&
         Objects.equals(this.creditArrangementSettings, loanProduct.creditArrangementSettings) &&
         Objects.equals(this.allowCustomRepaymentAllocation, loanProduct.allowCustomRepaymentAllocation) &&
-        Objects.equals(this.productOffsetSettings, loanProduct.productOffsetSettings) &&
         Objects.equals(this.scheduleSettings, loanProduct.scheduleSettings) &&
         Objects.equals(this.accountingSettings, loanProduct.accountingSettings) &&
         Objects.equals(this.name, loanProduct.name) &&
         Objects.equals(this.loanAmountSettings, loanProduct.loanAmountSettings) &&
+        Objects.equals(this.category, loanProduct.category) &&
         Objects.equals(this.internalControls, loanProduct.internalControls) &&
         Objects.equals(this.fundingSettings, loanProduct.fundingSettings);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(notes, availabilitySettings, paymentSettings, taxSettings, redrawSettings, type, arrearsSettings, newAccountSettings, interestSettings, encodedKey, id, state, penaltySettings, lastModifiedDate, feesSettings, accountLinkSettings, securitySettings, gracePeriodSettings, offsetSettings, creationDate, creditArrangementSettings, allowCustomRepaymentAllocation, productOffsetSettings, scheduleSettings, accountingSettings, name, loanAmountSettings, internalControls, fundingSettings);
+    return Objects.hash(notes, availabilitySettings, paymentSettings, taxSettings, redrawSettings, type, arrearsSettings, newAccountSettings, interestSettings, encodedKey, id, state, penaltySettings, lastModifiedDate, feesSettings, accountLinkSettings, securitySettings, templates, gracePeriodSettings, offsetSettings, creationDate, creditArrangementSettings, allowCustomRepaymentAllocation, scheduleSettings, accountingSettings, name, loanAmountSettings, category, internalControls, fundingSettings);
   }
 
 
@@ -1026,16 +1107,17 @@ public class LoanProduct {
     sb.append("    feesSettings: ").append(toIndentedString(feesSettings)).append("\n");
     sb.append("    accountLinkSettings: ").append(toIndentedString(accountLinkSettings)).append("\n");
     sb.append("    securitySettings: ").append(toIndentedString(securitySettings)).append("\n");
+    sb.append("    templates: ").append(toIndentedString(templates)).append("\n");
     sb.append("    gracePeriodSettings: ").append(toIndentedString(gracePeriodSettings)).append("\n");
     sb.append("    offsetSettings: ").append(toIndentedString(offsetSettings)).append("\n");
     sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");
     sb.append("    creditArrangementSettings: ").append(toIndentedString(creditArrangementSettings)).append("\n");
     sb.append("    allowCustomRepaymentAllocation: ").append(toIndentedString(allowCustomRepaymentAllocation)).append("\n");
-    sb.append("    productOffsetSettings: ").append(toIndentedString(productOffsetSettings)).append("\n");
     sb.append("    scheduleSettings: ").append(toIndentedString(scheduleSettings)).append("\n");
     sb.append("    accountingSettings: ").append(toIndentedString(accountingSettings)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    loanAmountSettings: ").append(toIndentedString(loanAmountSettings)).append("\n");
+    sb.append("    category: ").append(toIndentedString(category)).append("\n");
     sb.append("    internalControls: ").append(toIndentedString(internalControls)).append("\n");
     sb.append("    fundingSettings: ").append(toIndentedString(fundingSettings)).append("\n");
     sb.append("}");

@@ -1,6 +1,7 @@
 package com.backbase.stream.mambu.configuration;
 
 import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.productcatalog.model.ProductCatalog;
 import java.util.Collections;
 import java.util.List;
 import lombok.Data;
@@ -32,11 +33,18 @@ public class MambuBootstrapTaskConfiguration {
     private List<String>  defaultReferenceJobRoleNames = Collections.emptyList();
 
 
+    private List<String> customerNameFilters;
+
     /**
      * Default Loan Currency
      *
      */
     private String defaultLoanCurrency;
+
+
+    private boolean setupLegalEntityHierachy = false;
+
+    private boolean setupProductCatalog = false;
 
     /**
      * Ingest Product Catalog
@@ -54,10 +62,15 @@ public class MambuBootstrapTaskConfiguration {
     private boolean ingestMambuTransactions = false;
 
 
+    private boolean ingestMambuClientsAsBeneficiaries = false;
+
+
     /**
      * The Root Legal Entity including Subsidiaries
      */
     private LegalEntity legalEntity;
+
+    private ProductCatalog productCatalog;
 
 }
 

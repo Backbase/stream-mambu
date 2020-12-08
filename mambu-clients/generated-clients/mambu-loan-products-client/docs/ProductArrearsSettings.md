@@ -8,7 +8,9 @@ The product arrears settings, shows whether the non working days are taken in co
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **monthlyToleranceDay** | **Integer** | Defines the tolerance monthly date |  [optional]
+**toleranceFloorAmount** | [**BigDecimal**](BigDecimal.md) | The tolerance floor amount. |  [optional]
 **nonWorkingDaysMethod** | [**NonWorkingDaysMethodEnum**](#NonWorkingDaysMethodEnum) | Shows whether the non working days are taken in consideration or not when applying penaltees/late fees or when setting an account into arrears |  [optional]
+**tolerancePercentageOfOutstandingPrincipal** | [**DecimalInterval**](DecimalInterval.md) |  |  [optional]
 **tolerancePeriod** | [**IntegerIntervalConstraints**](IntegerIntervalConstraints.md) |  |  [optional]
 **encodedKey** | **String** | The encoded key of the arrears base settings, auto generated, unique. |  [optional] [readonly]
 **toleranceCalculationMethod** | [**ToleranceCalculationMethodEnum**](#ToleranceCalculationMethodEnum) | Defines the tolerance calculation method |  [optional]
@@ -40,6 +42,7 @@ Name | Value
 ---- | -----
 ACCOUNT_FIRST_WENT_TO_ARREARS | &quot;ACCOUNT_FIRST_WENT_TO_ARREARS&quot;
 LAST_LATE_REPAYMENT | &quot;LAST_LATE_REPAYMENT&quot;
+ACCOUNT_FIRST_BREACHED_MATERIALITY_THRESHOLD | &quot;ACCOUNT_FIRST_BREACHED_MATERIALITY_THRESHOLD&quot;
 
 
 

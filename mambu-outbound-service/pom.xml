@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-http-starter-parent</artifactId>
-        <version>2.10.0</version>
+        <version>2.17.0</version>
         <relativePath/>
     </parent>
 
@@ -26,7 +26,7 @@
             <dependency>
                 <groupId>com.backbase.dbs</groupId>
                 <artifactId>banking-services-bom</artifactId>
-                <version>2.19.1</version>
+                <version>2.19.3</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>cursor-publishers</artifactId>
-            <version>2.10.0</version>
+            <version>2.17.0</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-ui -->
@@ -60,11 +60,11 @@
             <version>1.4.3</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.backbase.stream</groupId>-->
-<!--            <artifactId>stream-web-start-webflux</artifactId>-->
-<!--            <version>2.10.0</version>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.backbase.stream</groupId>-->
+        <!--            <artifactId>stream-web-start-webflux</artifactId>-->
+        <!--            <version>2.17.0</version>-->
+        <!--        </dependency>-->
 
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -102,7 +102,7 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>transactions-core</artifactId>
-            <version>2.10.0</version>
+            <version>2.17.0</version>
         </dependency>
 
         <dependency>
@@ -137,16 +137,18 @@
                     <execution>
                         <id>unpack-payment-spec</id>
                         <phase>generate-sources</phase>
-                        <goals><goal>unpack</goal>
+                        <goals>
+                            <goal>unpack</goal>
                         </goals>
                         <configuration>
                             <includes>**/*.raml,**/*.json,**/*.md,**/*.csv</includes>
                             <artifactItems>
                                 <artifactItem>
-                                <groupId>com.backbase.dbs.paymentorder</groupId>
-                                <artifactId>payment-order-persistence-spec</artifactId>
-                                <version>${payment-order-persistence-spec.version}</version>
-                                <outputDirectory>${project.build.directory}/payment-order-persistence-spec                                </outputDirectory>
+                                    <groupId>com.backbase.dbs.paymentorder</groupId>
+                                    <artifactId>payment-order-persistence-spec</artifactId>
+                                    <version>${payment-order-persistence-spec.version}</version>
+                                    <outputDirectory>${project.build.directory}/payment-order-persistence-spec
+                                    </outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -176,15 +178,14 @@
                 </executions>
             </plugin>
 
-<!--            <plugin>-->
-<!--            <groupId>org.openapitools</groupId>-->
-<!--            <artifactId>openapi-generator-maven-plugin</artifactId>-->
-<!--            &lt;!&ndash; RELEASE_VERSION &ndash;&gt;-->
-<!--            <version>4.3.1</version>-->
+            <!--            <plugin>-->
+            <!--            <groupId>org.openapitools</groupId>-->
+            <!--            <artifactId>openapi-generator-maven-plugin</artifactId>-->
+            <!--            &lt;!&ndash; RELEASE_VERSION &ndash;&gt;-->
+            <!--            <version>4.3.1</version>-->
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
-                <version>0.2.2</version>
                 <executions>
                     <execution>
                         <id>account-integration-spec</id>
@@ -287,7 +288,9 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <generatorName>spring</generatorName>
-                            <inputSpec>${project.basedir}/api/com/backbase/dbs/transaction/transaction-integration-external-outbound-spec/service-api/service-api/openapi.yaml</inputSpec>
+                            <inputSpec>
+                                ${project.basedir}/api/com/backbase/dbs/transaction/transaction-integration-external-outbound-spec/service-api/service-api/openapi.yaml
+                            </inputSpec>
                             <generateApiTests>false</generateApiTests>
                             <generateApis>true</generateApis>
                             <generateModels>true</generateModels>
@@ -351,7 +354,6 @@
                     <plugin>
                         <groupId>com.backbase.oss</groupId>
                         <artifactId>boat-maven-plugin</artifactId>
-                        <version>0.2.2</version>
                         <configuration>
                             <includeVersionInOutputDirectory>false</includeVersionInOutputDirectory>
                             <removeDeprecated>true</removeDeprecated>

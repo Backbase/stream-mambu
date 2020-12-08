@@ -35,6 +35,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @ApiModel(description = "The response representation of the PredefinedFee. Represents a fee with a defined name and a fixed value.")
 @JsonPropertyOrder({
   PredefinedFee.JSON_PROPERTY_AMOUNT,
+  PredefinedFee.JSON_PROPERTY_LAST_MODIFIED_DATE,
   PredefinedFee.JSON_PROPERTY_AMOUNT_CALCULATION_METHOD,
   PredefinedFee.JSON_PROPERTY_TRIGGER,
   PredefinedFee.JSON_PROPERTY_CREATION_DATE,
@@ -51,6 +52,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class PredefinedFee {
   public static final String JSON_PROPERTY_AMOUNT = "amount";
   private BigDecimal amount;
+
+  public static final String JSON_PROPERTY_LAST_MODIFIED_DATE = "lastModifiedDate";
+  private OffsetDateTime lastModifiedDate;
 
   /**
    * The amount from which the fee is calculated using percentageAmount
@@ -303,6 +307,31 @@ public class PredefinedFee {
 
   public void setAmount(BigDecimal amount) {
     this.amount = amount;
+  }
+
+
+  public PredefinedFee lastModifiedDate(OffsetDateTime lastModifiedDate) {
+    
+    this.lastModifiedDate = lastModifiedDate;
+    return this;
+  }
+
+   /**
+   * Shows the last modified date of the fee
+   * @return lastModifiedDate
+  **/
+  @javax.annotation.Nullable
+  @ApiModelProperty(example = "2016-09-06T13:37:50+03:00", value = "Shows the last modified date of the fee")
+  @JsonProperty(JSON_PROPERTY_LAST_MODIFIED_DATE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public OffsetDateTime getLastModifiedDate() {
+    return lastModifiedDate;
+  }
+
+
+  public void setLastModifiedDate(OffsetDateTime lastModifiedDate) {
+    this.lastModifiedDate = lastModifiedDate;
   }
 
 
@@ -587,6 +616,7 @@ public class PredefinedFee {
     }
     PredefinedFee predefinedFee = (PredefinedFee) o;
     return Objects.equals(this.amount, predefinedFee.amount) &&
+        Objects.equals(this.lastModifiedDate, predefinedFee.lastModifiedDate) &&
         Objects.equals(this.amountCalculationMethod, predefinedFee.amountCalculationMethod) &&
         Objects.equals(this.trigger, predefinedFee.trigger) &&
         Objects.equals(this.creationDate, predefinedFee.creationDate) &&
@@ -602,7 +632,7 @@ public class PredefinedFee {
 
   @Override
   public int hashCode() {
-    return Objects.hash(amount, amountCalculationMethod, trigger, creationDate, accountingRules, name, feeApplication, amortizationSettings, encodedKey, state, applyDateMethod, percentageAmount);
+    return Objects.hash(amount, lastModifiedDate, amountCalculationMethod, trigger, creationDate, accountingRules, name, feeApplication, amortizationSettings, encodedKey, state, applyDateMethod, percentageAmount);
   }
 
 
@@ -611,6 +641,7 @@ public class PredefinedFee {
     StringBuilder sb = new StringBuilder();
     sb.append("class PredefinedFee {\n");
     sb.append("    amount: ").append(toIndentedString(amount)).append("\n");
+    sb.append("    lastModifiedDate: ").append(toIndentedString(lastModifiedDate)).append("\n");
     sb.append("    amountCalculationMethod: ").append(toIndentedString(amountCalculationMethod)).append("\n");
     sb.append("    trigger: ").append(toIndentedString(trigger)).append("\n");
     sb.append("    creationDate: ").append(toIndentedString(creationDate)).append("\n");

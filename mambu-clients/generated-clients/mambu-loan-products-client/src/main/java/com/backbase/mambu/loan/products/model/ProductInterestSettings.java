@@ -36,7 +36,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   ProductInterestSettings.JSON_PROPERTY_INDEX_RATE_SETTINGS,
   ProductInterestSettings.JSON_PROPERTY_INTEREST_BALANCE_CALCULATION_METHOD,
   ProductInterestSettings.JSON_PROPERTY_DAYS_IN_YEAR,
-  ProductInterestSettings.JSON_PROPERTY_ACCRUE_LATE_INTEREST
+  ProductInterestSettings.JSON_PROPERTY_ACCRUE_LATE_INTEREST,
+  ProductInterestSettings.JSON_PROPERTY_COMPOUNDING_FREQUENCY
 })
 
 public class ProductInterestSettings {
@@ -162,7 +163,9 @@ public class ProductInterestSettings {
   public enum InterestTypeEnum {
     SIMPLE_INTEREST("SIMPLE_INTEREST"),
     
-    CAPITALIZED_INTEREST("CAPITALIZED_INTEREST");
+    CAPITALIZED_INTEREST("CAPITALIZED_INTEREST"),
+    
+    COMPOUNDING_INTEREST("COMPOUNDING_INTEREST");
 
     private String value;
 
@@ -283,6 +286,42 @@ public class ProductInterestSettings {
 
   public static final String JSON_PROPERTY_ACCRUE_LATE_INTEREST = "accrueLateInterest";
   private Boolean accrueLateInterest;
+
+  /**
+   * The frequency on which the accrued interest will be added to the principal for interest calculation. It is used only for InterestType.COMPOUNDING_INTEREST
+   */
+  public enum CompoundingFrequencyEnum {
+    DAILY("DAILY");
+
+    private String value;
+
+    CompoundingFrequencyEnum(String value) {
+      this.value = value;
+    }
+
+    @JsonValue
+    public String getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return String.valueOf(value);
+    }
+
+    @JsonCreator
+    public static CompoundingFrequencyEnum fromValue(String value) {
+      for (CompoundingFrequencyEnum b : CompoundingFrequencyEnum.values()) {
+        if (b.value.equals(value)) {
+          return b;
+        }
+      }
+      throw new IllegalArgumentException("Unexpected value '" + value + "'");
+    }
+  }
+
+  public static final String JSON_PROPERTY_COMPOUNDING_FREQUENCY = "compoundingFrequency";
+  private CompoundingFrequencyEnum compoundingFrequency;
 
 
   public ProductInterestSettings interestCalculationMethod(InterestCalculationMethodEnum interestCalculationMethod) {
@@ -482,6 +521,31 @@ public class ProductInterestSettings {
   }
 
 
+  public ProductInterestSettings compoundingFrequency(CompoundingFrequencyEnum compoundingFrequency) {
+    
+    this.compoundingFrequency = compoundingFrequency;
+    return this;
+  }
+
+   /**
+   * The frequency on which the accrued interest will be added to the principal for interest calculation. It is used only for InterestType.COMPOUNDING_INTEREST
+   * @return compoundingFrequency
+  **/
+  @javax.annotation.Nullable
+  @ApiModelProperty(value = "The frequency on which the accrued interest will be added to the principal for interest calculation. It is used only for InterestType.COMPOUNDING_INTEREST")
+  @JsonProperty(JSON_PROPERTY_COMPOUNDING_FREQUENCY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public CompoundingFrequencyEnum getCompoundingFrequency() {
+    return compoundingFrequency;
+  }
+
+
+  public void setCompoundingFrequency(CompoundingFrequencyEnum compoundingFrequency) {
+    this.compoundingFrequency = compoundingFrequency;
+  }
+
+
   @Override
   public boolean equals(java.lang.Object o) {
     if (this == o) {
@@ -498,12 +562,13 @@ public class ProductInterestSettings {
         Objects.equals(this.indexRateSettings, productInterestSettings.indexRateSettings) &&
         Objects.equals(this.interestBalanceCalculationMethod, productInterestSettings.interestBalanceCalculationMethod) &&
         Objects.equals(this.daysInYear, productInterestSettings.daysInYear) &&
-        Objects.equals(this.accrueLateInterest, productInterestSettings.accrueLateInterest);
+        Objects.equals(this.accrueLateInterest, productInterestSettings.accrueLateInterest) &&
+        Objects.equals(this.compoundingFrequency, productInterestSettings.compoundingFrequency);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(interestCalculationMethod, scheduleInterestDaysCountMethod, interestApplicationMethod, interestType, indexRateSettings, interestBalanceCalculationMethod, daysInYear, accrueLateInterest);
+    return Objects.hash(interestCalculationMethod, scheduleInterestDaysCountMethod, interestApplicationMethod, interestType, indexRateSettings, interestBalanceCalculationMethod, daysInYear, accrueLateInterest, compoundingFrequency);
   }
 
 
@@ -519,6 +584,7 @@ public class ProductInterestSettings {
     sb.append("    interestBalanceCalculationMethod: ").append(toIndentedString(interestBalanceCalculationMethod)).append("\n");
     sb.append("    daysInYear: ").append(toIndentedString(daysInYear)).append("\n");
     sb.append("    accrueLateInterest: ").append(toIndentedString(accrueLateInterest)).append("\n");
+    sb.append("    compoundingFrequency: ").append(toIndentedString(compoundingFrequency)).append("\n");
     sb.append("}");
     return sb.toString();
   }

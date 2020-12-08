@@ -15,6 +15,7 @@ Name | Type | Description | Notes
 **interestBalanceCalculationMethod** | [**InterestBalanceCalculationMethodEnum**](#InterestBalanceCalculationMethodEnum) | The interest balance calculation method. Represents the option which determines the way the balance for the account&#39;s interest is computed. |  [optional]
 **daysInYear** | [**DaysInYearEnum**](#DaysInYearEnum) | The days in year that should be used for loan calculations. | 
 **accrueLateInterest** | **Boolean** | Whether late interest should be accrued, applied and paid |  [optional]
+**compoundingFrequency** | [**CompoundingFrequencyEnum**](#CompoundingFrequencyEnum) | The frequency on which the accrued interest will be added to the principal for interest calculation. It is used only for InterestType.COMPOUNDING_INTEREST |  [optional]
 
 
 
@@ -52,6 +53,7 @@ Name | Value
 ---- | -----
 SIMPLE_INTEREST | &quot;SIMPLE_INTEREST&quot;
 CAPITALIZED_INTEREST | &quot;CAPITALIZED_INTEREST&quot;
+COMPOUNDING_INTEREST | &quot;COMPOUNDING_INTEREST&quot;
 
 
 
@@ -74,6 +76,14 @@ ACTUAL_360 | &quot;ACTUAL_360&quot;
 ACTUAL_ACTUAL_ISDA | &quot;ACTUAL_ACTUAL_ISDA&quot;
 E30_360 | &quot;E30_360&quot;
 E30_42_365 | &quot;E30_42_365&quot;
+
+
+
+## Enum: CompoundingFrequencyEnum
+
+Name | Value
+---- | -----
+DAILY | &quot;DAILY&quot;
 
 
 

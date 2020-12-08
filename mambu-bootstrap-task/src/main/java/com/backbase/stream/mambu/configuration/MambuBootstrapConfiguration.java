@@ -1,6 +1,7 @@
 package com.backbase.stream.mambu.configuration;
 
 import com.backbase.dbs.transaction.presentation.service.model.TransactionIds;
+import com.backbase.mambu.clients.model.Client;
 import com.backbase.mambu.deposit.products.api.DepositProductsApi;
 import com.backbase.mambu.loan.products.api.LoanProductsApi;
 import com.backbase.stream.LegalEntitySaga;
@@ -31,25 +32,31 @@ import com.backbase.stream.productcatalog.model.ProductKind;
 import com.backbase.stream.productcatalog.model.ProductType;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
+import java.time.Duration;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.CommandLineRunner;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.task.configuration.EnableTask;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.util.StringUtils;
-import org.yaml.snakeyaml.Yaml;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
@@ -79,14 +86,21 @@ public class MambuBootstrapConfiguration {
     private final ReactiveProductCatalogService productCatalogService;
     private final DepositProductsApi depositProductsApi;
     private final LoanProductsApi loanProductsApi;
+    private final Scheduler single = Schedulers.single();
+    private List<Pattern> nameFilterPatterns;
 
     public void execute() {
-//        setupLegalEntityHierarchy();
-        Flux<LegalEntity> clients = setupLegalEntities();
+        if (mambuBootstrapTaskConfiguration.isSetupProductCatalog()) {
+            productCatalogService.setupProductCatalog(mambuBootstrapTaskConfiguration.getProductCatalog()).block();
+        }
+        if (mambuBootstrapTaskConfiguration.isSetupLegalEntityHierachy()) {
+            setupLegalEntityHierarchy();
+        }
+        Flux<LegalEntity> clients = createMambuLegalEntities();
         // Get Product Catalog and set it as context
         ProductCatalog productCatalog = getProductCatalog();
         // Get All Mambu Customers
-        List<LegalEntity> legalEntityAggregates = getMambuCustomers(clients, productCatalog);
+        List<LegalEntity> legalEntityAggregates = setupProductCatalogForMambuCustomers(clients, productCatalog);
 
         if (mambuBootstrapTaskConfiguration.isIngestProductCatalog()) {
             setupProductCatalog(productCatalog);
@@ -99,6 +113,23 @@ public class MambuBootstrapConfiguration {
         if (mambuBootstrapTaskConfiguration.isIngestMambuTransactions()) {
             ingestMambuTransactions(legalEntityAggregates);
         }
+
+        if(mambuBootstrapTaskConfiguration.isIngestMambuClientsAsBeneficiaries()) {
+            ingestMambuCLientsAsBeneficiaries(legalEntityAggregates);
+        }
+
+
+    }
+
+    private void ingestMambuCLientsAsBeneficiaries(List<LegalEntity> legalEntityAggregates) {
+
+        legalEntityAggregates.forEach(legalEntity ->  {
+
+            List<LegalEntity> otherClients = legalEntityAggregates.stream().filter(le -> !le.equals(legalEntity)).collect(Collectors.toList());
+
+
+        });
+
     }
 
     private void setupProductCatalog(ProductCatalog productCatalog) {
@@ -110,7 +141,7 @@ public class MambuBootstrapConfiguration {
             .block();
     }
 
-    private List<LegalEntity> getMambuCustomers(Flux<LegalEntity> clients, ProductCatalog productCatalog) {
+    private List<LegalEntity> setupProductCatalogForMambuCustomers(Flux<LegalEntity> clients, ProductCatalog productCatalog) {
         return clients
             .flatMap(legalEntity -> setupMambuProducts(legalEntity, productCatalog))
             .collectList()
@@ -162,21 +193,66 @@ public class MambuBootstrapConfiguration {
         return productCatalog.orElseThrow(() -> new NullPointerException("Unable to get product catalog"));
     }
 
-    private Flux<LegalEntity> setupLegalEntities() {
+    private Flux<LegalEntity> createMambuLegalEntities() {
         return clientsService.getAllClients(mambuBootstrapTaskConfiguration.getMambuBranchId(), mambuBootstrapTaskConfiguration.getMambuCentreId())
+            .filter(this::filterClient)
             .map(client -> {
                 String fullName = client.getFirstName() + " " + client.getLastName();
-
                 User user = setupUser(client, fullName);
                 JobProfileUser jobProfileUser = setupJobProfileUser(user);
-                LegalEntity legalEntity = setupLegalEntity(client, fullName, user, jobProfileUser);
-                log.info("Setup Legal Entity: {}", legalEntity.getName());
-                return legalEntity;
+                return createMambuLegalEntity(client, fullName, user, jobProfileUser);
             })
-            .filter(legalEntity -> legalEntity.getExternalId().equals("bart.veenstra"));
+            .collectList()
+            .map(legalEntities -> {
+                Comparator<LegalEntity> comparing = Comparator.comparing(LegalEntity::getName);
+                Set<LegalEntity> uniqueLegalEntities = distinct(legalEntities, Comparator.comparing(LegalEntity::getName));
+                log.info("Unique name legal entities: {} from: {}", uniqueLegalEntities.size(), legalEntities.size());
+                uniqueLegalEntities = distinct(uniqueLegalEntities, (l1, l2) -> {
+                    String emailL1 = l1.getUsers().stream().findFirst().get().getUser().getEmailAddress().getAddress();
+                    String emaill2 = l2.getUsers().stream().findFirst().get().getUser().getEmailAddress().getAddress();
+                    return emailL1.compareTo(emaill2);
+                });
+                log.info("Unique email legal entities: {} from: {}", uniqueLegalEntities.size(), legalEntities.size());
+                return uniqueLegalEntities;
+            })
+            .flatMapIterable(Function.identity());
     }
 
-    private LegalEntity setupLegalEntity(com.backbase.mambu.clients.model.Client client, String fullName, User user, JobProfileUser jobProfileUser) {
+    public Set<LegalEntity> distinct(Collection<LegalEntity> input, Comparator<LegalEntity> comparator) {
+        TreeSet<LegalEntity> result = new TreeSet<>(comparator);
+        result.addAll(input);
+        return result;
+    }
+
+    public List<Pattern> getNameFilterPatterns() {
+        if (this.nameFilterPatterns == null) {
+            this.nameFilterPatterns = this.mambuBootstrapTaskConfiguration.getCustomerNameFilters().stream()
+                .map(Pattern::compile)
+                .collect(Collectors.toList());
+        }
+        return nameFilterPatterns;
+    }
+
+    private boolean filterClient(Client client) {
+        String name = getClientFullName(client);
+        boolean accepted = getNameFilterPatterns().stream()
+            .map(pattern -> pattern.matcher(name))
+            .noneMatch(Matcher::find);
+        log.info("Client: {} matched name filter patterns: {}", name, accepted);
+        return accepted;
+    }
+
+    @NotNull
+    private String getClientFullName(Client client) {
+        String name = client.getFirstName();
+        if (client.getMiddleName() != null) {
+            name += " " + client.getMiddleName();
+        }
+        name += " " + client.getLastName();
+        return name;
+    }
+
+    private LegalEntity createMambuLegalEntity(com.backbase.mambu.clients.model.Client client, String fullName, User user, JobProfileUser jobProfileUser) {
         LegalEntity legalEntity = new LegalEntity();
         legalEntity.setParentExternalId(mambuBootstrapTaskConfiguration.getParentLegalEntityExternalId());
         legalEntity.setName(fullName);
@@ -228,7 +304,8 @@ public class MambuBootstrapConfiguration {
                 .map(LegalEntityTask::new)
                 .flatMap(legalEntitySaga::executeTask)
                 .doOnNext(StreamTask::logSummary)
-                .doOnError(throwable -> {
+                .doOnError(StreamTaskException.class, throwable -> {
+                    throwable.getTask().logSummary();
                     log.error("Failed to setup Legal Entity Hierarchy", throwable);
                 })
 
@@ -245,9 +322,11 @@ public class MambuBootstrapConfiguration {
             .collect(Collectors.toList());
 
         return Flux.fromIterable(currentAccounts)
+            .publishOn(single)
             .filter(currentAccount -> Objects.nonNull(currentAccount.getExternalId()))
             .map(currentAccount -> depositTransactionsService.getTransactionItemsForOutbound(currentAccount.getExternalId(), null))
             .flatMap(transactionService::processTransactions)
+            .delayElements(Duration.ofSeconds(2))
             .collectList()
             .map(transactionIds -> Tuples.of(legalEntity, transactionIds));
 
@@ -272,13 +351,24 @@ public class MambuBootstrapConfiguration {
 
     private Mono<List<CurrentAccount>> ingestDepositAccounts(LegalEntity legalEntity, ProductCatalog productCatalog) {
         return depositAccountsService.getAllDepositAccounts(legalEntity.getExternalId())
+            .filter(depositAccount -> {
+                assert depositAccount.getCurrencyCode() != null;
+                return depositAccount.getCurrencyCode().equals("EUR");
+            })
             .map(productMapper::mapMambuToDbs)
-            .flatMap(product -> {
-                Optional<ProductType> productType = getProductType(productCatalog, product.getProductTypeExternalId());
+            .flatMap(currentAccount -> {
+                Optional<ProductType> productType = getProductType(productCatalog, currentAccount.getProductTypeExternalId());
                 if (!productType.isPresent()) {
-                    return Mono.just(product).zipWith(createProductTypeFromMambuDepositProduct(product.getProductTypeExternalId(), productCatalog), (product1, productType1) -> product1);
+                    return Mono.just(currentAccount)
+                        .zipWith(createProductTypeFromMambuDepositProduct(currentAccount.getProductTypeExternalId(), productCatalog),
+                            (arr, productType1) -> {
+                                arr.setProductTypeExternalId(productType1.getExternalId());
+                                return arr;
+                            }
+
+                        );
                 } else {
-                    return Mono.just(product);
+                    return Mono.just(currentAccount);
                 }
             })
             .collectList();
@@ -295,19 +385,24 @@ public class MambuBootstrapConfiguration {
     private Mono<List<Loan>> ingestLoans(LegalEntity legalEntity, ProductCatalog productCatalog) {
         return loanService.getAllLoanAccounts(legalEntity.getExternalId())
             .map(loanAccount -> productMapper.mapMambuToDbs(loanAccount, legalEntity, mambuBootstrapTaskConfiguration.getDefaultLoanCurrency()))
-            .flatMap(product -> {
-                Optional<ProductType> productType = getProductType(productCatalog, product.getProductTypeExternalId());
+            .flatMap(loan -> {
+                Optional<ProductType> productType = getProductType(productCatalog, loan.getProductTypeExternalId());
                 if (!productType.isPresent()) {
-                    return Mono.just(product).zipWith(createProductTypeFromMambuLoanProduct(product.getProductTypeExternalId(), productCatalog), (product1, productType1) -> product1);
+                    return Mono.just(loan).zipWith(createProductTypeFromMambuLoanProduct(loan.getProductTypeExternalId(), productCatalog),
+                        (arr, productType1) -> {
+                            arr.setProductTypeExternalId(productType1.getExternalId());
+                            return arr;
+                        });
                 } else {
-                    return Mono.just(product);
+                    return Mono.just(loan);
                 }
             })
             .collectList();
     }
 
 
-    private Mono<ProductType> createProductTypeFromMambuDepositProduct(String productTypeKey, ProductCatalog productCatalog) {
+    private Mono<ProductType> createProductTypeFromMambuDepositProduct(String productTypeKey, ProductCatalog
+        productCatalog) {
 
         return depositProductsApi.getById(productTypeKey, "FULL")
             .flatMap(depositProduct -> {
@@ -320,15 +415,18 @@ public class MambuBootstrapConfiguration {
 
                 return createProductType(productTypeKey, productCatalog, productKindName, name, id);
 
-            });
+            })
+            .switchIfEmpty(Mono.error(NullPointerException::new));
     }
 
-    private MambuConfigurationProperties.Mapping.MambuProductConfigurationProperties getMambuProductConfigurationProperties() {
+    private MambuConfigurationProperties.Mapping.MambuProductConfigurationProperties getMambuProductConfigurationProperties
+        () {
         MambuConfigurationProperties.Mapping mapping = mambuConfigurationProperties.getMapping();
         return mapping.getProduct();
     }
 
-    private Mono<ProductType> createProductTypeFromMambuLoanProduct(String productTypeKey, ProductCatalog productCatalog) {
+    private Mono<ProductType> createProductTypeFromMambuLoanProduct(String productTypeKey, ProductCatalog
+        productCatalog) {
 
         return loanProductsApi.getById(productTypeKey, "FULL")
             .flatMap(loanProduct -> {
@@ -342,16 +440,21 @@ public class MambuBootstrapConfiguration {
             });
     }
 
-    private Mono<ProductType> createProductType(String productTypeKey, ProductCatalog productCatalog, String productKindName, String name, String id) {
-        if (productCatalog.getProductTypes().stream().anyMatch(productType -> {
+    private Mono<ProductType> createProductType(String productTypeKey, ProductCatalog productCatalog, String
+        productKindName, String name, String id) {
+
+        Optional<ProductType> first = productCatalog.getProductTypes().stream().filter(productType -> {
+
             String externalTypeId = productType.getExternalTypeId();
             if (externalTypeId == null) {
                 externalTypeId = productType.getExternalId();
-                log.info("whut?");
             }
             return externalTypeId != null && externalTypeId.equals(id);
-        })) {
-            return Mono.empty();
+        }).findFirst();
+
+        if (first.isPresent()) {
+            ProductType productType = first.get();
+            return Mono.just(productType);
         }
 
         if (productKindName == null) {

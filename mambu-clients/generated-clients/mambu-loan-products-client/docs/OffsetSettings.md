@@ -7,7 +7,7 @@ The offset settings, holds information about offset.
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**offsetPercentage** | [**BigDecimal**](BigDecimal.md) | The offset percentage |  [optional]
+**allowOffset** | **Boolean** | Indicates whether the product supports offset |  [optional]
 
 
 

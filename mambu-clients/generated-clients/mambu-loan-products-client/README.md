@@ -114,6 +114,7 @@ Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *LoanProductsApi* | [**create**](docs/LoanProductsApi.md#create) | **POST** /loanproducts | Create a new loan product
 *LoanProductsApi* | [**delete**](docs/LoanProductsApi.md#delete) | **DELETE** /loanproducts/{loanProductId} | Delete a loan product
+*LoanProductsApi* | [**getAll**](docs/LoanProductsApi.md#getAll) | **GET** /loanproducts | Allows retrieval of all loan products in paginated or non-paginated manner
 *LoanProductsApi* | [**getById**](docs/LoanProductsApi.md#getById) | **GET** /loanproducts/{loanProductId} | Allows retrieval of a single loan product via id or encoded key
 *LoanProductsApi* | [**patch**](docs/LoanProductsApi.md#patch) | **PATCH** /loanproducts/{loanProductId} | Partially update an existing loan product
 *LoanProductsApi* | [**update**](docs/LoanProductsApi.md#update) | **PUT** /loanproducts/{loanProductId} | Update an existing loan product
@@ -128,6 +129,7 @@ Class | Method | HTTP request | Description
  - [CreditArrangementSettings](docs/CreditArrangementSettings.md)
  - [DecimalConstraints](docs/DecimalConstraints.md)
  - [DecimalInterval](docs/DecimalInterval.md)
+ - [DocumentTemplate](docs/DocumentTemplate.md)
  - [ErrorResponse](docs/ErrorResponse.md)
  - [FeesSettings](docs/FeesSettings.md)
  - [FundingSettings](docs/FundingSettings.md)
@@ -151,7 +153,6 @@ Class | Method | HTTP request | Description
  - [ProductArrearsSettings](docs/ProductArrearsSettings.md)
  - [ProductAvailabilitySettings](docs/ProductAvailabilitySettings.md)
  - [ProductInterestSettings](docs/ProductInterestSettings.md)
- - [ProductOffsetSettings](docs/ProductOffsetSettings.md)
  - [ProductPenaltySettings](docs/ProductPenaltySettings.md)
  - [ProductPrepaymentSettings](docs/ProductPrepaymentSettings.md)
  - [ProductRedrawSettings](docs/ProductRedrawSettings.md)

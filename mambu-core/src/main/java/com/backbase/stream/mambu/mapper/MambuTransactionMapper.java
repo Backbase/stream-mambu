@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 public class MambuTransactionMapper {
@@ -71,7 +72,7 @@ public class MambuTransactionMapper {
             .transactionAmountCurrency(new Currency()
                 .amount(amount.toEngineeringString())
                 .currencyCode(depositTransaction.getCurrencyCode()))
-            .description(description)
+            .description(StringUtils.truncate(description, 140))
             .creditDebitIndicator(indicator));
 
     }
