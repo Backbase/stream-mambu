@@ -113,7 +113,8 @@ bootstrap:
   setup-product-catalog: false
   setup-legal-entity-hierarchy: false
   ingest-mambu-clients: true
-  ingest-mambu-transactions: true
+  ingest-mambu-transactions: false
+  ingest-mambu-clients-as-beneficiaries: false
   parent-legal-entity-external-id: mambu-bank
   default-loan-currency: EUR
 #  mambu-branch-id: "dope"
@@ -627,6 +628,7 @@ bootstrap:
       - externalProductId: "home-insurance"
         externalProductKindId: "insurance"
         productTypeName: "Home Insurance"
+
 
 logging:
   level:

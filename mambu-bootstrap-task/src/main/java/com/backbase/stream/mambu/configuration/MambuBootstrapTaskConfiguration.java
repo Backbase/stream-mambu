@@ -42,7 +42,7 @@ public class MambuBootstrapTaskConfiguration {
     private String defaultLoanCurrency;
 
 
-    private boolean setupLegalEntityHierachy = false;
+    private boolean setupLegalEntityHierarchy = false;
 
     private boolean setupProductCatalog = false;
 
@@ -60,7 +60,6 @@ public class MambuBootstrapTaskConfiguration {
      * Ingest Mambu Transactions
      */
     private boolean ingestMambuTransactions = false;
-
 
     private boolean ingestMambuClientsAsBeneficiaries = false;
 

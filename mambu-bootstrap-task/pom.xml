@@ -52,6 +52,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>contacts-core</artifactId>
+            <version>${stream-services.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.backbase.stream.mambu</groupId>
             <artifactId>mambu-core</artifactId>
             <version>1.0.0-SNAPSHOT</version>

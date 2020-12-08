@@ -1,5 +1,9 @@
 package com.backbase.stream.mambu.configuration;
 
+import com.backbase.dbs.contact.service.model.ContactsbulkingestionRequest;
+import com.backbase.dbs.contact.service.model.ExternalAccessContext;
+import com.backbase.dbs.contact.service.model.ExternalAccountInformation;
+import com.backbase.dbs.contact.service.model.ExternalContact;
 import com.backbase.dbs.transaction.presentation.service.model.TransactionIds;
 import com.backbase.mambu.clients.model.Client;
 import com.backbase.mambu.deposit.products.api.DepositProductsApi;
@@ -9,6 +13,8 @@ import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.TransactionService;
 import com.backbase.stream.configuration.LegalEntitySagaConfiguration;
 import com.backbase.stream.configuration.TransactionServiceConfiguration;
+import com.backbase.stream.contacts.ContactsService;
+import com.backbase.stream.contacts.configuration.ContactsServiceConfiguration;
 import com.backbase.stream.legalentity.model.CurrentAccount;
 import com.backbase.stream.legalentity.model.EmailAddress;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
@@ -68,7 +74,8 @@ import reactor.util.function.Tuples;
     MambuConfiguration.class,
     LegalEntitySagaConfiguration.class,
     ProductCatalogServiceConfiguration.class,
-    TransactionServiceConfiguration.class
+    TransactionServiceConfiguration.class,
+    ContactsServiceConfiguration.class
 })
 @RequiredArgsConstructor
 @ComponentScan("com.backbase.stream.mambu")
@@ -89,11 +96,13 @@ public class MambuBootstrapConfiguration {
     private final Scheduler single = Schedulers.single();
     private List<Pattern> nameFilterPatterns;
 
+    private final ContactsService contactsService;
+
     public void execute() {
         if (mambuBootstrapTaskConfiguration.isSetupProductCatalog()) {
             productCatalogService.setupProductCatalog(mambuBootstrapTaskConfiguration.getProductCatalog()).block();
         }
-        if (mambuBootstrapTaskConfiguration.isSetupLegalEntityHierachy()) {
+        if (mambuBootstrapTaskConfiguration.isSetupLegalEntityHierarchy()) {
             setupLegalEntityHierarchy();
         }
         Flux<LegalEntity> clients = createMambuLegalEntities();
@@ -114,22 +123,83 @@ public class MambuBootstrapConfiguration {
             ingestMambuTransactions(legalEntityAggregates);
         }
 
-        if(mambuBootstrapTaskConfiguration.isIngestMambuClientsAsBeneficiaries()) {
-            ingestMambuCLientsAsBeneficiaries(legalEntityAggregates);
+        if (mambuBootstrapTaskConfiguration.isIngestMambuClientsAsBeneficiaries()) {
+            ingestMambuClientsAsBeneficiaries(legalEntityAggregates);
         }
-
-
     }
 
-    private void ingestMambuCLientsAsBeneficiaries(List<LegalEntity> legalEntityAggregates) {
+    private void ingestMambuClientsAsBeneficiaries(List<LegalEntity> legalEntityAggregates) {
+        Flux.fromStream(legalEntityAggregates.stream().map(legalEntity -> {
+            List<LegalEntity> otherClients = legalEntityAggregates.stream()
+                .filter(le -> !le.equals(legalEntity))
+                .filter(this::hasCurrentAccounts)
+                .collect(Collectors.toList());
+            return createContactsbulkingestionRequest(legalEntity, otherClients);
+        }))
+            .publishOn(Schedulers.single())
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .flatMap( contactsService::ingestContacts)
+            .doOnNext(StreamTask::logSummary)
+            .doOnError(StreamTaskException.class,  throwable -> {
+                throwable.getTask().logSummary();
+                log.error("Failed to ingest contacts: {}", throwable.getMessage(), throwable);
+            })
+            .collectList()
+            .block();
+    }
 
-        legalEntityAggregates.forEach(legalEntity ->  {
+    @NotNull
+    private Optional<ContactsbulkingestionRequest> createContactsbulkingestionRequest(LegalEntity legalEntity, List<LegalEntity> otherClients) {
+        if(legalEntity.getMasterServiceAgreement() == null) {
+            return Optional.empty();
+        }
 
-            List<LegalEntity> otherClients = legalEntityAggregates.stream().filter(le -> !le.equals(legalEntity)).collect(Collectors.toList());
+        log.info("Creating {} contacts for: {}", otherClients.size(), legalEntity.getName());
+        ExternalAccessContext accessContext = new ExternalAccessContext();
+        accessContext.setExternalLegalEntityId(legalEntity.getExternalId());
+        accessContext.setExternalServiceAgreementId(legalEntity.getMasterServiceAgreement().getExternalId());
+        accessContext.setExternalUserId(legalEntity.getUsers().stream().findFirst().orElseThrow(NullPointerException::new).getUser().getExternalId());
+        accessContext.setScope(ExternalAccessContext.ScopeEnum.LE);
+        List<ExternalContact> externalContacts = otherClients.stream()
+            .map(this::mapMambuToContact)
+            .collect(Collectors.toList());
 
+        ContactsbulkingestionRequest contactsbulkingestionRequest = new ContactsbulkingestionRequest();
+        contactsbulkingestionRequest.setAccessContext(accessContext);
+        contactsbulkingestionRequest.setIngestMode(ContactsbulkingestionRequest.IngestModeEnum.UPSERT);
+        contactsbulkingestionRequest.setContacts(externalContacts);
+        return Optional.of(contactsbulkingestionRequest);
+    }
 
-        });
+    private ExternalContact mapMambuToContact(LegalEntity client) {
 
+        List<CurrentAccount> currentAccounts = client.getProductGroups().stream().flatMap(productGroup -> productGroup.getCurrentAccounts().stream()).collect(Collectors.toList());
+        ExternalContact externalContact = new ExternalContact();
+        externalContact.setExternalId(client.getExternalId());
+        externalContact.setName(client.getName());
+        externalContact.setAccounts(currentAccounts.stream()
+            .map(this::mapBaseProductToExternalAccountInformation)
+            .collect(Collectors.toList()));
+        return externalContact;
+    }
+
+    private ExternalAccountInformation mapBaseProductToExternalAccountInformation(CurrentAccount currentAccount) {
+        ExternalAccountInformation externalAccountInformation = new ExternalAccountInformation();
+        externalAccountInformation.setExternalId(currentAccount.getExternalId());
+        externalAccountInformation.setAccountHolderAddressLine1(currentAccount.getAccountHolderAddressLine1());
+        externalAccountInformation.setAccountHolderAddressLine2(currentAccount.getAccountHolderAddressLine2());
+        externalAccountInformation.setAccountHolderCountry(currentAccount.getAccountHolderCountry());
+        externalAccountInformation.setAccountHolderTown(currentAccount.getTown());
+        externalAccountInformation.setAccountHolderPostCode(currentAccount.getPostCode());
+        externalAccountInformation.setAccountHolderStreetName(currentAccount.getAccountHolderStreetName());
+        externalAccountInformation.setAlias(currentAccount.getBankAlias());
+        externalAccountInformation.setBankCode(currentAccount.getBankBranchCode());
+        externalAccountInformation.setBIC(currentAccount.getBIC());
+        externalAccountInformation.setAccountNumber(currentAccount.getBBAN());
+        externalAccountInformation.setIBAN(currentAccount.getIBAN());
+        externalAccountInformation.setName(currentAccount.getName());
+        return externalAccountInformation;
     }
 
     private void setupProductCatalog(ProductCatalog productCatalog) {
@@ -144,8 +214,29 @@ public class MambuBootstrapConfiguration {
     private List<LegalEntity> setupProductCatalogForMambuCustomers(Flux<LegalEntity> clients, ProductCatalog productCatalog) {
         return clients
             .flatMap(legalEntity -> setupMambuProducts(legalEntity, productCatalog))
+            .filter(this::hasProducts)
             .collectList()
             .block();
+    }
+
+    private boolean hasProducts(LegalEntity legalEntity) {
+        boolean hasProducts = !(legalEntity.getProductGroups().stream().mapToLong(productGroup -> StreamUtils.getAllProducts(productGroup).size()).sum() == 0);
+        if(hasProducts) {
+            return true;
+        } else {
+            log.warn("Legal Entity: {} does not have any products. Skipping...", legalEntity.getName());
+        }
+        return hasProducts;
+    }
+
+    private boolean hasCurrentAccounts(LegalEntity legalEntity) {
+        boolean hasProducts = !(legalEntity.getProductGroups().stream().mapToLong(productGroup -> productGroup.getCurrentAccounts().size()).sum() == 0);
+        if(hasProducts) {
+            return true;
+        } else {
+            log.warn("Legal Entity: {} does not have any current accounts. Skipping adding as contact", legalEntity.getName());
+        }
+        return hasProducts;
     }
 
     private void ingestMambuTransactions(List<LegalEntity> legalEntityAggregates) {
@@ -167,14 +258,7 @@ public class MambuBootstrapConfiguration {
         Flux.fromIterable(legalEntityAggregates)
             .publishOn(Schedulers.single())
             .map(LegalEntityTask::new)
-            .filter(legalEntityTask -> {
-                boolean b = !legalEntityTask.getLegalEntity().getProductGroups().isEmpty() &&
-                    legalEntityTask.getLegalEntity().getProductGroups().stream().noneMatch(productGroup -> StreamUtils.getAllProducts(productGroup).isEmpty());
-                if (!b) {
-                    log.warn("Legal Entity: {} does not have any products", legalEntityTask.getLegalEntity().getName());
-                }
-                return b;
-            })
+
             .flatMap(legalEntitySaga::executeTask)
             .onErrorResume(StreamTaskException.class, e -> {
                 StreamTask streamTask = e.getTask();
